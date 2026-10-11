@@ -126,6 +126,8 @@ form.stack{display:flex;flex-direction:column;gap:10px}
 .field{display:flex;flex-direction:column;gap:4px;min-width:0}
 .field input,.field select,.field textarea{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 10px;width:100%}
 .inline{display:flex;gap:10px;flex-wrap:wrap}
+.inline>.field{min-width:0;flex:1 1 140px}.field input[type=date]{min-width:0;width:100%;max-width:100%;box-sizing:border-box;-webkit-appearance:none;appearance:none}
+.area-grp{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:10px 0 6px}.area-grp:first-of-type{margin-top:2px}
 .inline>.field{flex:1 1 140px}
 /* Agent */
 .agent{display:grid;grid-template-rows:1fr auto;height:calc(100vh - 150px);min-height:440px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
@@ -376,7 +378,7 @@ const STR = {
 en:{today:"Today",animals:"Animals",agent:"Shepherd AI",dash:"Dashboard",
 hello:"Good day",tasksFor:"Your tasks for",allTasks:"All tasks today",noTasks:"No tasks assigned for today.",
 daily:"Daily",high:"High priority",assign:"Assign task",addAnimal:"Add animal",all:"All",
-chicken:"Chickens",cow:"Cattle",pig:"Pigs",horse:"Horses",sheep:"Sheep",
+chicken:"Chickens",cow:"Cattle",pig:"Pigs",horse:"Horses",sheep:"Sheep",office:"Office & admin",marketing:"Marketing",pr:"Public relations",foundation:"Foundation",
 flock:"Flock / group",head:"head",pen:"Pen",breed:"Breed",sex:"Sex",born:"Born",status:"Status",
 weight:"Weight",weights:"Weight history",production:"Egg production",history:"History",due:"Coming up",
 back:"All animals",log:"Log an entry",type:"Type",note:"Note",save:"Save",cancel:"Cancel",
@@ -402,7 +404,7 @@ photoFirst:"Start with a photo. Shepherd reads the ear tag and fills in what it 
 es:{today:"Hoy",animals:"Animales",agent:"Shepherd IA",dash:"Panel",
 hello:"Buen día",tasksFor:"Tus tareas para",allTasks:"Todas las tareas de hoy",noTasks:"No hay tareas asignadas para hoy.",
 daily:"Diaria",high:"Prioridad alta",assign:"Asignar tarea",addAnimal:"Agregar animal",all:"Todos",
-chicken:"Gallinas",cow:"Ganado",pig:"Cerdos",horse:"Caballos",sheep:"Ovejas",
+chicken:"Gallinas",cow:"Ganado",pig:"Cerdos",horse:"Caballos",sheep:"Ovejas",office:"Oficina y administración",marketing:"Mercadeo",pr:"Relaciones públicas",foundation:"Fundación",
 flock:"Lote / grupo",head:"cabezas",pen:"Corral",breed:"Raza",sex:"Sexo",born:"Nacimiento",status:"Estado",
 weight:"Peso",weights:"Historial de peso",production:"Producción de huevos",history:"Historial",due:"Próximo",
 back:"Todos los animales",log:"Registrar",type:"Tipo",note:"Nota",save:"Guardar",cancel:"Cancelar",
@@ -559,7 +561,7 @@ const FLAG_US='<svg viewBox="0 0 38 20" width="30" height="16" aria-hidden="true
 const FLAG_ES='<svg viewBox="0 0 30 20" width="30" height="16" aria-hidden="true"><rect width="30" height="20" fill="#AA151B"/><rect y="5" width="30" height="10" fill="#F1BF00"/></svg>';
 function meSquare(st,cls){ return st&&st.photoId?`<img class="${cls}" src="${blobSrc(st.photoId)}" alt="">`:`<span class="${cls} sq-init">${esc(initials(st?st.name:"?"))}</span>`; }
 function profileSheet(){ const me=meObj(); if(!me) return; openSheet(`<div class="prof"><label class="prof-photo" title="${T2("Change photo","Cambiar foto")}">${meSquare(me,"sq-big")}<span class="prof-cam">${T2("Change photo","Cambiar foto")}</span><input id="profPhotoIn" type="file" accept="image/*" capture="user" hidden></label>
-<div class="prof-info"><h2 style="margin:0">${esc(me.name)}</h2><div class="t-meta">${me.role==="admin"?t("admin"):t("employee")}${L(me,"area")?" · "+esc(L(me,"area")):""}</div>
+<div class="prof-info"><h2 style="margin:0">${esc(me.name)}</h2><div class="t-meta">${me.role==="admin"?t("admin"):t("employee")}${areaLabel(me)?" · "+esc(areaLabel(me)):""}</div>
 ${clocks.find(c=>c.staffId===me.id)?`<div class="t-meta">${T2("Clocked in at ","Entrada a las ")}${fmtTime(clocks.find(c=>c.staffId===me.id).in)}</div>`:""}
 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn" data-act="closeSheet">${T2("Close","Cerrar")}</button><button class="btn primary" data-act="switch">${t("switch")}</button></div></div></div>`); }
 document.addEventListener("change",async e=>{ if(e.target.id!=="profPhotoIn"||!e.target.files||!e.target.files[0]) return; const me=meObj(); if(!me||!S.assets) return;
@@ -611,7 +613,7 @@ return `<div class="gate"><div class="gate-tools"><div class="seg flags" role="g
 const pinField=(id)=>`<form class="gate-form" id="gateForm" data-id="${esc(id)}"><div class="field"><label class="label" for="gt-pin">PIN</label>
 <input id="gt-pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required autocomplete="current-password"></div>
 <div class="gate-err" id="gt-err" role="alert"></div><button class="btn primary" type="submit">${T2("Sign in","Entrar")}</button><button class="linkbtn" type="button" data-forgot="${esc(id)}" style="align-self:center">${T2("Forgot PIN?","¿Olvidó su PIN?")}</button></form>`;
-const whoList=list=>`<div class="gate-list">${list.map(s=>`<button class="who-btn" data-login="${esc(s.id)}"><span class="avatar">${esc(initials(s.name))}</span><span class="grow">${esc(s.name)}<div class="t-meta">${s.role==="admin"?t("admin"):t("employee")}${L(s,"area")?" · "+esc(L(s,"area")):""}</div></span></button>`).join("")}</div>`;
+const whoList=list=>`<div class="gate-list">${list.map(s=>`<button class="who-btn" data-login="${esc(s.id)}"><span class="avatar">${esc(initials(s.name))}</span><span class="grow">${esc(s.name)}<div class="t-meta">${s.role==="admin"?t("admin"):t("employee")}${areaLabel(s)?" · "+esc(areaLabel(s)):""}</div></span></button>`).join("")}</div>`;
 const adminLink=()=>`<button class="linkish subtle" data-act="adminMode">${T2("Administrator sign-in","Acceso de administrador")}</button>`;
 function renderLogin(){
 const active=S.staff.filter(x=>staffStatus(x)==="active");
@@ -818,7 +820,7 @@ return topbar(t("dash"), t("farm"), S.canWrite?`${isAdmin()?`<button class="btn 
 <div class="grid cols-2" style="align-items:start">
 ${whosHerePanel()}
 ${pinResetPanel()}${newHiresPanel()}
-<section class="panel"><h2>${t("staffProgress")}</h2><div class="list">${staff.map(({s,n,d})=>`<div class="row"><span class="avatar">${esc(initials(s.name))}</span><div class="grow"><b>${esc(s.name)}</b> <span class="t-meta">${esc(L(s,"area"))}</span><div class="bar-track" style="margin-top:6px"><div class="bar-fill" style="width:${n?Math.round(d/n*100):0}%"></div></div></div><span class="pill ${n&&d===n?"ok":"mute"}">${d}/${n}</span></div>`).join("")||`<div class="empty">—</div>`}</div></section>
+<section class="panel"><h2>${t("staffProgress")}</h2><div class="list">${staff.map(({s,n,d})=>`<div class="row"><span class="avatar">${esc(initials(s.name))}</span><div class="grow"><b>${esc(s.name)}</b> <span class="t-meta">${esc(areaLabel(s))}</span><div class="bar-track" style="margin-top:6px"><div class="bar-fill" style="width:${n?Math.round(d/n*100):0}%"></div></div></div><span class="pill ${n&&d===n?"ok":"mute"}">${d}/${n}</span></div>`).join("")||`<div class="empty">—</div>`}</div></section>
 <section class="panel"><h2>${t("alerts")}</h2><div class="list">${care.length?care.slice(0,10).map(({a,it,n})=>`<button class="row rowlink" data-open="${esc(a.id)}" data-due="${esc(it.d+"|"+it.what)}" title="${esc(T2("Open","Abrir"))}"><span class="tag ${a.kind==="group"?"group":""}"><span>${esc(a.tag)}</span></span><div class="grow"><b>${esc(L(it,"what"))}</b><div class="t-meta">${esc(L(a,"name")||t(a.species))}</div></div>${duePill(n)}<span class="chev" aria-hidden="true">›</span></button>`).join(""):`<div class="empty">—</div>`}</div></section>
 <section class="panel"><h2>${t("recentHealth")}</h2><div class="list">${health.length?health.slice(0,10).map(({a,e})=>`<div class="row"><span class="when t-meta" style="font-family:var(--f-mono);width:84px">${esc(e.d)}</span><div class="grow"><button class="chip" data-open="${esc(a.id)}">${esc(animalLabel(a))}</button> ${esc(L(e,"note"))}<div class="t-meta">${esc(e.by||"")}</div></div></div>`).join(""):`<div class="empty">—</div>`}</div></section>
 </div>`;
@@ -1570,7 +1572,10 @@ out.innerHTML=`<div class="profile-head" style="margin:14px 0 4px"><span class="
 
 // ---------- onboarding ----------
 const T2 = (en,es) => lang==="es" ? es : en;
-const AREA_OF = {cow:"cattle",horse:"horses",sheep:"sheep",pig:"pigs",chicken:"poultry"};
+const AREA_OF = {cow:"cattle",horse:"horses",sheep:"sheep",pig:"pigs",chicken:"poultry",office:"office",marketing:"marketing",pr:"pr",foundation:"foundation"};
+const DEPTS = ["office","marketing","pr","foundation"];
+const isDept = a => DEPTS.includes(a);
+function areaLabel(s){ const own=L(s,"area"); if(own) return own; const a=(s&&s.areas)||[]; return a.length?a.map(x=>t(x)).join(" · "):""; }
 const CORE_TRAINING = ["biosecurity","meds"];
 const TRAIN = {
 biosecurity:{title:["Biosecurity basics","Bioseguridad básica"],
@@ -1621,6 +1626,38 @@ points:[["Use a sorting board between you and the pigs when moving them.","Use u
 quiz:[[["What goes between you and pigs when you move them?","¿Qué va entre usted y los cerdos al moverlos?"],[["A sorting board","Una tabla de manejo"],["Nothing","Nada"]],0],
 [["On a hot day, check first…","En un día caluroso, revise primero…"],[["Water and shade","Agua y sombra"],["The feed bags","Los sacos de alimento"]],0],
 [["Can you enter the farrowing pen alone with a sow and piglets?","¿Puede entrar solo al corral de parto con una cerda y lechones?"],[["Yes","Sí"],["No","No"]],1]]},
+office:{title:["Office & records","Oficina y registros"],
+points:[["Employee files, ID copies and pay information are private. Never share, photograph or forward them.","Los expedientes de empleados, copias de identificación y datos de pago son privados. Nunca los comparta, fotografíe ni reenvíe."],
+["Every sale, invoice and payment is entered in Shepherd the same day, with a receipt or photo attached.","Cada venta, factura y pago se anota en Shepherd el mismo día, con recibo o foto adjunta."],
+["Money is never moved, refunded or paid out without the owner's written approval.","Nunca se mueve, reembolsa ni paga dinero sin aprobación escrita del dueño."],
+["Lock the computer and the file cabinet whenever you step away.","Bloquee la computadora y el archivo cada vez que se aleje."]],
+quiz:[[["A caller says they're from the bank and asks for the farm's account number. You…","Alguien llama diciendo que es del banco y pide el número de cuenta. Usted…"],[["Give it, they're the bank","Se lo da, es el banco"],["Don't share it; tell the owner","No lo comparte; avisa al dueño"]],1],
+[["When do you enter today's egg sale?","¿Cuándo anota la venta de huevos de hoy?"],[["Today, with the receipt","Hoy, con el recibo"],["At the end of the month","A fin de mes"]],0],
+[["A coworker asks to see another employee's ID file. You…","Un compañero pide ver el expediente de otro empleado. Usted…"],[["Show it if they're a friend","Se lo enseña si es amigo"],["Say no; only the owner can open it","Dice que no; solo el dueño puede abrirlo"]],1]]},
+marketing:{title:["Marketing & brand","Mercadeo y marca"],
+points:[["Use only the official La Finca Pastoreo logo, colors and photos from the brand folder.","Use solo el logo, colores y fotos oficiales de La Finca Pastoreo de la carpeta de marca."],
+["Every post, ad or flyer is approved by the owner before it goes out.","Cada publicación, anuncio u hoja suelta la aprueba el dueño antes de salir."],
+["Never post a photo of a person, child or worker without their permission (a parent's for children).","Nunca publique fotos de personas, niños o trabajadores sin su permiso (el de los padres para niños)."],
+["Only claim what is true: don't say organic, grass-fed or certified unless the owner confirms it.","Solo diga lo que es cierto: no diga orgánico, de pasto o certificado sin que el dueño lo confirme."]],
+quiz:[[["You took a great photo of a visitor's child with a calf. Can you post it?","Tomó una foto linda del hijo de un visitante con un ternero. ¿Puede publicarla?"],[["Yes, it's cute","Sí, es linda"],["Only with the parent's permission","Solo con permiso de los padres"]],1],
+[["Who approves a post before it goes out?","¿Quién aprueba una publicación antes de salir?"],[["The owner","El dueño"],["Nobody, post fast","Nadie, publique rápido"]],0],
+[["Can you call the eggs 'certified organic' in an ad?","¿Puede decir 'orgánico certificado' en un anuncio?"],[["Only if the owner confirms it's true","Solo si el dueño confirma que es cierto"],["Yes, it sells more","Sí, se vende más"]],0]]},
+pr:{title:["Public relations & media","Relaciones públicas y prensa"],
+points:[["Only the owner or someone they name speaks to reporters, officials or the public for the farm.","Solo el dueño o la persona que él designe habla con periodistas, funcionarios o el público por la finca."],
+["If a reporter calls, take their name, outlet, number and deadline, and pass it to the owner the same hour.","Si llama un periodista, anote su nombre, medio, teléfono y fecha límite, y páselo al dueño en la misma hora."],
+["Never comment on an animal death, injury, accident or complaint in public. Report it inside first.","Nunca comente en público una muerte de animal, lesión, accidente o queja. Repórtelo internamente primero."],
+["Log every visit, event and interview in Shepherd so the team has one record.","Anote cada visita, evento y entrevista en Shepherd para que el equipo tenga un solo registro."]],
+quiz:[[["A reporter asks you about a sick cow. You…","Un periodista le pregunta por una vaca enferma. Usted…"],[["Explain what happened","Explica lo que pasó"],["Take their details and pass them to the owner","Toma sus datos y los pasa al dueño"]],1],
+[["Who speaks for the farm in public?","¿Quién habla por la finca en público?"],[["Anyone on staff","Cualquier empleado"],["The owner or someone they name","El dueño o quien él designe"]],1],
+[["After a school visit, you should…","Después de una visita escolar, usted debe…"],[["Log it in Shepherd","Anotarla en Shepherd"],["Nothing","Nada"]],0]]},
+foundation:{title:["Foundation & giving","Fundación y donaciones"],
+points:[["Foundation money and farm money are always kept separate. Never mix them.","El dinero de la fundación y el de la finca siempre se mantienen separados. Nunca se mezclan."],
+["Every donation gets a receipt and a thank-you, and is logged the same day.","Cada donación recibe un recibo y un agradecimiento, y se anota el mismo día."],
+["Donor names and amounts are private unless the donor says they can be shared.","Los nombres y montos de donantes son privados salvo que el donante autorice compartirlos."],
+["Food or animals given to families are logged with date, amount and who approved it.","La comida o animales entregados a familias se anotan con fecha, cantidad y quién lo aprobó."]],
+quiz:[[["A donor gives cash at the farm stand. You…","Un donante entrega efectivo en el puesto de la finca. Usted…"],[["Put it in the farm register","Lo pone en la caja de la finca"],["Give a receipt and log it as a foundation donation","Da recibo y lo anota como donación de la fundación"]],1],
+[["Can you post the list of this month's donors?","¿Puede publicar la lista de donantes del mes?"],[["Only those who agreed to be named","Solo los que aceptaron ser nombrados"],["Yes, everyone","Sí, todos"]],0],
+[["You give 10 dozen eggs to a family in need. What do you log?","Entrega 10 docenas de huevos a una familia necesitada. ¿Qué anota?"],[["Date, amount and who approved it","Fecha, cantidad y quién lo aprobó"],["Nothing, it's charity","Nada, es caridad"]],0]]},
 poultry:{title:["Working with poultry","Trabajo con aves"],
 points:[["Collect eggs at least twice a day and log the count in Shepherd.","Recoja huevos al menos dos veces al día y anote el conteo en Shepherd."],
 ["Cracked or dirty eggs are kept apart and never sold.","Los huevos rotos o sucios se separan y nunca se venden."],
@@ -1640,7 +1677,7 @@ const pick = lang==="es" ? (es.length?es:en) : (en.length?en:es); return pick.le
 const isDraftValues = () => !(handbook&&(handbook.values_en||handbook.values_es));
 
 const staffStatus = s => s.status || "active";
-function trainingFor(s){ const keys=CORE_TRAINING.slice(); for(const sp of (s.areas||[])) { const k=AREA_OF[sp]; if(k&&!keys.includes(k)) keys.push(k); } return keys; }
+function trainingFor(s){ const ar=s.areas||[]; const officeOnly=ar.length&&ar.every(isDept); const keys=officeOnly?["biosecurity"]:CORE_TRAINING.slice(); for(const sp of (s.areas||[])) { const k=AREA_OF[sp]; if(k&&!keys.includes(k)) keys.push(k); } return keys; }
 function canWork(species){ const me=meObj(); if(!me) return false; if(me.role==="admin"||!me.ob) return true; const k=AREA_OF[species]; if(!k) return true; return !!(me.ob.train&&me.ob.train[k]&&me.ob.train[k].passed); }
 function obSteps(s){ return ["welcome","profile","legal","pin","values"].concat(trainingFor(s).map(k=>"train:"+k)).concat(["done"]); }
 function stepDone(s,step){ const ob=s.ob||{}; if(step==="welcome") return !!ob.welcome; if(step==="profile") return !!ob.profile; if(step==="legal") return !!(s.legal&&s.legal.done); if(step==="pin") return !!s.pinHash; if(step==="values") return !!(ob.values&&ob.values.date);
@@ -1717,7 +1754,10 @@ function hireSheet(){ openSheet(`<h2>${T2("Add employee","Agregar empleado")}</h
 <div class="field"><label class="label" for="hf-start">${T2("Start date","Fecha de inicio")}</label><input id="hf-start" name="start" type="date" value="${today()}" required></div>
 <div class="field"><label class="label" for="hf-lang">${T2("Language","Idioma")}</label><select id="hf-lang" name="lang"><option value="es">Español</option><option value="en">English</option></select></div></div>
 <fieldset class="q"><legend class="label">${T2("Work areas (training required for each)","Áreas de trabajo (cada una requiere entrenamiento)")}</legend>
-<div class="chips">${SPECIES.map(sp=>`<label class="chip"><input type="checkbox" name="areas" value="${sp}"> ${t(sp)}</label>`).join("")}</div></fieldset>
+<div class="area-grp">${T2("Farm & animals","Finca y animales")}</div>
+<div class="chips">${SPECIES.map(sp=>`<label class="chip"><input type="checkbox" name="areas" value="${sp}"> ${t(sp)}</label>`).join("")}</div>
+<div class="area-grp">${T2("Office & outreach","Oficina y comunidad")}</div>
+<div class="chips">${DEPTS.map(sp=>`<label class="chip"><input type="checkbox" name="areas" value="${sp}"> ${t(sp)}</label>`).join("")}</div></fieldset>
 <div class="inline"><button class="btn primary" type="submit">${T2("Create invite","Crear invitación")}</button><button class="btn" type="button" data-act="closeSheet">${t("cancel")}</button></div></form>`); }
 const JOIN_URL=(window.claude&&window.claude.use?"https://claude.ai/artifact/GHyjc5r7NpGkf6gq8tKsFZ":(location.origin+location.pathname))+"#join";
 function b64u(str){ return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
@@ -1853,12 +1893,19 @@ return `<section class="panel"><div style="display:flex;justify-content:space-be
 }
 async function firstWeekTasks(staffId,start,areas){
 const add=(n)=>{ const d=new Date(start+"T12:00"); d.setDate(d.getDate()+n); return d.toLocaleDateString("en-CA"); };
-const areaNames={en:areas.map(a=>STR.en[a]).join(", ")||"the farm",es:areas.map(a=>STR.es[a]).join(", ")||"la finca"};
+const animalAreas=areas.filter(a=>!isDept(a)), depts=areas.filter(isDept);
+const areaNames={en:animalAreas.map(a=>STR.en[a]).join(", ")||"the farm",es:animalAreas.map(a=>STR.es[a]).join(", ")||"la finca"};
+const DEPT_TASKS={
+office:[1,"Office setup: logins, files and filing","Oficina: accesos, archivos y organización",["Get computer and Shepherd access","Learn where invoices and receipts go","Review this week's sales and payments in Records"],["Recibir acceso a la computadora y a Shepherd","Aprender dónde van facturas y recibos","Revisar ventas y pagos de la semana en Registros"]],
+marketing:[1,"Brand kit and content calendar","Kit de marca y calendario de contenido",["Get the logo, colors and photo folder","List the farm's social accounts and logins owner","Draft 3 posts for owner approval"],["Recibir logo, colores y carpeta de fotos","Listar las redes de la finca y quién tiene los accesos","Preparar 3 publicaciones para aprobación del dueño"]],
+pr:[1,"Media and community contacts","Contactos de prensa y comunidad",["Meet with the owner on who speaks for the farm","Build the press and partners contact list","Set up the visits and events log"],["Reunirse con el dueño sobre quién habla por la finca","Crear la lista de contactos de prensa y aliados","Preparar el registro de visitas y eventos"]],
+foundation:[1,"Foundation programs and donor records","Programas de la fundación y registro de donantes",["Review current programs and families served","Learn the donation receipt and thank-you process","Confirm foundation and farm accounts are separate"],["Revisar programas actuales y familias atendidas","Aprender el proceso de recibo y agradecimiento","Confirmar que las cuentas de la fundación y la finca están separadas"]]};
 const list=[
 [0,"Farm tour with the administrator","Recorrido de la finca con el administrador",["Barns, coops and pastures","Emergency exits and first aid kit","Where medicines and chemicals are stored"],["Establos, gallineros y pastos","Salidas de emergencia y botiquín","Dónde se guardan medicinas y químicos"],"high"],
 [0,"Biosecurity walk-through","Recorrido de bioseguridad",["Boot dips","Hand-wash stations","Chore order: young to old, healthy to sick"],["Pediluvios","Estaciones para lavarse las manos","Orden de tareas: jóvenes a mayores, sanos a enfermos"],"normal"],
-[1,`Meet the animals: ${areaNames.en}`,`Conocer a los animales: ${areaNames.es}`,["Learn tag numbers and names","Note any animals that need special handling"],["Aprender números de arete y nombres","Anotar animales que requieren manejo especial"],"normal"],
-[2,"Shadow a full shift","Acompañar un turno completo",["Morning chores","Log at least one entry in Shepherd","Evening chores"],["Tareas de la mañana","Registrar al menos una entrada en Shepherd","Tareas de la tarde"],"normal"],
+...depts.map(d=>{ const [n,en,es,cen,ces]=DEPT_TASKS[d]; return [n,en,es,cen,ces,"normal"]; }),
+...(depts.length&&!animalAreas.length?[]:[[1,`Meet the animals: ${areaNames.en}`,`Conocer a los animales: ${areaNames.es}`,["Learn tag numbers and names","Note any animals that need special handling"],["Aprender números de arete y nombres","Anotar animales que requieren manejo especial"],"normal"]]),
+(depts.length&&!animalAreas.length)?[2,"Shadow the owner for a day","Acompañar al dueño un día",["Morning walk of the farm","Sit in on calls and meetings","Log at least one entry in Shepherd"],["Recorrido de la finca en la mañana","Estar en llamadas y reuniones","Registrar al menos una entrada en Shepherd"],"normal"]:[2,"Shadow a full shift","Acompañar un turno completo",["Morning chores","Log at least one entry in Shepherd","Evening chores"],["Tareas de la mañana","Registrar al menos una entrada en Shepherd","Tareas de la tarde"],"normal"],
 [4,"End-of-week check-in with the administrator","Reunión de fin de semana con el administrador",["Questions so far","Confirm work areas and schedule"],["Preguntas hasta ahora","Confirmar áreas y horario"],"normal"]];
 for(const [n,en,es,cen,ces,prio] of list) await createTask({title:en,title_es:es,checklist:cen,checklist_es:ces,assignee:staffId,date:add(n),priority:prio,area:"Onboarding",area_es:"Ingreso"});
 }
