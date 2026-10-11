@@ -5,7 +5,8 @@
 /* Layout: app shell — left rail on desktop, bottom tab bar on phones; ear-tag chips identify every animal */
 :root{
 /* Brand: Faith Based Family Farms Foundation, from the egg carton: forest green, leaf green, harvest gold on kraft cream */
---bg:#F3EDE0; --surface:#FFFDF8; --sunk:#EAE2D0; --line:#DCD1B8;
+--bg:#EAE0C8; --surface:#FBF5E6; --sunk:#E6DCC4; --line:#D3C39C;
+--card:linear-gradient(180deg,#F7EEDA 0%,#EFE3C6 100%); --card-kpi:linear-gradient(155deg,#E5EDD3 0%,#D3E0BC 100%); --card-row:#FBF5E6; --card-glow:0 1px 0 rgba(255,255,255,.6) inset,0 6px 18px -10px rgba(23,61,34,.35);
 --fg:#1E2B1C; --muted:#5F6650; --pasture:#1F4D2B; --pasture-ink:#FFFDF6; --leaf:#4C8A2E;
 --hay:#C9A23F; --hay-ink:#2A1F05; --ok:#3F7D2A; --warn:#A87418; --crit:#A8382B;
 --ok-bg:#E4EFD8; --warn-bg:#F6EBCF; --crit-bg:#F5DFD8;
@@ -21,13 +22,13 @@
 --fg:#EEE8D6; --muted:#A9AE96; --pasture:#6FAE4C; --pasture-ink:#0C160E; --leaf:#86BF5E;
 --hay:#D9B65A; --hay-ink:#241A04; --ok:#7CC25A; --warn:#E0A945; --crit:#EE7E6C;
 --ok-bg:#1A3218; --warn-bg:#33280F; --crit-bg:#3A1C16;
---rail:#0A140C; --rail-ink:#EEE8D6; --rail-gold:#D9B65A; color-scheme:dark; --bg-art:radial-gradient(900px 520px at 100% -10%,rgba(217,182,90,.14),transparent 60%),radial-gradient(800px 600px at -10% 110%,rgba(111,174,76,.12),transparent 60%),radial-gradient(1px 1px at 20% 30%,rgba(238,232,214,.35),transparent 1.5px),radial-gradient(1px 1px at 70% 12%,rgba(238,232,214,.3),transparent 1.5px),radial-gradient(1px 1px at 45% 8%,rgba(238,232,214,.25),transparent 1.5px),repeating-linear-gradient(135deg,rgba(238,232,214,.025) 0 2px,transparent 2px 14px);}}
+--rail:#0A140C; --rail-ink:#EEE8D6; --rail-gold:#D9B65A; color-scheme:dark; --card:var(--surface); --card-kpi:linear-gradient(155deg,#1B2C1F 0%,#16241A 100%); --card-row:#1A2A1E; --card-glow:0 6px 18px -12px rgba(0,0,0,.6); --bg-art:radial-gradient(900px 520px at 100% -10%,rgba(217,182,90,.14),transparent 60%),radial-gradient(800px 600px at -10% 110%,rgba(111,174,76,.12),transparent 60%),radial-gradient(1px 1px at 20% 30%,rgba(238,232,214,.35),transparent 1.5px),radial-gradient(1px 1px at 70% 12%,rgba(238,232,214,.3),transparent 1.5px),radial-gradient(1px 1px at 45% 8%,rgba(238,232,214,.25),transparent 1.5px),repeating-linear-gradient(135deg,rgba(238,232,214,.025) 0 2px,transparent 2px 14px);}}
 :root[data-theme="dark"]{
 --bg:#0F1A12; --surface:#16241A; --sunk:#0B140D; --line:#2A3B2C;
 --fg:#EEE8D6; --muted:#A9AE96; --pasture:#6FAE4C; --pasture-ink:#0C160E; --leaf:#86BF5E;
 --hay:#D9B65A; --hay-ink:#241A04; --ok:#7CC25A; --warn:#E0A945; --crit:#EE7E6C;
 --ok-bg:#1A3218; --warn-bg:#33280F; --crit-bg:#3A1C16;
---rail:#0A140C; --rail-ink:#EEE8D6; --rail-gold:#D9B65A; color-scheme:dark; --bg-art:radial-gradient(900px 520px at 100% -10%,rgba(217,182,90,.14),transparent 60%),radial-gradient(800px 600px at -10% 110%,rgba(111,174,76,.12),transparent 60%),radial-gradient(1px 1px at 20% 30%,rgba(238,232,214,.35),transparent 1.5px),radial-gradient(1px 1px at 70% 12%,rgba(238,232,214,.3),transparent 1.5px),radial-gradient(1px 1px at 45% 8%,rgba(238,232,214,.25),transparent 1.5px),repeating-linear-gradient(135deg,rgba(238,232,214,.025) 0 2px,transparent 2px 14px);}
+--rail:#0A140C; --rail-ink:#EEE8D6; --rail-gold:#D9B65A; color-scheme:dark; --card:var(--surface); --card-kpi:linear-gradient(155deg,#1B2C1F 0%,#16241A 100%); --card-row:#1A2A1E; --card-glow:0 6px 18px -12px rgba(0,0,0,.6); --bg-art:radial-gradient(900px 520px at 100% -10%,rgba(217,182,90,.14),transparent 60%),radial-gradient(800px 600px at -10% 110%,rgba(111,174,76,.12),transparent 60%),radial-gradient(1px 1px at 20% 30%,rgba(238,232,214,.35),transparent 1.5px),radial-gradient(1px 1px at 70% 12%,rgba(238,232,214,.3),transparent 1.5px),radial-gradient(1px 1px at 45% 8%,rgba(238,232,214,.25),transparent 1.5px),repeating-linear-gradient(135deg,rgba(238,232,214,.025) 0 2px,transparent 2px 14px);}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{background-color:var(--bg);background-image:var(--bg-art);background-attachment:fixed;color:var(--fg);transition:background-color .25s,color .25s;font-family:var(--f-body);font-size:15px;line-height:1.45}
@@ -61,11 +62,11 @@ button{cursor:pointer}
 .demo{background:var(--warn-bg);color:var(--fg);border:1px dashed var(--warn);border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:16px}
 .grid{display:grid;gap:16px}
 .cols-2{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
-.panel h2{font-family:var(--f-display);font-weight:700;color:var(--pasture);font-size:18px;padding-bottom:8px;border-bottom:1px solid var(--line);margin:0 0 12px;letter-spacing:.01em}
+.panel{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--pasture);box-shadow:var(--card-glow);border-radius:var(--r);padding:16px;min-width:0}
+.panel h2{font-family:var(--f-display);font-weight:700;color:var(--pasture);font-size:18px;padding-bottom:8px;border-bottom:2px solid var(--hay);margin:0 0 12px;letter-spacing:.01em}
 .label{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
-.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.kpi{background:var(--card-kpi);border:1px solid var(--line);border-radius:var(--r);padding:14px}
 .kpi b{display:block;font-family:var(--f-display);color:var(--pasture);font-size:30px;line-height:1.05;font-variant-numeric:tabular-nums}
 .kpi.crit b{color:var(--crit)}
 .list{display:flex;flex-direction:column}
@@ -221,8 +222,27 @@ fieldset.q.good{border-color:var(--ok)} fieldset.q.bad{border-color:var(--crit);
 .agent{height:calc(100vh - 210px)}
 }
 :root:not([data-theme]) .nav button[aria-current="page"],.nav button[aria-current="page"]{background:rgba(212,175,79,.18);box-shadow:inset 3px 0 0 var(--rail-gold)}
-.panel,.kpi,.task,.acard{box-shadow:0 1px 0 rgba(31,77,43,.06)}
+.kpi,.task,.acard{box-shadow:var(--card-glow)}
+.panel .task,.panel .acard,.panel .who-btn{background:var(--card-row)}
 .kpi{border-top:3px solid var(--hay)}
+.rec-bar{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;margin-bottom:12px}
+.rec-filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.rec-filters input,.rec-filters select{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13px;min-width:0}
+.rec-filters input{width:min(240px,100%)}
+.sheetwrap{overflow:auto;max-height:62vh;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.sheet-t{border-collapse:separate;border-spacing:0;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+.sheet-t th{position:sticky;top:0;z-index:1;background:var(--rail);color:var(--rail-ink);text-align:left;font-weight:700;padding:8px 10px;white-space:nowrap;cursor:pointer;border-bottom:2px solid var(--rail-gold);user-select:none}
+.sheet-t th:hover{color:var(--rail-gold)}
+.sheet-t td{padding:7px 10px;border-bottom:1px solid var(--line);border-right:1px solid color-mix(in srgb,var(--line) 55%,transparent);white-space:nowrap;vertical-align:top}
+.sheet-t td.wide{white-space:normal;min-width:240px;max-width:420px}
+.sheet-t td.mono{font-family:var(--f-mono);font-weight:700}
+.sheet-t .num{text-align:right}
+.sheet-t .rn{color:var(--muted);text-align:right;width:1%;background:var(--sunk);font-size:11px}
+.sheet-t tbody tr:nth-child(even) td:not(.rn){background:color-mix(in srgb,var(--pasture) 5%,transparent)}
+.sheet-t tbody tr:hover td:not(.rn){background:color-mix(in srgb,var(--hay) 16%,transparent)}
+.sheet-t tfoot td{position:sticky;bottom:0;background:var(--sunk);font-weight:700;border-top:2px solid var(--hay)}
+.sheet-t .empty{text-align:center;color:var(--muted);padding:24px;white-space:normal}
+
 .btn.primary{background:var(--pasture);border-color:var(--pasture);color:var(--pasture-ink);box-shadow:inset 0 -2px 0 rgba(0,0,0,.15)}
 .btn{border-radius:999px}
 .bar-fill{background:linear-gradient(90deg,var(--pasture),var(--leaf))}
@@ -322,7 +342,7 @@ Female:"Hembra",Male:"Macho","Castrated male":"Macho castrado",Mixed:"Mixto"};
 const V = v => lang==="es" && VOCAB[v] ? VOCAB[v] : (v||"");
 
 // ---------- state ----------
-const S = { speak: LS.get("sh.speak",false), view: LS.get("sh.view","today"), animals:[], tasks:[], staff:[], me: LS.get("sh.me",null),
+const S = { sales:[], speak: LS.get("sh.speak",false), view: LS.get("sh.view","today"), animals:[], tasks:[], staff:[], me: LS.get("sh.me",null),
 species:"all", animalId:null, db:null, sample:null, canWrite:true, ready:false, chat:[], busy:false, ctl:null, photo:null };
 const today = () => new Date().toLocaleDateString("en-CA");
 const daysBetween = (a,b) => Math.round((new Date(b+"T12:00")-new Date(a+"T12:00"))/864e5);
@@ -335,6 +355,7 @@ const I = {
 today:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="17" rx="2"/><path d="M8 2v4M16 2v4M8 12l2.5 2.5L16 9"/></svg>',
 animals:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 9c0-3 2-5 7-5s7 2 7 5v3c0 4-3 8-7 8s-7-4-7-8z"/><path d="M5 9 2 7M19 9l3-2"/><circle cx="9.5" cy="11" r="1" fill="currentColor"/><circle cx="14.5" cy="11" r="1" fill="currentColor"/><path d="M10 16h4"/></svg>',
 agent:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H9l-5 4z"/><path d="M9 10h.01M15 10h.01"/></svg>',
+sheet:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16M15 4v16"/></svg>',
 dash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
 camera:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
 mic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
@@ -428,8 +449,8 @@ else await writeDoc("tasks",tk.id,()=>S.db.collection("tasks").doc(tk.id).update
 // ---------- render ----------
 function renderNav(){
 if(meObj() && staffStatus(meObj())!=="active"){ document.getElementById("nav").innerHTML=""; document.getElementById("railNote").textContent=meObj().name; return; }
-const items=[["today",I.today],["animals",I.animals],["agent",I.agent]]; if(isAdmin()){ items.unshift(["command",I.megaphone]); items.push(["dash",I.dash]); }
-document.getElementById("nav").innerHTML = items.map(([k,ic])=>`<button data-nav="${k}" ${S.view===k?'aria-current="page"':""}>${ic}<span>${t(k)}</span></button>`).join("");
+const items=[["today",I.today],["animals",I.animals],["agent",I.agent]]; if(isAdmin()){ items.unshift(["command",I.megaphone]); items.push(["dash",I.dash]); items.push(["records",I.sheet]); }
+document.getElementById("nav").innerHTML = items.map(([k,ic])=>`<button data-nav="${k}" ${S.view===k?'aria-current="page"':""}>${ic}<span>${k==="records"?T2("Records","Registros"):t(k)}</span></button>`).join("");
 document.getElementById("railNote").textContent = meObj() ? `${meObj().name} · ${meObj().role==="admin"?t("admin"):t("employee")}` : "";
 }
 function topbar(title,sub,extra=""){
@@ -452,7 +473,7 @@ const focusId=document.activeElement&&document.activeElement.id;
 const me=meObj(); let html;
 if(!me) html=renderLogin();
 else if(staffStatus(me)!=="active") html=renderOnboarding(me);
-else { if(S.view==="dash" && !isAdmin()) S.view="today"; if((S.view==="kiosk"||S.view==="command")&&!isAdmin()) S.view="today"; html=({today:renderToday,animals:renderAnimals,agent:renderAgent,dash:renderDash,kiosk:renderKiosk,command:renderCommand}[S.view]||renderToday)(); }
+else { if(S.view==="dash" && !isAdmin()) S.view="today"; if((S.view==="kiosk"||S.view==="command"||S.view==="records")&&!isAdmin()) S.view="today"; html=({today:renderToday,animals:renderAnimals,agent:renderAgent,dash:renderDash,kiosk:renderKiosk,command:renderCommand,records:renderRecords}[S.view]||renderToday)(); }
 main.innerHTML = html;
 if(!me || staffStatus(me)!=="active"){ for(const [id,val] of Object.entries(keep)){ const x=document.getElementById(id); if(x&&val) x.value=val; } if(focusId) document.getElementById(focusId)?.focus(); return; }
 for(const [id,val] of Object.entries(keep)){ const x=document.getElementById(id); if(x&&val) x.value=val; }
@@ -564,7 +585,7 @@ const care=careItems(); const overdue=care.filter(x=>x.n<0); const health=recent
 const herd=S.animals.reduce((s,a)=>s+(a.kind==="group"?(a.count||0):1),0);
 const counts={}; for(const a of S.animals) counts[a.species]=(counts[a.species]||0)+(a.kind==="group"?(a.count||0):1);
 const staff=S.staff.filter(s=>s.role!=="admin"&&staffStatus(s)==="active").map(s=>{const m=list.filter(tk=>tk.assignee===s.id);return{s,n:m.length,d:m.filter(taskDoneToday).length}});
-return topbar(t("dash"), t("farm"), S.canWrite?`${isAdmin()?`<button class="btn voicebtn" data-nav="command">${I.megaphone} ${T2("Command center","Centro de mando")}</button>`:`<button class="btn voicebtn" data-act="voice">${I.mic} ${T2("Voice log","Registro por voz")}</button>`}<button class="btn" data-act="hire">${T2("Add employee","Agregar empleado")}</button><button class="btn primary" data-act="assign">${t("assign")}</button>`:"") + banners() +
+return topbar(t("dash"), t("farm"), S.canWrite?`${isAdmin()?`<button class="btn voicebtn" data-nav="command">${I.megaphone} ${T2("Command center","Centro de mando")}</button>`:`<button class="btn voicebtn" data-act="voice">${I.mic} ${T2("Voice log","Registro por voz")}</button>`}<button class="btn" data-nav="records">${I.sheet} ${T2("Records","Registros")}</button><button class="btn" data-act="hire">${T2("Add employee","Agregar empleado")}</button><button class="btn primary" data-act="assign">${t("assign")}</button>`:"") + banners() +
 `<div class="kpis"><div class="kpi"><span class="label">${t("done")}</span><b>${doneN}/${list.length}</b></div>
 <div class="kpi ${overdue.length?"crit":""}"><span class="label">${t("overdue")}</span><b>${overdue.length}</b></div>
 <div class="kpi"><span class="label">${t("health7")}</span><b>${health.length}</b></div>
@@ -796,6 +817,7 @@ function makeLocalDB(){
 const KEY="sh.demo.db"; let st=null;
 try{ st=JSON.parse(localStorage.getItem(KEY)||"null"); }catch{}
 if(!st){ st=JSON.parse(JSON.stringify(DEMO_SEED).split("__TODAY__").join(today())); }
+if(!st._rec){ st.sales=Object.assign(demoSales(),st.sales||{}); st.clock=Object.assign(demoClocks(),st.clock||{}); st._rec=1; }
 const subs=new Set(); const save=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){ console.warn("demo save",e); toast("Storage full on this device. Use Reset demo."); } };
 const fire=()=>setTimeout(()=>subs.forEach(f=>{ try{f();}catch(e){console.warn(e);} }),0);
 const merge=(a,b)=>{ const o=Object.assign({},a); for(const [k,v] of Object.entries(b)){ o[k]=(v&&typeof v==="object"&&!Array.isArray(v)&&o[k]&&typeof o[k]==="object"&&!Array.isArray(o[k]))?merge(o[k],v):v; } return o; };
@@ -1021,6 +1043,127 @@ toast(fail?T2(`${n} done, ${fail} couldn't be done`,`${n} hechas, ${fail} no se 
 }
 async function ackDirective(id){ const me=meObj(); const x=directives.find(d=>d.id===id); if(!x||!me) return;
 try{ await writeDoc("directives",id,()=>S.db.collection("directives").doc(id).update({acks:{[me.id]:{ts:new Date().toISOString(),date:today(),name:me.name}}})); toast(T2("Marked as read","Marcado como leído")); }catch{ toast(t("saveErr")); } }
+
+// ---------- farm records (admin spreadsheet) ----------
+let clockAll=[];
+const REC={tab:LS.get("sh.rec.tab","activity"),range:LS.get("sh.rec.range","30"),q:"",who:"all",sort:{}};
+const SALE_CH=[["grocery","Grocery store","Supermercado"],["pizzeria","Pizzeria","Pizzería"],["stand","Farm stand","Puesto de la finca"],["wholesale","Wholesale","Al por mayor"],["other","Other","Otro"]];
+function chLabel(k){ const c=SALE_CH.find(x=>x[0]===k)||SALE_CH[4]; return T2(c[1],c[2]); }
+function demoSales(){ const out={}; const items=[["Eggs (dozen)","Huevos (docena)","doz",6,"grocery"],["Eggs (dozen)","Huevos (docena)","doz",6,"stand"],["Farm pizza","Pizza de la finca","ea",18,"pizzeria"],["Pork sausage","Salchicha de cerdo","lb",9,"grocery"],["Whole chicken","Pollo entero","ea",22,"stand"],["Ground beef","Carne molida","lb",8.5,"grocery"]];
+const who=[["maria","María Rivera"],["ana","Ana Colón"],["admin","Farm Administrator"]]; let seed=7; const rnd=()=>{ seed=(seed*9301+49297)%233280; return seed/233280; };
+for(let i=29;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); const ds=d.toISOString().slice(0,10);
+for(const [en,es,unit,price,ch] of items){ if(rnd()<0.45) continue; const qty=unit==="doz"?Math.round(8+rnd()*14):unit==="lb"?Math.round(5+rnd()*20):Math.round(3+rnd()*12);
+const p=who[Math.floor(rnd()*who.length)]; const tm=new Date(ds+"T"+String(9+Math.floor(rnd()*8)).padStart(2,"0")+":"+String(Math.floor(rnd()*60)).padStart(2,"0")+":00");
+out["s"+ds+en.slice(0,4)+ch]={d:ds,ts:tm.toISOString(),channel:ch,item:en,item_es:es,qty,unit,price,total:Math.round(qty*price*100)/100,by:p[1],byId:p[0],sample:true}; } }
+return out; }
+function demoClocks(){ const out={}; const ppl=[["ana","Ana Colón"],["daniel","Daniel Torres"],["maria","María Rivera"]];
+for(let i=14;i>=1;i--){ const d=new Date(); d.setDate(d.getDate()-i); if(d.getDay()===0) continue; const ds=d.toISOString().slice(0,10);
+ppl.forEach(([id,name],k)=>{ if((i+k)%9===0) return; const inn=new Date(ds+"T0"+(6+k%2)+":"+String((i*7+k*11)%50).padStart(2,"0")+":00"); const out_=new Date(inn.getTime()+(8+((i+k)%3)*0.5)*3600e3);
+out[id+"_"+ds]={staffId:id,name,date:ds,in:inn.toISOString(),out:out_.toISOString(),method:"qr",shifts:[],sample:true}; }); }
+return out; }
+function recFrom(){ return REC.range==="all"?"0000-00-00":(()=>{ const d=new Date(); d.setDate(d.getDate()-Number(REC.range)+1); return d.toISOString().slice(0,10); })(); }
+function inRange(d){ return d && d>=recFrom() && d<=today(); }
+function fmtWhen(ts,d){ if(!ts) return d||""; try{ return new Date(ts).toLocaleString(lang==="es"?"es-PR":"en-US",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"}); }catch{ return d||""; } }
+const TYPE_L={health:["Health","Salud"],treatment:["Treatment","Tratamiento"],obs:["Observation","Observación"],feed:["Feed","Alimento"],breeding:["Breeding","Reproducción"],movement:["Movement","Movimiento"],birth:["Birth","Nacimiento"],task:["Task done","Tarea hecha"],clockin:["Clock in","Entrada"],clockout:["Clock out","Salida"],directive:["Directive","Directiva"],sale:["Sale","Venta"]};
+function typeL(k){ const v=TYPE_L[k]; return v?T2(v[0],v[1]):k; }
+function viaL(v){ return ({form:T2("Form","Formulario"),voice:T2("Voice","Voz"),agent:"Shepherd AI",due:T2("Care list","Lista de cuidados"),photo:T2("Photo","Foto"),command:T2("Command center","Centro de mando"),qr:"QR",admin:T2("Admin entry","Entrada del admin"),checklist:T2("Checklist","Lista")})[v]||v||""; }
+function instrL(v){ if(!v||v==="self") return T2("Own initiative","Iniciativa propia"); if(v==="schedule") return T2("Care schedule","Calendario de cuidados"); if(v.startsWith("staff:")) return staffName(v.slice(6)); if(v.startsWith("vet:")) return T2("Vet: ","Veterinario: ")+v.slice(4); return v; }
+
+function recRows(tab){
+if(tab==="activity"){ const rows=[];
+for(const a of S.animals) for(const e of (a.events||[])) rows.push({ts:e.ts||e.d,d:e.d,who:e.by||"",whoId:e.byId||"",role:e.byRole||"",type:typeL(e.type),animal:animalLabel(a),species:t(a.species),pen:L(e,"pen")||L(a,"pen"),detail:L(e,"note"),via:viaL(e.via),instr:instrL(e.instructedBy)});
+for(const tk of S.tasks){ const an=S.animals.find(x=>x.id===tk.animalId);
+if(tk.recurring) for(const [d,v] of Object.entries(tk.doneOn||{})) rows.push({ts:v.ts||d,d,who:v.by||"",whoId:v.byId||"",role:"",type:typeL("task"),animal:animalLabel(an),species:an?t(an.species):"",pen:L(tk,"area"),detail:L(tk,"title"),via:viaL("checklist"),instr:T2("Admin task","Tarea del admin")});
+else if(tk.done) rows.push({ts:tk.doneAt||tk.date,d:(tk.doneAt||tk.date||"").slice(0,10),who:tk.doneBy||"",whoId:"",role:"",type:typeL("task"),animal:animalLabel(an),species:an?t(an.species):"",pen:L(tk,"area"),detail:L(tk,"title"),via:viaL("checklist"),instr:T2("Admin task","Tarea del admin")}); }
+for(const c of clockAll){ rows.push({ts:c.in,d:c.date,who:c.name,whoId:c.staffId,role:"",type:typeL("clockin"),animal:"",species:"",pen:T2("Admin office","Oficina"),detail:c.note||"",via:viaL(c.method),instr:c.enteredBy?T2("Entered by ","Entrado por ")+c.enteredBy:""});
+if(c.out) rows.push({ts:c.out,d:c.date,who:c.name,whoId:c.staffId,role:"",type:typeL("clockout"),animal:"",species:"",pen:"",detail:"",via:viaL(c.method),instr:""}); }
+for(const x of directives) rows.push({ts:x.ts,d:x.date||(x.ts||"").slice(0,10),who:x.createdBy||"",whoId:x.createdById||"",role:"admin",type:typeL("directive"),animal:"",species:"",pen:"",detail:(x.priority==="high"?"⚑ ":"")+L(x,"text"),via:viaL("command"),instr:x.to==="all"?T2("To all staff","A todo el personal"):T2("To: ","Para: ")+[].concat(x.to).map(staffName).join(", ")});
+for(const s of S.sales) rows.push({ts:s.ts||s.d,d:s.d,who:s.by||"",whoId:s.byId||"",role:"",type:typeL("sale"),animal:"",species:"",pen:chLabel(s.channel),detail:`${s.qty} ${s.unit} ${L(s,"item")} · $${Number(s.total||0).toFixed(2)}`,via:viaL("form"),instr:""});
+return rows.filter(r=>inRange(r.d)); }
+if(tab==="animals") return S.animals.map(a=>{ const w=(a.weights||[]).slice().sort((x,y)=>x.d.localeCompare(y.d)); const last=w[w.length-1]; const prev=w[w.length-2];
+const due=(a.due||[]).slice().sort((x,y)=>x.d.localeCompare(y.d)).find(x=>x.d>=today())||null; const ev=(a.events||[])[0];
+return {tag:a.tag,name:L(a,"name"),species:t(a.species),head:a.kind==="group"?(a.count||0):1,breed:a.breed||"",sex:a.sex||"",status:L(a,"status")||a.status||"",pen:L(a,"pen"),born:a.born||"",lastLb:last?last.lb:"",chg:last&&prev?Math.round((last.lb-prev.lb)*10)/10:"",lastEv:ev?ev.d:"",events:(a.events||[]).length,next:due?`${due.d} · ${L(due,"what")}`:""}; });
+if(tab==="production"){ const rows=[];
+for(const a of S.animals){ for(const p of (a.production||[])) if(inRange(p.d)) rows.push({d:p.d,unit:animalLabel(a),species:t(a.species),metric:T2("Eggs","Huevos"),value:p.eggs,head:a.count||"",rate:a.count?Math.round(p.eggs/a.count*1000)/10:""});
+const w=(a.weights||[]).slice().sort((x,y)=>x.d.localeCompare(y.d)); w.forEach((x,i)=>{ if(!inRange(x.d)) return; const pv=w[i-1]; rows.push({d:x.d,unit:animalLabel(a),species:t(a.species),metric:a.kind==="group"?T2("Avg weight (lb)","Peso prom. (lb)"):T2("Weight (lb)","Peso (lb)"),value:x.lb,head:a.kind==="group"?(a.count||""):1,rate:pv?Math.round((x.lb-pv.lb)/Math.max(1,daysBetween(pv.d,x.d))*100)/100:""}); }); }
+return rows; }
+if(tab==="sales") return S.sales.filter(s=>inRange(s.d)).map(s=>({ts:s.ts||s.d,d:s.d,channel:chLabel(s.channel),item:L(s,"item"),qty:s.qty,unit:s.unit,price:s.price,total:s.total,who:s.by||"",whoId:s.byId||"",note:s.note||""}));
+if(tab==="labor") return clockAll.filter(c=>inRange(c.date)).map(c=>{ const h=c.in&&c.out?Math.round((new Date(c.out)-new Date(c.in))/360e3)/10:"";
+let done=0; for(const tk of S.tasks){ if(tk.recurring){ const v=(tk.doneOn||{})[c.date]; if(v&&(v.byId===c.staffId||v.by===c.name)) done++; } else if(tk.done&&(tk.doneAt||"").slice(0,10)===c.date&&tk.doneBy===c.name) done++; }
+for(const a of S.animals) for(const e of (a.events||[])) if(e.d===c.date&&(e.byId===c.staffId||e.by===c.name)) done++;
+return {d:c.date,who:c.name,whoId:c.staffId,inT:c.in?fmtTime(c.in):"",outT:c.out?fmtTime(c.out):(c.date===today()?T2("On farm","En la finca"):"—"),hours:h,method:viaL(c.method),done}; });
+return [];
+}
+function recCols(tab){ const c=(k,en,es,o)=>Object.assign({k,label:T2(en,es)},o||{});
+return ({activity:[c("ts","When","Cuándo",{fmt:(v,r)=>fmtWhen(r.ts,r.d)}),c("who","Who","Quién"),c("type","Action","Acción"),c("animal","Animal","Animal"),c("pen","Where","Dónde"),c("detail","Details","Detalles",{wide:1}),c("via","How","Cómo"),c("instr","Instructed by","Instruido por")],
+animals:[c("tag","Tag","Arete",{mono:1}),c("name","Name","Nombre"),c("species","Species","Especie"),c("head","Head","Cabezas",{num:1}),c("breed","Breed","Raza"),c("sex","Sex","Sexo"),c("status","Status","Estado"),c("pen","Pen / pasture","Corral / pasto"),c("born","Born","Nació"),c("lastLb","Last lb","Último lb",{num:1}),c("chg","Change lb","Cambio lb",{num:1,sign:1}),c("lastEv","Last entry","Última entrada"),c("events","Entries","Entradas",{num:1}),c("next","Next care","Próximo cuidado",{wide:1})],
+production:[c("d","Date","Fecha"),c("unit","Animal / group","Animal / grupo"),c("species","Species","Especie"),c("metric","Metric","Medida"),c("value","Value","Valor",{num:1}),c("head","Head","Cabezas",{num:1}),c("rate","Lay % / lb per day","% postura / lb por día",{num:1})],
+sales:[c("ts","When","Cuándo",{fmt:(v,r)=>fmtWhen(r.ts,r.d)}),c("channel","Channel","Canal"),c("item","Item","Producto"),c("qty","Qty","Cant.",{num:1}),c("unit","Unit","Unidad"),c("price","Price","Precio",{num:1,money:1}),c("total","Total","Total",{num:1,money:1}),c("who","Sold by","Vendido por"),c("note","Note","Nota")],
+labor:[c("d","Date","Fecha"),c("who","Person","Persona"),c("inT","In","Entrada"),c("outT","Out","Salida"),c("hours","Hours","Horas",{num:1}),c("method","Method","Método"),c("done","Things logged","Registros hechos",{num:1})]})[tab]; }
+function recFiltered(){ const tab=REC.tab; let rows=recRows(tab); const q=REC.q.trim().toLowerCase();
+if(REC.who!=="all") rows=rows.filter(r=>r.whoId===REC.who||r.who===staffName(REC.who));
+if(q) rows=rows.filter(r=>Object.values(r).some(v=>String(v).toLowerCase().includes(q)));
+const s=REC.sort[tab]||{k:(tab==="animals"?"tag":tab==="production"||tab==="labor"?"d":"ts"),dir:tab==="animals"?1:-1};
+rows.sort((a,b)=>{ const x=a[s.k],y=b[s.k]; const n=typeof x==="number"||typeof y==="number"; return (n?((Number(x)||0)-(Number(y)||0)):String(x??"").localeCompare(String(y??""),undefined,{numeric:true}))*s.dir; });
+return {rows,sort:s}; }
+function cellFmt(c,v,r){ if(c.fmt) return c.fmt(v,r); if(v===""||v==null) return ""; if(c.money) return "$"+Number(v).toFixed(2); if(c.sign&&typeof v==="number") return (v>0?"+":"")+v; return v; }
+function recSummary(){ const tab=REC.tab; const k=(lab,val,sub)=>`<div class="kpi"><span class="t-meta">${lab}</span><b>${val}</b>${sub?`<span class="t-meta">${sub}</span>`:""}</div>`;
+const sales=S.sales.filter(s=>inRange(s.d)); const rev=sales.reduce((s,x)=>s+(Number(x.total)||0),0);
+const hrs=clockAll.filter(c=>inRange(c.date)&&c.in&&c.out).reduce((s,c)=>s+(new Date(c.out)-new Date(c.in))/36e5,0);
+const flock=S.animals.filter(a=>(a.production||[]).length); let eggs=0,days=new Set(),hens=0; for(const a of flock){ hens+=a.count||0; for(const p of a.production) if(inRange(p.d)){ eggs+=p.eggs; days.add(p.d); } }
+const lastEggs=flock.reduce((s,a)=>{ const p=(a.production||[]).slice().sort((x,y)=>x.d.localeCompare(y.d)); return s+(p.length?p[p.length-1].eggs:0); },0);
+const lay=hens?Math.round(lastEggs/hens*100):0; const list=tasksToday(); const doneN=list.filter(taskDoneToday).length;
+const acts=recRows("activity"); const people=new Set(acts.map(r=>r.who).filter(Boolean));
+const byCh={}; for(const s of sales) byCh[s.channel]=(byCh[s.channel]||0)+(Number(s.total)||0); const topCh=Object.entries(byCh).sort((a,b)=>b[1]-a[1])[0];
+return `<div class="kpis">${k(T2("Revenue","Ingresos"),"$"+Math.round(rev).toLocaleString(),topCh?T2("Top: ","Mayor: ")+chLabel(topCh[0]):T2("No sales logged","Sin ventas"))}
+${k(T2("Eggs","Huevos"),eggs.toLocaleString(),days.size?`${Math.round(eggs/days.size)} ${T2("per day","por día")}`:"")}
+${k(T2("Lay rate (capacity)","Tasa de postura (capacidad)"),lay+"%",`${lastEggs} / ${hens} ${T2("hens, last count","gallinas, último conteo")}`)}
+${k(T2("Labor hours","Horas de trabajo"),Math.round(hrs*10)/10,`${people.size} ${T2("people active","personas activas")}`)}
+${k(T2("Tasks today","Tareas hoy"),`${doneN}/${list.length}`,list.length?Math.round(doneN/list.length*100)+"% "+T2("complete","completo"):"")}
+${k(T2("Logged entries","Entradas registradas"),acts.length.toLocaleString(),T2("in this range","en este período"))}</div>`; }
+function recTableHTML(){ const cols=recCols(REC.tab); const {rows,sort}=recFiltered();
+const tot={}; if(REC.tab==="sales"){ tot.qty=rows.reduce((s,r)=>s+(Number(r.qty)||0),0); tot.total=rows.reduce((s,r)=>s+(Number(r.total)||0),0); }
+if(REC.tab==="labor"){ tot.hours=Math.round(rows.reduce((s,r)=>s+(Number(r.hours)||0),0)*10)/10; tot.done=rows.reduce((s,r)=>s+(Number(r.done)||0),0); }
+if(REC.tab==="animals"){ tot.head=rows.reduce((s,r)=>s+(Number(r.head)||0),0); tot.events=rows.reduce((s,r)=>s+(Number(r.events)||0),0); }
+const hasTot=Object.keys(tot).length;
+return `<div class="t-meta" style="margin:0 0 6px">${rows.length} ${T2("rows","filas")}</div><div class="sheetwrap"><table class="sheet-t"><thead><tr><th class="rn">#</th>${cols.map(c=>`<th data-recsort="${c.k}" class="${c.num?"num":""}" aria-sort="${sort.k===c.k?(sort.dir>0?"ascending":"descending"):"none"}">${esc(c.label)}${sort.k===c.k?(sort.dir>0?" ▲":" ▼"):""}</th>`).join("")}</tr></thead>
+<tbody>${rows.length?rows.slice(0,1500).map((r,i)=>`<tr><td class="rn">${i+1}</td>${cols.map(c=>`<td class="${c.num?"num":""}${c.wide?" wide":""}${c.mono?" mono":""}">${esc(String(cellFmt(c,r[c.k],r)))}</td>`).join("")}</tr>`).join(""):`<tr><td colspan="${cols.length+1}" class="empty">${T2("Nothing in this range yet.","Nada en este período todavía.")}</td></tr>`}</tbody>
+${hasTot&&rows.length?`<tfoot><tr><td class="rn">Σ</td>${cols.map((c,i)=>`<td class="${c.num?"num":""}">${tot[c.k]!=null?esc(String(c.money?"$"+tot[c.k].toFixed(2):tot[c.k])):i===0?T2("Totals","Totales"):""}</td>`).join("")}</tr></tfoot>`:""}</table></div>`; }
+function renderRecords(){ const tabs=[["activity",T2("Activity log","Bitácora")],["animals",T2("Animals","Animales")],["production",T2("Production","Producción")],["sales",T2("Sales","Ventas")],["labor",T2("Labor","Personal")]];
+const ranges=[["7",T2("7 days","7 días")],["30",T2("30 days","30 días")],["90",T2("90 days","90 días")],["all",T2("All","Todo")]];
+return topbar(T2("Farm records","Registros de la finca"),T2("Every animal, sale, harvest and shift. Who, what, when.","Cada animal, venta, cosecha y turno. Quién, qué, cuándo."),
+`${REC.tab==="sales"&&S.canWrite?`<button class="btn primary" data-act="addSale">+ ${T2("Log sale","Anotar venta")}</button>`:""}<button class="btn" data-act="recCsv">${T2("Export to Excel (CSV)","Exportar a Excel (CSV)")}</button>`)+banners()+recSummary()+
+`<section class="panel"><div class="rec-bar"><div class="chips">${tabs.map(([k,l])=>`<button class="chip" data-rectab="${k}" aria-pressed="${REC.tab===k}">${l}</button>`).join("")}</div>
+<div class="rec-filters">${REC.tab!=="animals"?`<div class="seg">${ranges.map(([k,l])=>`<button data-recrange="${k}" aria-pressed="${REC.range===k}">${l}</button>`).join("")}</div>`:""}
+${["activity","sales","labor"].includes(REC.tab)?`<select id="recWho" aria-label="${T2("Person","Persona")}"><option value="all">${T2("Everyone","Todos")}</option>${S.staff.map(s=>`<option value="${esc(s.id)}" ${REC.who===s.id?"selected":""}>${esc(s.name)}</option>`).join("")}</select>`:""}
+<input id="recQ" type="search" placeholder="${T2("Search any column…","Buscar en cualquier columna…")}" value="${esc(REC.q)}"></div></div>
+<div id="recTable">${recTableHTML()}</div></section>`; }
+function recCsv(){ const cols=recCols(REC.tab); const {rows}=recFiltered(); const q=v=>{ const s=String(v??""); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; };
+const csv="﻿"+[cols.map(c=>q(c.label)).join(",")].concat(rows.map(r=>cols.map(c=>q(c.k==="ts"?(r.ts||r.d):r[c.k])).join(","))).join("\n");
+const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download=`faith-farms-${REC.tab}-${today()}.csv`; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); toast(T2("Spreadsheet downloaded","Hoja descargada")); }
+function saleSheet(){ openSheet(`<h2>${T2("Log a sale","Anotar una venta")}</h2><form class="stack" id="saleForm">
+<div class="inline"><div class="field"><label class="label" for="sf-ch">${T2("Channel","Canal")}</label><select id="sf-ch" name="channel">${SALE_CH.map(c=>`<option value="${c[0]}">${T2(c[1],c[2])}</option>`).join("")}</select></div>
+<div class="field"><label class="label" for="sf-d">${t("date")}</label><input id="sf-d" name="d" type="date" value="${today()}" max="${today()}"></div></div>
+<div class="field"><label class="label" for="sf-item">${T2("Item","Producto")}</label><input id="sf-item" name="item" required placeholder="${T2("Eggs (dozen), farm pizza, pork…","Huevos (docena), pizza, cerdo…")}"></div>
+<div class="inline"><div class="field"><label class="label" for="sf-q">${T2("Quantity","Cantidad")}</label><input id="sf-q" name="qty" type="number" step="any" min="0" required></div>
+<div class="field"><label class="label" for="sf-u">${T2("Unit","Unidad")}</label><select id="sf-u" name="unit"><option value="doz">doz</option><option value="ea">ea</option><option value="lb">lb</option><option value="case">case</option></select></div>
+<div class="field"><label class="label" for="sf-p">${T2("Price per unit ($)","Precio por unidad ($)")}</label><input id="sf-p" name="price" type="number" step="0.01" min="0" required></div></div>
+<div class="field"><label class="label" for="sf-n">${T2("Note (optional)","Nota (opcional)")}</label><input id="sf-n" name="note"></div>
+<div style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="btn" data-act="closeSheet">${T2("Cancel","Cancelar")}</button><button class="btn primary">${T2("Save sale","Guardar venta")}</button></div></form>`); }
+function updateRecTable(){ const el=document.getElementById("recTable"); if(el) el.innerHTML=recTableHTML(); }
+document.addEventListener("click",e=>{ const el=e.target.closest("[data-rectab],[data-recrange],[data-recsort],[data-act=recCsv],[data-act=addSale]"); if(!el) return;
+if(el.dataset.rectab){ REC.tab=el.dataset.rectab; LS.set("sh.rec.tab",REC.tab); render(); }
+else if(el.dataset.recrange){ REC.range=el.dataset.recrange; LS.set("sh.rec.range",REC.range); render(); }
+else if(el.dataset.recsort){ const k=el.dataset.recsort; const cur=REC.sort[REC.tab]||recFiltered().sort; REC.sort[REC.tab]={k,dir:cur.k===k?-cur.dir:(k==="ts"||k==="d"?-1:1)}; updateRecTable(); }
+else if(el.dataset.act==="recCsv") recCsv();
+else if(el.dataset.act==="addSale") saleSheet(); });
+document.addEventListener("input",e=>{ if(e.target.id==="recQ"){ REC.q=e.target.value; updateRecTable(); } });
+document.addEventListener("change",e=>{ if(e.target.id==="recWho"){ REC.who=e.target.value; updateRecTable(); } });
+document.addEventListener("submit",async e=>{ if(e.target.id!=="saleForm") return; e.preventDefault(); const fd=new FormData(e.target); const me=meObj()||{};
+const qty=Number(fd.get("qty")), price=Number(fd.get("price")); const item=String(fd.get("item")||"").trim(); const d=String(fd.get("d")||today());
+const now=new Date(); const ts=d===today()?now.toISOString():new Date(d+"T12:00:00").toISOString();
+try{ await S.db.collection("sales").add({d,ts,channel:String(fd.get("channel")),item,item_es:item,qty,unit:String(fd.get("unit")),price,total:Math.round(qty*price*100)/100,note:String(fd.get("note")||"").trim(),by:me.name||"",byId:me.id||""});
+closeSheet(); toast(T2("Sale saved","Venta guardada")); }catch(err){ console.warn(err); toast(t("saveErr")); } });
 
 // ---------- voice logging ----------
 function logFormHTML(a,pre,px){
@@ -1483,6 +1626,8 @@ db.doc("settings/handbook").onSnapshot(d=>{ handbook=d.exists?d.data():null; ren
 db.collection("directives").onSnapshot(snap=>{ directives=snap.docs.map(d=>Object.assign({id:d.id},d.data())); render(); },err=>console.warn("directives",err));
 bind("animals","animals"); bind("tasks","tasks"); bind("staff","staff",(a,b)=>String(a.name).localeCompare(String(b.name)));
 db.doc("settings/clock").onSnapshot(d=>{ clockCfg=d.exists?d.data():null; if(pendingClock&&pendingClock!=="ok"){ const c=pendingClock; pendingClock=null; location.hash="clockin-"+c; } render(); },err=>console.warn("clock",err));
+bind("sales","sales");
+db.collection("clock").onSnapshot(snap=>{ clockAll=snap.docs.map(d=>Object.assign({id:d.id},d.data())); if(S.view==="records") render(); },err=>console.warn("clockAll",err));
 db.collection("clock").where("date","==",today()).onSnapshot(snap=>{ clocks=snap.docs.map(d=>Object.assign({id:d.id},d.data())); render(); },err=>console.warn("clocks",err));
 window.addEventListener("hashchange",()=>{ if(/^#clockin-/.test(location.hash)) setTimeout(handleClockHash,400); });
 setTimeout(handleClockHash,1200);
