@@ -146,6 +146,31 @@ form.stack{display:flex;flex-direction:column;gap:10px}
 .suggest{display:flex;gap:6px;flex-wrap:wrap}
 .empty{color:var(--muted);text-align:center;padding:28px 12px}
 .login{max-width:520px;margin:6vh auto 0}
+body.signed-out .app{grid-template-columns:1fr}
+body.signed-out .rail{display:none}
+body.signed-out .main{padding-bottom:0}
+.gate{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px calc(24px + env(safe-area-inset-bottom,0px));position:relative}
+.gate-tools{position:absolute;top:14px;right:14px;display:flex;gap:8px}
+.gate-logo{width:min(78vw,360px);height:auto;filter:drop-shadow(0 8px 22px rgba(0,0,0,.28));margin-bottom:10px}
+.gate-tag{font-family:var(--f-display);font-size:12px;letter-spacing:.24em;color:var(--leaf);text-transform:uppercase;text-align:center;margin-bottom:26px}
+.gate-form{width:100%;max-width:340px;display:flex;flex-direction:column;gap:14px}
+.gate-form .label{font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:12px}
+.gate-form input{width:100%;font-size:18px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:inherit;box-sizing:border-box}
+.gate-form input:focus{outline:2px solid var(--pasture);outline-offset:1px}
+.gate-form #gt-pin{font-family:var(--f-mono);font-size:26px;letter-spacing:.6em;text-align:center;padding-left:calc(16px + .6em)}
+.gate-form .btn.primary{width:100%;font-size:17px;padding:14px;border-radius:12px;margin-top:4px}
+.gate-ok{color:var(--pasture);font-weight:800;font-size:14px;letter-spacing:.06em;margin:-14px 0 16px}
+.gate-list{width:100%;max-width:380px;display:flex;flex-direction:column;gap:10px}
+.gate .who-btn{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;font-weight:600;color:inherit}
+.gate-scan{width:100%;max-width:340px;text-align:center;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 18px}
+.gate-scan p{margin:0 0 14px}
+.gate-scan-ic{display:inline-flex;color:var(--pasture);margin-bottom:6px}.gate-scan-ic svg{width:44px;height:44px}
+.gate-foot .linkish.subtle{font-weight:600;font-size:13px;opacity:.8}
+.gate-hello{font-family:var(--f-display);font-weight:800;font-size:22px;color:var(--pasture);margin:-12px 0 20px;text-align:center}
+.gate-face{display:flex;align-items:center;justify-content:center;gap:10px}
+.gate-err{min-height:18px;color:var(--crit);font-size:14px;text-align:center}
+.gate-foot{margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;max-width:340px}
+.gate-foot .linkish{background:none;border:0;color:var(--pasture);font-weight:700;text-decoration:underline;cursor:pointer;font-size:15px;padding:6px}
 .login-hero{display:flex;gap:14px;align-items:center;margin-bottom:16px}
 .login-hero img{width:120px;height:auto;flex:none;filter:drop-shadow(0 3px 8px rgba(0,0,0,.25))}
 .login-name{font-family:var(--f-display);font-weight:800;font-size:20px;color:var(--pasture);line-height:1.1}
@@ -232,6 +257,10 @@ fieldset.q.good{border-color:var(--ok)} fieldset.q.bad{border-color:var(--crit);
 .kpi,.task,.acard{box-shadow:var(--card-glow)}
 .panel .task,.panel .acard,.panel .who-btn{background:var(--card-row)}
 .kpi{border-top:3px solid var(--hay)}
+.apic img.stock{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.apic em,.apic .apic-cam{z-index:1}
+.apic-big{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+.credit{font-size:10px;color:var(--muted);max-width:160px;line-height:1.25;text-decoration:none}
 .apic.can{cursor:pointer}
 .apic .apic-cam svg{width:14px;height:14px;flex:none}
 .apic-cam{position:absolute;right:4px;top:4px;display:flex;align-items:center;gap:4px;background:var(--pasture);color:var(--pasture-ink);border-radius:999px;padding:4px;font-size:11px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.3)}
@@ -529,7 +558,9 @@ const main=document.getElementById("main");
 if(!S.db){ main.innerHTML = S.ready ? topbar("Shepherd")+`<div class="panel empty">${t("noDb")}</div>` : `<div class="empty">${t("loading")}</div>`; return; }
 const keep={}; main.querySelectorAll("input[id],textarea[id],select[id]").forEach(x=>{ if(x.type!=="checkbox"&&x.type!=="file"&&x.type!=="radio") keep[x.id]=x.value; });
 const focusId=document.activeElement&&document.activeElement.id;
-const me=meObj(); let html;
+let me=meObj(); let html;
+if(me&&staffStatus(me)==="active"&&!sessionOK(me)){ S.me=null; LS.set("sh.me",null); me=null; renderNav(); }
+document.body.classList.toggle("signed-out",!me);
 if(!me) html=renderLogin();
 else if(staffStatus(me)!=="active") html=renderOnboarding(me);
 else { if(S.view==="dash" && !isAdmin()) S.view="today"; if((S.view==="kiosk"||S.view==="command"||S.view==="records")&&!isAdmin()) S.view="today"; html=({today:renderToday,animals:renderAnimals,agent:renderAgent,dash:renderDash,kiosk:renderKiosk,command:renderCommand,records:renderRecords}[S.view]||renderToday)(); }
@@ -542,15 +573,55 @@ if(S.view==="kiosk"){ drawQR(); if(!kioskTimer) kioskTimer=setInterval(drawQR,50
 if(S.view==="animals" && S.animalId) drawCharts();
 }
 
+// ---------- sign-in: QR (on-site proof) + PIN (identity) ----------
+const QR_TTL=10*60*1000, ADMIN_TTL=12*3600*1000;
+let adminMode=false;
+function deviceStaff(){ const id=LS.get("sh.device",null); const st=id&&S.staff.find(x=>x.id===id); return st&&staffStatus(st)==="active"&&st.role!=="admin"?st:null; }
+const qrOK=()=>pendingClock==="ok"||(Date.now()-LS.get("sh.qr",0))<QR_TTL;
+function sessionOK(me){ const since=LS.get("sh.since",null); if(!since) return false;
+return me.role==="admin" ? (Date.now()-new Date(since).getTime())<ADMIN_TTL : new Date(since).toLocaleDateString("en-CA")===today(); }
+function endSession(msgEn,msgEs){ S.me=null; LS.set("sh.me",null); LS.set("sh.since",null); closeSheet(); render(); window.scrollTo(0,0); if(msgEn) toast(T2(msgEn,msgEs)); }
+function gateShell(inner){ const em=document.querySelector(".brand img")?.src||"";
+return `<div class="gate"><div class="gate-tools"><div class="seg flags" role="group" aria-label="${t("langLabel")}"><button data-lang="en" aria-pressed="${lang==="en"}" aria-label="English">${FLAG_US}</button><button data-lang="es" aria-pressed="${lang==="es"}" aria-label="Español">${FLAG_ES}</button></div></div>
+<img class="gate-logo" src="${em}" alt="La Finca Pastoreo · Regenerativo · Puerto Rico"><div class="gate-tag">Shepherd Farm OS</div>${inner}</div>`; }
+const pinField=(id)=>`<form class="gate-form" id="gateForm" data-id="${esc(id)}"><div class="field"><label class="label" for="gt-pin">PIN</label>
+<input id="gt-pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required autocomplete="current-password"></div>
+<div class="gate-err" id="gt-err" role="alert"></div><button class="btn primary" type="submit">${T2("Sign in","Entrar")}</button></form>`;
+const whoList=list=>`<div class="gate-list">${list.map(s=>`<button class="who-btn" data-login="${esc(s.id)}"><span class="avatar">${esc(initials(s.name))}</span><span class="grow">${esc(s.name)}<div class="t-meta">${s.role==="admin"?t("admin"):t("employee")}${L(s,"area")?" · "+esc(L(s,"area")):""}</div></span></button>`).join("")}</div>`;
 function renderLogin(){
-const staff=S.staff.filter(x=>staffStatus(x)==="active").sort((a,b)=>(a.role==="admin"?0:1)-(b.role==="admin"?0:1));
-const em=document.querySelector(".brand img")?.src||"";
-return topbar("Shepherd", t("farm")) + `<div class="login panel"><div class="login-hero"><img src="${em}" alt=""><div><div class="login-name">La Finca Pastoreo</div><div class="login-tag">Regenerativo · Puerto Rico</div></div></div><h2>${t("whoWorking")}</h2>${DEMO?`<div class="t-meta" style="margin-bottom:10px">${T2("Demo: tap a name and create any 4-digit PIN. Try Farm Administrator first, then an employee.","Demo: toque un nombre y cree cualquier PIN de 4 dígitos. Pruebe primero Farm Administrator y luego un empleado.")}</div>`:""}${pendingClock==="ok"?`<div class="demo">${T2("QR scanned. Tap your name and enter your PIN to clock in.","QR escaneado. Toque su nombre e ingrese su PIN para marcar entrada.")}</div>`:""}
-${staff.length?`<div class="grid">${staff.map(s=>`<button class="who-btn" data-login="${esc(s.id)}"><span class="avatar">${esc(initials(s.name))}</span><span class="grow">${esc(s.name)}<div class="t-meta">${s.role==="admin"?t("admin"):t("employee")}${L(s,"area")?" · "+esc(L(s,"area")):""}</div></span></button>`).join("")}</div>`
-:`<div class="empty">${t("noStaff")}</div>`}
-<button class="btn" data-act="join" style="margin-top:14px;width:100%">${T2("New employee? Join with a code","¿Empleado nuevo? Entrar con código")}</button>
-<p class="t-meta" style="margin-top:14px">${T2("Each person signs in with their own 4-digit PIN.","Cada persona entra con su propio PIN de 4 dígitos.")}</p></div>`;
+const active=S.staff.filter(x=>staffStatus(x)==="active");
+if(adminMode){ const ad=active.filter(x=>x.role==="admin");
+return gateShell(`<div class="gate-hello">${T2("Administrator sign-in","Acceso de administrador")}</div>
+${ad.length?whoList(ad):`<div class="empty">${t("noStaff")}</div>`}
+<div class="gate-foot"><button class="linkish" data-act="gateBack">${T2("Back","Volver")}</button></div>`); }
+if(qrOK()){ const st=deviceStaff();
+if(st) return gateShell(`<div class="gate-ok">✓ ${T2("QR verified","QR verificado")}</div><div class="gate-hello">${T2("Good morning, ","Buenos días, ")}${esc(String(st.name).split(" ")[0])}</div>${pinField(st.id)}
+<div class="gate-foot"><div class="t-meta">${T2("Your PIN signs you in and clocks you in.","Su PIN le da acceso y marca su entrada.")}</div><button class="linkish" data-act="notme">${T2("Not you? Pick your name","¿No es usted? Elija su nombre")}</button></div>`);
+const emp=active.filter(x=>x.role!=="admin");
+return gateShell(`<div class="gate-ok">✓ ${T2("QR verified","QR verificado")}</div><div class="gate-hello">${t("whoWorking")}</div>${emp.length?whoList(emp):`<div class="empty">${t("noStaff")}</div>`}`); }
+return gateShell(`<div class="gate-scan"><div class="gate-scan-ic">${I.qr}</div>
+<div class="gate-hello" style="margin:0 0 6px">${T2("Scan to start your shift","Escanee para empezar su turno")}</div>
+<p>${T2("Open your phone camera and scan the QR code at the farm office. Then enter your PIN.","Abra la cámara del teléfono y escanee el código QR en la oficina de la finca. Luego ingrese su PIN.")}</p>
+${DEMO?`<button class="btn primary" data-act="demoScan" style="width:100%">${T2("Demo: simulate QR scan","Demo: simular escaneo QR")}</button>`:""}</div>
+<div class="gate-foot"><button class="linkish" data-act="join">${T2("New employee? Join with a code","¿Empleado nuevo? Entrar con código")}</button>
+<button class="linkish subtle" data-act="adminMode">${T2("Administrator sign-in","Acceso de administrador")}</button></div>`);
 }
+function signIn(st){ const wasQr=qrOK();
+S.me=st.id; LS.set("sh.me",S.me); LS.set("sh.since",new Date().toISOString()); adminMode=false;
+if(st.role!=="admin"){ LS.set("sh.device",st.id); pendingClock=null; LS.set("sh.qr",0); }
+S.view=st.role==="admin"?"dash":"today"; closeSheet(); render(); window.scrollTo(0,0);
+if(st.role!=="admin"&&wasQr) doClockIn("qr").catch(()=>toast(t("saveErr"))); }
+async function checkPin(st,pin,errEl,form){
+if(!/^\d{4}$/.test(pin)){ errEl.textContent=T2("PIN is 4 digits.","El PIN tiene 4 dígitos."); return false; }
+const wait=(pinFails[st.id]||{}).until||0; if(Date.now()<wait){ errEl.textContent=T2("Too many tries. Wait a few minutes.","Demasiados intentos. Espere unos minutos."); return false; }
+if(!st.pinHash&&DEMO){ await saveStaff(st.id,{pinHash:await pinHash(st.id,pin)}); pinFails[st.id]={n:0}; return true; } // demo only: first PIN typed becomes the PIN
+if(!st.pinHash){ errEl.textContent=T2("No PIN on file. Ask the administrator to reset your access.","No tiene PIN. Pida al administrador que restablezca su acceso."); return false; }
+if(st.pinHash!==await pinHash(st.id,pin)){ const pf=pinFails[st.id]=pinFails[st.id]||{n:0}; pf.n++;
+if(pf.n>=(st.role==="admin"?3:5)){ pf.until=Date.now()+(st.role==="admin"?5:1)*60000; pf.n=0; }
+errEl.textContent=T2("Wrong PIN.","PIN incorrecto."); form&&form.reset(); return false; }
+pinFails[st.id]={n:0}; return true; }
+
+
 
 function taskCard(tk){
 const done=taskDoneToday(tk), checks=taskChecks(tk), a=S.animals.find(x=>x.id===tk.animalId);
@@ -620,10 +691,12 @@ const id="g"+String(a.id||a.tag).replace(/[^a-z0-9]/gi,"");
 const herd=grp?`<g transform="translate(34 6) scale(.62)" opacity=".85">${one}</g><g transform="translate(-6 14) scale(.7)">${one}</g><g transform="translate(18 22) scale(.78)">${one}</g>`:`<g transform="translate(-2 2)">${one}</g>`;
 return `<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe3e6"/><stop offset=".55" stop-color="#e9efd9"/><stop offset=".56" stop-color="#8fb36a"/><stop offset="1" stop-color="#5e8a3e"/></linearGradient></defs>
 <rect width="100" height="100" fill="url(#${id})"/><path d="M0 52 q20-14 38-6 q16-12 34-2 q14-8 28 2 v10 h-100z" fill="#7fa45c" opacity=".55"/><circle cx="82" cy="18" r="7" fill="#f6e2a0" opacity=".9"/>${herd}</svg>`; }
+const STOCK={"calf104":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ac/A_black_calf_in_Ireland.jpg/500px-A_black_calf_in_Ireland.jpg","a":"Eoin Gardiner","l":"CC BY 2.0","d":"https://commons.wikimedia.org/w/index.php?curid=14776107"},"cow212":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Hereford_cattle_Big_Sur_May_2011_003.jpg/500px-Hereford_cattle_Big_Sur_May_2011_003.jpg","a":"King of Hearts","l":"CC BY-SA 4.0","d":"https://commons.wikimedia.org/w/index.php?curid=76227220"},"cow248":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Aberdeen_Angus_cattle_at_Camborne_Show%2C_Cornwall_-_July_2026.jpg/500px-Aberdeen_Angus_cattle_at_Camborne_Show%2C_Cornwall_-_July_2026.jpg","a":"Mutney","l":"CC BY 4.0","d":"https://commons.wikimedia.org/w/index.php?curid=196250439"},"horse01":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/Puerto_rican-Paso-Fino-Horse-chestnut.jpg/500px-Puerto_rican-Paso-Fino-Horse-chestnut.jpg","a":"Arsdelicata","l":"CC BY-SA 3.0","d":"https://commons.wikimedia.org/w/index.php?curid=5613586"},"horse02":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/0/09/QuarterHorseBai.jpg/500px-QuarterHorseBai.jpg","a":"evelynbelgium","l":"CC BY-SA 2.0","d":"https://commons.wikimedia.org/w/index.php?curid=6280480"},"ram01":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/5/52/Katahdin_ewe_with_twin_lambs.jpg/500px-Katahdin_ewe_with_twin_lambs.jpg","a":"Thesheepdog","l":"CC BY-SA 4.0","d":"https://commons.wikimedia.org/w/index.php?curid=124916580"},"sheep-flock":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2f/Registered-katahdin-ewes.jpg/500px-Registered-katahdin-ewes.jpg","a":"Rockinrick3000","l":"CC BY-SA 4.0","d":"https://commons.wikimedia.org/w/index.php?curid=144283395"},"sow07":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Berkshire_Sow%2C_Best_of_Breed.jpg/500px-Berkshire_Sow%2C_Best_of_Breed.jpg","a":"David Merrett","l":"CC BY 2.0","d":"https://commons.wikimedia.org/w/index.php?curid=7396790"},"pigs-g1":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/1/13/Berkshire_pigs_at_a_farm_in_Los_Altos_Hills%2C_CA_-_2_%28cropped%29.jpg/500px-Berkshire_pigs_at_a_farm_in_Los_Altos_Hills%2C_CA_-_2_%28cropped%29.jpg","a":"Suiren2022","l":"CC BY-SA 4.0","d":"https://commons.wikimedia.org/w/index.php?curid=197353595"},"broilers1":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1f/Broiler_Chickens_002.jpg/500px-Broiler_Chickens_002.jpg","a":"Icem4k","l":"CC BY-SA 4.0","d":"https://commons.wikimedia.org/w/index.php?curid=75379696"},"layers1":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d2/Rhode_Island_Red_hen_-_geograph.org.uk_-_5455945.jpg/500px-Rhode_Island_Red_hen_-_geograph.org.uk_-_5455945.jpg","a":"Evelyn Simak","l":"CC BY-SA 2.0","d":"https://commons.wikimedia.org/w/index.php?curid=137904826"}};
 function animalPic(a,big){ const can=S.canWrite&&meObj()&&canWork(a.species);
 const cam=can?`<b class="apic-cam" title="${a.photoId?T2("Change photo","Cambiar foto"):T2("Add photo","Agregar foto")}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>${big?`<span>${a.photoId?T2("Change photo","Cambiar foto"):T2("Add photo","Agregar foto")}</span>`:""}</b>`:"";
 const attr=can?` data-photo-for="${esc(a.id)}" role="button" tabindex="0"`:"";
-return a.photoId?`<span class="apic${can?" can":""}"${attr}><img src="${blobSrc(a.photoId)}" alt="">${cam}</span>`:`<span class="apic sample${can?" can":""}"${attr}>${animalArt(a)}<em>${T2("Sample","Ejemplo")}</em>${cam}</span>`; }
+const st=STOCK[a.id];
+return a.photoId?`<span class="apic${can?" can":""}"${attr}><img src="${blobSrc(a.photoId)}" alt="">${cam}</span>`:`<span class="apic sample${can?" can":""}"${attr}>${animalArt(a)}${st?`<img class="stock" src="${st.u}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:""}<em>${T2("Sample photo","Foto de ejemplo")}</em>${cam}</span>${big&&st?`<a class="credit" href="${st.d}" target="_blank" rel="noopener">${T2("Sample photo","Foto de ejemplo")}: ${esc(st.a)} · ${esc(st.l)} · Wikimedia Commons</a>`:""}`; }
 let photoTarget=null;
 function animalPhotoInput(){ let el=document.getElementById("animalPhotoIn"); if(!el){ el=document.createElement("input"); el.type="file"; el.accept="image/*"; el.id="animalPhotoIn"; el.hidden=true; document.body.appendChild(el); } return el; }
 document.addEventListener("click",e=>{ const pt=e.target.closest("[data-photo-for]"); if(!pt) return; e.preventDefault(); e.stopPropagation(); photoTarget=pt.dataset.photoFor;
@@ -1003,7 +1076,7 @@ await S.db.collection("clock").doc(id).set(Object.assign({staffId:me.id,name:me.
 S.view="today"; LS.set("sh.view","today"); render(); window.scrollTo(0,0);
 toast(T2(`Clocked in at ${fmtTime(ts)}. Here are your tasks.`,`Entrada marcada a las ${fmtTime(ts)}. Aquí están sus tareas.`)); }
 async function doClockOut(){ const c=myClock(); if(!c) return; const ts=new Date().toISOString();
-await writeDoc("clock",c.id,()=>S.db.collection("clock").doc(c.id).update({out:ts})); toast(T2(`Clocked out at ${fmtTime(ts)}`,`Salida marcada a las ${fmtTime(ts)}`)); }
+await writeDoc("clock",c.id,()=>S.db.collection("clock").doc(c.id).update({out:ts})); const who=meObj(); if(who&&who.role!=="admin") endSession(`Clocked out at ${fmtTime(ts)}. See you next shift.`,`Salida marcada a las ${fmtTime(ts)}. Hasta el próximo turno.`); else toast(T2(`Clocked out at ${fmtTime(ts)}`,`Salida marcada a las ${fmtTime(ts)}`)); }
 let pendingClock=null;
 async function handleClockHash(){
 const m=/^#clockin-([a-z0-9]{6,12})$/i.exec(location.hash||""); if(!m) return; const code=m[1].toLowerCase();
@@ -1011,7 +1084,7 @@ try{ history.replaceState(null,"",location.pathname+location.search); }catch{ lo
 if(!clockCfg){ pendingClock=code; return; }
 if(!(await validCode(code))){ toast(T2("This QR code has expired. Scan the code at the office again.","Este código QR expiró. Escanee de nuevo el código en la oficina.")); return; }
 const me=meObj();
-if(!me||staffStatus(me)!=="active"){ pendingClock="ok"; S.me=me&&staffStatus(me)==="active"?S.me:null; render(); toast(T2("Sign in with your PIN to finish clocking in.","Entre con su PIN para terminar de marcar entrada.")); return; }
+if(!me||staffStatus(me)!=="active"||!sessionOK(me)){ pendingClock="ok"; LS.set("sh.qr",Date.now()); adminMode=false; S.me=null; LS.set("sh.me",null); render(); toast(T2("Sign in with your PIN to finish clocking in.","Entre con su PIN para terminar de marcar entrada.")); return; }
 doClockIn("qr");
 }
 function hoursBetween(a,b){ return Math.max(0,(new Date(b)-new Date(a))/36e5); }
@@ -1522,8 +1595,8 @@ function obNext(me){ const steps=obSteps(me); const i=steps.indexOf(obStep); obS
 
 // login: PIN + invite code
 function pinSheet(s){ openSheet(`<h2>${esc(s.name)}</h2><form class="stack" id="pinForm" data-id="${esc(s.id)}">
-<div class="field"><label class="label" for="pf-pin">${s.pinHash?T2("Enter your PIN","Ingrese su PIN"):T2("Create a 4-digit PIN for next time","Cree un PIN de 4 dígitos para la próxima vez")}</label>
-<input id="pf-pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required autocomplete="${s.pinHash?"current-password":"new-password"}" autofocus></div>
+<div class="field"><label class="label" for="pf-pin">${T2("Enter your PIN","Ingrese su PIN")}</label>
+<input id="pf-pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required autocomplete="current-password" autofocus></div>
 <div id="pf-err" class="t-meta" style="color:var(--crit)"></div>
 <div class="inline"><button class="btn primary" type="submit">${T2("Sign in","Entrar")}</button><button class="btn" type="button" data-act="closeSheet">${t("cancel")}</button></div></form>`); setTimeout(()=>document.getElementById("pf-pin")?.focus(),50); }
 function codeSheet(){ openSheet(`<h2>${T2("Join the farm team","Únase al equipo")}</h2><p>${T2("Enter the 6-digit invite code the administrator gave you.","Ingrese el código de 6 dígitos que le dio el administrador.")}</p>
@@ -1623,7 +1696,7 @@ else if(el.dataset.duedone){ completeDue(el.dataset.duedone,el.dataset.key,el); 
 else if(el.dataset.sp){ S.species=el.dataset.sp; render(); }
 else if(el.dataset.suggest){ ask(t(el.dataset.suggest)); }
 else switch(el.dataset.act){
-case "switch": closeSheet(); S.me=null; LS.set("sh.me",null); render(); break;
+case "switch": endSession(); break;
 case "profile": profileSheet(); break;
 case "back": S.animalId=null; render(); break;
 case "assign": assignSheet(); break;
@@ -1632,6 +1705,11 @@ case "skipPhoto": animalSheet("form"); break;
 case "closeSheet": closeSheet(); break;
 case "stop": S.ctl?.abort(); break;
 case "join": codeSheet(); break;
+case "notme": LS.set("sh.device",null); render(); break;
+case "adminMode": adminMode=true; render(); window.scrollTo(0,0); break;
+case "gateBack": adminMode=false; render(); break;
+case "demoScan": pendingClock="ok"; LS.set("sh.qr",Date.now()); adminMode=false; render(); break;
+
 case "voice": voiceSheet(); break;
 case "cmdParse": cmdParse(); break;
 case "cmdRun": cmdRun(); break;
@@ -1671,19 +1749,17 @@ else if(el.id==="photoIn" && el.files && el.files[0]){ const f=el.files[0]; S.ph
 document.addEventListener("submit", async e=>{
 e.preventDefault(); const f=e.target; const fd=new FormData(f);
 try{
-if(f.id==="pinForm"){ const st=S.staff.find(x=>x.id===f.dataset.id); const pin=String(fd.get("pin")||""); const err=document.getElementById("pf-err");
-if(!/^\d{4}$/.test(pin)){ err.textContent=T2("Enter 4 digits.","Ingrese 4 dígitos."); return; }
-const wait=(pinFails[st.id]||{}).until||0; if(Date.now()<wait){ err.textContent=T2("Too many tries. Wait a minute.","Demasiados intentos. Espere un minuto."); return; }
-const h=await pinHash(st.id,pin);
-if(st.pinHash && st.pinHash!==h){ const pf=pinFails[st.id]=pinFails[st.id]||{n:0}; pf.n++; if(pf.n>=5){ pf.until=Date.now()+60000; pf.n=0; } err.textContent=T2("Wrong PIN.","PIN incorrecto."); f.reset(); return; }
-if(!st.pinHash) await saveStaff(st.id,{pinHash:h});
-S.me=st.id; LS.set("sh.me",S.me); S.view=st.role==="admin"?"dash":"today"; closeSheet(); render();
-if(pendingClock==="ok"&&st.role!=="admin"){ pendingClock=null; doClockIn("qr").catch(()=>toast(t("saveErr"))); } }
+if(f.id==="gateForm"){ const st=S.staff.find(x=>x.id===f.dataset.id); if(!st){ LS.set("sh.device",null); render(); return; }
+if(st.role!=="admin"&&!qrOK()){ render(); toast(T2("Scan the office QR code first.","Escanee primero el código QR de la oficina.")); return; }
+if(await checkPin(st,String(fd.get("pin")||""),document.getElementById("gt-err"),f)) signIn(st); }
+else if(f.id==="pinForm"){ const st=S.staff.find(x=>x.id===f.dataset.id); if(!st) return;
+if(st.role!=="admin"&&!qrOK()){ closeSheet(); render(); toast(T2("Scan the office QR code first.","Escanee primero el código QR de la oficina.")); return; }
+if(await checkPin(st,String(fd.get("pin")||""),document.getElementById("pf-err"),f)) signIn(st); }
 else if(f.id==="codeForm"){ const code=String(fd.get("code")||"").trim(); const st=S.staff.find(x=>x.code===code && staffStatus(x)!=="active");
 if(!st){ document.getElementById("cf-err").textContent=T2("That code isn't valid. Check it with the administrator.","Ese código no es válido. Verifíquelo con el administrador."); return; }
 if(st.langPref){ lang=st.langPref; LS.set("sh.lang",lang); }
 if(staffStatus(st)==="invited") await saveStaff(st.id,{status:"onboarding"});
-S.me=st.id; LS.set("sh.me",S.me); obStep=null; closeSheet(); render(); }
+S.me=st.id; LS.set("sh.me",S.me); LS.set("sh.since",new Date().toISOString()); obStep=null; closeSheet(); render(); }
 else if(f.id==="obProfile"){ const me=meObj();
 await saveStaff(me.id,{name:String(fd.get("name")).trim(),phone:String(fd.get("phone")).trim(),emergencyName:String(fd.get("ecName")).trim(),emergencyPhone:String(fd.get("ecPhone")).trim(),ob:{profile:today()}});
 obNext(me); render(); window.scrollTo(0,0); }
