@@ -232,6 +232,14 @@ fieldset.q.good{border-color:var(--ok)} fieldset.q.bad{border-color:var(--crit);
 .kpi,.task,.acard{box-shadow:var(--card-glow)}
 .panel .task,.panel .acard,.panel .who-btn{background:var(--card-row)}
 .kpi{border-top:3px solid var(--hay)}
+.apic.can{cursor:pointer}
+.apic .apic-cam svg{width:14px;height:14px;flex:none}
+.apic-cam{position:absolute;right:4px;top:4px;display:flex;align-items:center;gap:4px;background:var(--pasture);color:var(--pasture-ink);border-radius:999px;padding:4px;font-size:11px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.apic-big .apic-cam{top:auto;right:6px;bottom:6px;padding:5px 9px}
+.apic.can:hover{border-color:var(--pasture)}
+.ph-choose{display:grid;gap:8px;margin:12px 0}.ph-choose .btn.big{padding:13px;font-size:16px}
+.btn.danger{color:var(--crit);border-color:var(--crit)}
+
 .inv-actions a.btn:not(.primary){color:var(--fg)}
 .inv-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
 .inv-actions .btn.big{padding:12px 14px;font-size:15px;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px}
@@ -612,7 +620,28 @@ const id="g"+String(a.id||a.tag).replace(/[^a-z0-9]/gi,"");
 const herd=grp?`<g transform="translate(34 6) scale(.62)" opacity=".85">${one}</g><g transform="translate(-6 14) scale(.7)">${one}</g><g transform="translate(18 22) scale(.78)">${one}</g>`:`<g transform="translate(-2 2)">${one}</g>`;
 return `<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe3e6"/><stop offset=".55" stop-color="#e9efd9"/><stop offset=".56" stop-color="#8fb36a"/><stop offset="1" stop-color="#5e8a3e"/></linearGradient></defs>
 <rect width="100" height="100" fill="url(#${id})"/><path d="M0 52 q20-14 38-6 q16-12 34-2 q14-8 28 2 v10 h-100z" fill="#7fa45c" opacity=".55"/><circle cx="82" cy="18" r="7" fill="#f6e2a0" opacity=".9"/>${herd}</svg>`; }
-function animalPic(a){ return a.photoId?`<span class="apic"><img src="${blobSrc(a.photoId)}" alt=""></span>`:`<span class="apic sample">${animalArt(a)}<em>${T2("Sample","Ejemplo")}</em></span>`; }
+function animalPic(a,big){ const can=S.canWrite&&meObj()&&canWork(a.species);
+const cam=can?`<b class="apic-cam" title="${a.photoId?T2("Change photo","Cambiar foto"):T2("Add photo","Agregar foto")}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>${big?`<span>${a.photoId?T2("Change photo","Cambiar foto"):T2("Add photo","Agregar foto")}</span>`:""}</b>`:"";
+const attr=can?` data-photo-for="${esc(a.id)}" role="button" tabindex="0"`:"";
+return a.photoId?`<span class="apic${can?" can":""}"${attr}><img src="${blobSrc(a.photoId)}" alt="">${cam}</span>`:`<span class="apic sample${can?" can":""}"${attr}>${animalArt(a)}<em>${T2("Sample","Ejemplo")}</em>${cam}</span>`; }
+let photoTarget=null;
+function animalPhotoInput(){ let el=document.getElementById("animalPhotoIn"); if(!el){ el=document.createElement("input"); el.type="file"; el.accept="image/*"; el.id="animalPhotoIn"; el.hidden=true; document.body.appendChild(el); } return el; }
+document.addEventListener("click",e=>{ const pt=e.target.closest("[data-photo-for]"); if(!pt) return; e.preventDefault(); e.stopPropagation(); photoTarget=pt.dataset.photoFor;
+const a=S.animals.find(x=>x.id===photoTarget); if(!a) return;
+openSheet(`<h2>${a.photoId?T2("Change photo","Cambiar foto"):T2("Add photo","Agregar foto")} · ${esc(a.tag)}${L(a,"name")?" "+esc(L(a,"name")):""}</h2>
+<div class="ph-choose"><button class="btn primary big" type="button" data-ph="camera">📷 ${T2("Take photo","Tomar foto")}</button><button class="btn big" type="button" data-ph="library">🖼️ ${T2("Choose from photos","Elegir de la galería")}</button>
+${a.photoId?`<button class="btn big danger" type="button" data-ph="remove">${T2("Remove photo","Quitar foto")}</button>`:""}<button class="btn big" type="button" data-act="closeSheet">${t("cancel")}</button></div>
+<p class="t-meta">${T2("The photo is saved to this animal's record and logged in its history with your name and the time.","La foto se guarda en el expediente del animal y queda en su historial con su nombre y la hora.")}</p>`); },true);
+document.addEventListener("keydown",e=>{ if((e.key==="Enter"||e.key===" ")&&e.target.matches&&e.target.matches("[data-photo-for]")){ e.preventDefault(); e.target.click(); } });
+document.addEventListener("click",async e=>{ const b=e.target.closest("[data-ph]"); if(!b) return; const a=S.animals.find(x=>x.id===photoTarget); if(!a) return;
+if(b.dataset.ph==="remove"){ try{ await writeDoc("animals",a.id,()=>S.db.collection("animals").doc(a.id).update({photoId:""})); await addEvent(a.id,{type:"obs",note:"Profile photo removed",note_es:"Foto de perfil quitada",meta:{via:"photo"}}); closeSheet(); toast(T2("Photo removed","Foto quitada")); }catch(err){ console.warn(err); toast(t("saveErr")); } return; }
+const inp=animalPhotoInput(); if(b.dataset.ph==="camera") inp.setAttribute("capture","environment"); else inp.removeAttribute("capture"); inp.value=""; inp.click(); });
+document.addEventListener("change",async e=>{ if(e.target.id!=="animalPhotoIn"||!e.target.files||!e.target.files[0]) return; const a=S.animals.find(x=>x.id===photoTarget); if(!a||!S.assets) return;
+toast(T2("Saving photo…","Guardando foto…"));
+try{ const up=await S.assets.upload(e.target.files[0]); await writeDoc("animals",a.id,()=>S.db.collection("animals").doc(a.id).update({photoId:up.id}));
+await addEvent(a.id,{type:"obs",note:a.photoId?"Profile photo updated":"Profile photo added",note_es:a.photoId?"Foto de perfil actualizada":"Foto de perfil agregada",meta:{via:"photo",photoIds:[up.id]}});
+closeSheet(); toast(T2("Photo saved","Foto guardada")); }
+catch(err){ console.warn(err); toast(err&&err.code==="quota_exceeded"?T2("This phone's demo storage is full. Use Reset demo.","El almacenamiento de la demo está lleno. Use Reiniciar demo."):t("saveErr")); } });
 
 function animalCard(a){
 const last=(a.weights||[]).slice(-1)[0]; const prod=(a.production||[]).slice(-1)[0];
@@ -642,7 +671,7 @@ const isGroup=a.kind==="group"; const evTypes=["health","treatment","feed","move
 const due=(a.due||[]).map(it=>({it,n:daysBetween(today(),it.d)})).sort((x,y)=>x.n-y.n);
 const facts=[[t("species"),t(a.species)],[t("breed"),a.breed],[isGroup?t("count"):t("sex"),isGroup?a.count:V(a.sex)],[t("pen"),L(a,"pen")],[t("born"),a.born],[t("status"),V(a.status)],[t("color"),L(a,"color")],[a.dam?t("dam"):"",a.dam]].filter(f=>f[0]&&f[1]!=null&&f[1]!=="");
 return topbar(L(a,"name")||t(a.species), "", `<button class="btn ghost" data-act="back">← ${t("back")}</button>`) + banners() +
-`<div class="profile-head"><span class="apic-big">${animalPic(a)}</span><span class="tag ${isGroup?"group":""}"><span>${esc(a.tag)}</span></span><div class="facts" style="flex:1;min-width:0">${facts.map(([k,v])=>`<div><span class="label">${esc(k)}</span><b>${esc(v)}</b></div>`).join("")}</div></div>
+`<div class="profile-head"><span class="apic-big">${animalPic(a,true)}</span><span class="tag ${isGroup?"group":""}"><span>${esc(a.tag)}</span></span><div class="facts" style="flex:1;min-width:0">${facts.map(([k,v])=>`<div><span class="label">${esc(k)}</span><b>${esc(v)}</b></div>`).join("")}</div></div>
 <div class="grid cols-2" style="align-items:start">
 <section class="grid">
 ${(a.weights||[]).length?`<div class="panel"><h2>${t("weights")}</h2><svg class="spark" id="chartW" role="img" aria-label="${t("weights")}"></svg></div>`:""}
@@ -931,8 +960,8 @@ onSnapshot:(next)=>{ const f=()=>next(run()); subs.add(f); setTimeout(f,0); retu
 return { doc:(path)=>{ const p=path.split("/"); return docRef(p.slice(0,-1).join("/"),p[p.length-1]); },
 collection:(col)=>Object.assign(query(col,[]),{path:col,doc:(id)=>docRef(col,id||rid()),add:async d=>{ const r=docRef(col,rid()); await r.set(d); return r; }}) };
 }
-const localAssets={ upload:(blob)=>new Promise((res,rej)=>{ const img=new Image(); img.onload=()=>{ const sc=Math.min(1,900/Math.max(img.width,img.height)); const cv=document.createElement("canvas"); cv.width=Math.round(img.width*sc); cv.height=Math.round(img.height*sc);
-cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height); const url=cv.toDataURL("image/jpeg",0.7); const id=Math.random().toString(36).slice(2,14);
+const localAssets={ upload:(blob)=>new Promise((res,rej)=>{ const img=new Image(); img.onload=()=>{ const sc=Math.min(1,640/Math.max(img.width,img.height)); const cv=document.createElement("canvas"); cv.width=Math.round(img.width*sc); cv.height=Math.round(img.height*sc);
+cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height); const url=cv.toDataURL("image/jpeg",0.62); const id=Math.random().toString(36).slice(2,14);
 try{ localStorage.setItem("sh.demo.blob."+id,url); res({id,url,sizeBytes:url.length,contentType:"image/jpeg"}); }catch(e){ rej({code:"quota_exceeded"}); } }; img.onerror=()=>rej({code:"invalid_request"}); img.src=URL.createObjectURL(blob); }) };
 function demoClaude(){ const db=makeLocalDB(); return { use:async n=>n==="db"?db:n==="assets"?localAssets:null }; }
 function resetDemo(){ try{ Object.keys(localStorage).filter(k=>k.startsWith("sh.")).forEach(k=>localStorage.removeItem(k)); }catch{} location.hash=""; location.reload(); }
