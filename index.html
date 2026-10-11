@@ -328,6 +328,9 @@ fieldset.q.good{border-color:var(--ok)} fieldset.q.bad{border-color:var(--crit);
 .sp-head{display:flex;gap:14px;align-items:center;margin-bottom:12px}.sp-contact{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px}.sp-contact .btn{text-decoration:none;color:inherit}
 .sp-dl{margin:6px 0 14px}.sp-msg{background:var(--card-row,var(--surface));border:1px solid var(--line);border-radius:14px;padding:12px}.sp-msg textarea{width:100%;box-sizing:border-box}.sp-h3{margin:16px 0 6px;font-size:15px}
 .staff-link{background:none;border:0;padding:0;margin:0;color:inherit;font:inherit;text-align:left;cursor:pointer}.staff-link b{text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.co-warn{background:color-mix(in srgb,var(--crit) 12%,transparent);border:1px solid color-mix(in srgb,var(--crit) 40%,transparent);border-radius:12px;padding:10px 12px;margin:6px 0 12px;font-weight:600}
+.co-task{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;background:var(--card-row,var(--surface));display:flex;flex-direction:column;gap:8px}.co-or{font-size:13px;color:var(--muted)}.co-note{width:100%;box-sizing:border-box}
+.co-hint{margin-top:8px;font-size:14px;font-weight:600;color:var(--crit)}.stamp.warn{color:var(--crit)}
 .sq-big{width:180px;height:180px;border-radius:16px;object-fit:cover;border:3px solid var(--pasture);display:grid;place-items:center;font-size:56px}
 .prof-cam{position:absolute;left:8px;right:8px;bottom:8px;background:rgba(0,0,0,.6);color:#fff;border-radius:8px;text-align:center;font-size:12px;font-weight:700;padding:5px}
 .prof-info{flex:1;min-width:180px}
@@ -486,6 +489,14 @@ const next=prev.then(fn).catch(e=>{ console.warn(e); if(e&&e.code==="invalid_arg
 queues[key]=next.catch(()=>{}); return next;
 }
 function taskDoneToday(tk){ return tk.recurring ? !!(tk.doneOn&&tk.doneOn[today()]) : !!tk.done; }
+function taskExcuse(tk,d){ d=d||today(); return tk.recurring ? ((tk.missed||{})[d]||null) : (tk.notDone&&tk.notDone.d===d?tk.notDone:null); }
+function openTasksFor(id){ return tasksToday().filter(tk=>tk.assignee===id&&!taskDoneToday(tk)&&!taskExcuse(tk)); }
+async function saveTaskExcuse(tk,note){ const me=meObj()||{}; const ts=new Date().toISOString(); let note_es=note, note_en=note;
+try{ const b=await bilingual([note]); note_en=b.en[0]||note; note_es=b.es[0]||note; }catch{}
+const ex={d:today(),by:me.name||"",byId:me.id||"",ts,note:note_en,note_es};
+if(tk.recurring){ const missed=Object.assign({},tk.missed||{}); missed[today()]=ex; for(const k of Object.keys(missed)) if(daysBetween(k,today())>45) delete missed[k];
+await writeDoc("tasks",tk.id,()=>S.db.collection("tasks").doc(tk.id).update({missed})); }
+else { const hist=(tk.notDoneLog||[]).concat([ex]).slice(-20); await writeDoc("tasks",tk.id,()=>S.db.collection("tasks").doc(tk.id).update({notDone:ex,notDoneLog:hist})); } }
 function taskStamp(tk){ const d=tk.recurring?(tk.doneOn&&tk.doneOn[today()]):(tk.done?{by:tk.doneBy,ts:tk.doneAt}:null); return d&&d.ts?`${d.by||""} · ${fmtTime(d.ts)}`:(d&&d.by?d.by:""); }
 function checkStamp(tk,i){ const raw=(tk.recurring?(tk.checks&&tk.checks[today()]):tk.checksOnce)||[]; const c=raw[i]; return c&&c.ts?`${c.by||""} · ${fmtTime(c.ts)}`:""; }
 function taskChecks(tk){ const n=(tk.checklist||[]).length; const c = tk.recurring ? (tk.checks&&tk.checks[today()]) : tk.checksOnce; return Array.from({length:n},(_,i)=>!!(c&&c[i])); }
@@ -534,7 +545,7 @@ return ev;
 }
 async function createTask(data){
 const doc={title:data.title||"",title_es:data.title_es||"",assignee:data.assignee||"",area:data.area||"",area_es:data.area_es||"",priority:data.priority||"normal",
-checklist:data.checklist||[],checklist_es:data.checklist_es||[],animalId:data.animalId||"",createdBy:meObj()?.name||"",createdAt:today()};
+checklist:data.checklist||[],checklist_es:data.checklist_es||[],animalId:data.animalId||"",createdBy:meObj()?.name||"",createdById:meObj()?.id||"",createdAt:today(),createdTs:new Date().toISOString()};
 if(data.recurring){doc.recurring=true;doc.doneOn={};doc.checks={};} else {doc.date=data.date||today();doc.done=false;doc.checksOnce=[];}
 const ref=await S.db.collection("tasks").add(doc); return ref.id;
 }
@@ -661,7 +672,7 @@ const done=taskDoneToday(tk), checks=taskChecks(tk), a=S.animals.find(x=>x.id===
 const late = !tk.recurring && tk.date && tk.date<today() && !done; const locked = a && !canWork(a.species);
 return `<div class="task ${done?"done":""} ${tk.priority==="high"?"prio-high":""}">
 <input type="checkbox" class="check" id="tk-${esc(tk.id)}" data-task="${esc(tk.id)}" ${done?"checked":""} ${S.canWrite&&!locked&&clockOK()?"":"disabled"} aria-label="${esc(L(tk,"title"))}">
-<div class="grow"><label class="t-title" for="tk-${esc(tk.id)}">${esc(L(tk,"title"))}</label>${done&&taskStamp(tk)?`<span class="stamp">✓ ${esc(taskStamp(tk))}</span>`:""}
+<div class="grow"><label class="t-title" for="tk-${esc(tk.id)}">${esc(L(tk,"title"))}</label>${done&&taskStamp(tk)?`<span class="stamp">✓ ${esc(taskStamp(tk))}</span>`:""}${!done&&taskExcuse(tk)?`<span class="stamp warn">⚠ ${T2("Not done","No hecha")}: ${esc(L(taskExcuse(tk),"note"))} · ${esc(taskExcuse(tk).by||"")} ${esc(fmtTime(taskExcuse(tk).ts))}</span>`:""}
 <div class="t-meta">${tk.recurring?`<span class="pill mute">${t("daily")}</span>`:""}${tk.priority==="high"?`<span class="pill crit">${t("high")}</span>`:""}${late?`<span class="pill crit">${esc(tk.date)}</span>`:""}
 ${L(tk,"area")?`<span>${esc(L(tk,"area"))}</span>`:""}${isAdmin()?`<span>· ${esc(staffName(tk.assignee))}</span>`:""}
 ${a?`<button class="chip" data-open="${esc(a.id)}">${esc(animalLabel(a))}</button>`:""}${locked?`<span class="lock">🔒 ${T2("Training needed","Requiere entrenamiento")}</span>`:""}</div>
@@ -1109,9 +1120,38 @@ const ts=new Date().toISOString(); const shifts=(ex&&ex.shifts)||[]; if(ex&&ex.i
 await S.db.collection("clock").doc(id).set(Object.assign({staffId:me.id,name:me.name,date:today(),in:ts,out:"",method,shifts},extra||{}));
 S.view="today"; LS.set("sh.view","today"); render(); window.scrollTo(0,0);
 toast(T2(`Clocked in at ${fmtTime(ts)}. Here are your tasks.`,`Entrada marcada a las ${fmtTime(ts)}. Aquí están sus tareas.`)); }
-async function doClockOut(){ const c=myClock(); if(!c) return; const ts=new Date().toISOString();
-await writeDoc("clock",c.id,()=>S.db.collection("clock").doc(c.id).update({out:ts})); const who=meObj(); if(who&&who.role!=="admin") endSession(`Clocked out at ${fmtTime(ts)}. See you next shift.`,`Salida marcada a las ${fmtTime(ts)}. Hasta el próximo turno.`); else toast(T2(`Clocked out at ${fmtTime(ts)}`,`Salida marcada a las ${fmtTime(ts)}`)); }
-let pendingClock=null;
+let checkoutDone=[];
+function startClockOut(){ const me=meObj(); if(!me) return; if(me.role==="admin") return doClockOut(true);
+scanPurpose="out"; openScanner(); setTimeout(()=>{ const h=document.querySelector("#scanOv .sc-top b"); if(h) h.textContent=T2("Scan the QR code to clock out","Escanee el código QR para marcar salida"); },0); }
+function checkoutSheet(){ const me=meObj(); if(!me) return; const open=openTasksFor(me.id);
+const handled=tasksToday().filter(tk=>tk.assignee===me.id&&(taskDoneToday(tk)||taskExcuse(tk)));
+if(!open.length){ openSheet(`<h2>✓ ${T2("All tasks handled","Todas las tareas atendidas")}</h2><p>${T2("Everything assigned to you today is done or explained.","Todo lo asignado hoy está hecho o explicado.")}</p>
+<div class="list">${handled.map(tk=>{ const ex=taskExcuse(tk); return `<div class="row"><div class="grow"><b>${esc(L(tk,"title"))}</b><div class="t-meta">${ex?"⚠ "+T2("Not done: ","No hecha: ")+esc(L(ex,"note")):"✓ "+esc(taskStamp(tk))}</div></div></div>`; }).join("")}</div>
+<div class="inline" style="margin-top:12px"><button class="btn primary big" data-act="finishClockOut">${T2("Clock out now","Marcar salida ahora")}</button><button class="btn" data-act="closeSheet">${T2("Not yet","Todavía no")}</button></div>`); return; }
+openSheet(`<h2>${T2("Before you clock out","Antes de marcar salida")}</h2>
+<div class="co-warn">⚠ ${open.length===1?T2("1 task is still open.","Queda 1 tarea abierta."):T2(`${open.length} tasks are still open.`,`Quedan ${open.length} tareas abiertas.`)} ${T2("Finish each one, or write why you couldn't. You can't clock out until every task is done or explained.","Termine cada una o escriba por qué no pudo. No puede marcar salida hasta que cada tarea esté hecha o explicada.")}</div>
+${open.map(tk=>{ const ch=taskChecks(tk); const items=(L(tk,"checklist").length===ch.length?L(tk,"checklist"):tk.checklist)||[]; return `<div class="co-task" data-co="${esc(tk.id)}"><div class="co-h"><b>${esc(L(tk,"title"))}</b>${tk.priority==="high"?` <span class="pill crit">${t("high")}</span>`:""}
+<div class="t-meta">${L(tk,"area")?esc(L(tk,"area"))+" · ":""}${T2("Assigned by","Asignada por")} ${esc(tk.createdBy||"admin")}${tk.createdTs?" · "+esc(tk.createdTs.slice(0,10))+" "+esc(fmtTime(tk.createdTs)):""}</div></div>
+${items.length?`<div class="sub-list">${items.map((c,i)=>`<label><input type="checkbox" class="check sm" data-check="${esc(tk.id)}" data-i="${i}" ${ch[i]?"checked":""}>${esc(c)}</label>`).join("")}</div>`:""}
+<button class="btn primary" data-codone="${esc(tk.id)}">✓ ${T2("I finished it","La terminé")}</button>
+<div class="co-or">${T2("or, if you couldn't finish it:","o, si no pudo terminarla:")}</div>
+<textarea class="co-note" data-conote="${esc(tk.id)}" rows="2" placeholder="${esc(T2("Explain why (required): what stopped you, what's left","Explique por qué (obligatorio): qué se lo impidió, qué falta"))}"></textarea>
+<button class="btn" data-coskip="${esc(tk.id)}">${T2("Save reason","Guardar razón")}</button></div>`; }).join("")}
+${open.length>1?`<button class="linkish" data-act="coSameAll">${T2("Use the first reason for all open tasks","Usar la primera razón para todas")}</button>`:""}
+<div class="inline" style="margin-top:12px"><button class="btn" data-act="closeSheet">${T2("Keep working","Seguir trabajando")}</button></div>`); }
+async function coResolve(id,kind){ const tk=S.tasks.find(x=>x.id===id); if(!tk) return;
+if(kind==="done"){ await toggleTask(tk,true); toast(T2("Marked done","Marcada hecha")); }
+else { const ta=document.querySelector(`[data-conote="${CSS.escape(id)}"]`); const note=(ta&&ta.value||"").trim();
+if(note.length<8){ toast(T2("Write a real reason (at least a few words).","Escriba una razón real (al menos unas palabras).")); ta&&ta.focus(); return; }
+await saveTaskExcuse(tk,note); toast(T2("Reason saved","Razón guardada")); }
+setTimeout(checkoutSheet,250); }
+async function doClockOut(force){ const c=myClock(); if(!c) return; const ts=new Date().toISOString(); const me=meObj();
+if(!force&&me&&me.role!=="admin"&&openTasksFor(me.id).length){ checkoutSheet(); return; }
+const mine=me?tasksToday().filter(tk=>tk.assignee===me.id):[];
+const summary={ts,done:mine.filter(taskDoneToday).length,total:mine.length,notDone:mine.filter(tk=>taskExcuse(tk)).map(tk=>({id:tk.id,title:tk.title||tk.title_es||"",note:(taskExcuse(tk)||{}).note||""}))};
+closeSheet();
+await writeDoc("clock",c.id,()=>S.db.collection("clock").doc(c.id).update({out:ts,checkout:summary})); const who=meObj(); if(who&&who.role!=="admin") endSession(`Clocked out at ${fmtTime(ts)}. See you next shift.`,`Salida marcada a las ${fmtTime(ts)}. Hasta el próximo turno.`); else toast(T2(`Clocked out at ${fmtTime(ts)}`,`Salida marcada a las ${fmtTime(ts)}`)); }
+let pendingClock=null, scanPurpose=null;
 // ---------- in-app QR scanner: live camera -> auto-detect; photo + typed code as fallbacks ----------
 let scanStream=null, scanLoop=null, scanBusy=false;
 function decodeImageData(cx,w,h){ const r=window.jsQR?jsQR(cx.getImageData(0,0,w,h).data,w,h,{inversionAttempts:"attemptBoth"}):null; return r&&r.data?r.data:null; }
@@ -1193,7 +1233,8 @@ if(!clockCfg){ pendingClock=code; toast(T2("Connecting… one moment.","Conectan
 if(!(await validCode(code))){ toast(T2("This QR code has expired. Scan the code at the office again.","Este código QR expiró. Escanee de nuevo el código en la oficina.")); return; }
 const me=meObj();
 if(!me||staffStatus(me)!=="active"||!sessionOK(me)){ pendingClock="ok"; LS.set("sh.qr",Date.now()); adminMode=false; S.me=null; LS.set("sh.me",null); render(); toast(T2("Sign in with your PIN to finish clocking in.","Entre con su PIN para terminar de marcar entrada.")); return; }
-doClockIn("qr");
+const c0=myClock(); if(me.role!=="admin"&&c0&&c0.in&&!c0.out){ scanPurpose=null; checkoutSheet(); return; }
+scanPurpose=null; doClockIn("qr");
 }
 function hoursBetween(a,b){ return Math.max(0,(new Date(b)-new Date(a))/36e5); }
 function clockCard(){
@@ -1203,13 +1244,14 @@ if(!c||!c.in||c.out) return `<div class="clockcard off"><div class="clock-ic">${
 <div>${T2("Tap the button and point your camera at the QR code in the office. Your tasks unlock when you're clocked in.","Toque el botón y apunte la cámara al código QR en la oficina. Sus tareas se activan al marcar entrada.")}</div>
 <button class="btn primary big" data-qropen style="margin-top:8px">📷 ${T2("Scan QR code","Escanear código QR")}</button></div>${DEMO?`<button class="btn primary" data-act="simScan">${I.qr} ${T2("Demo: simulate QR scan","Demo: simular escaneo QR")}</button>`:""}</div>`;
 return `<div class="clockcard on"><div class="clock-ic">✓</div><div class="grow"><b>${T2("Clocked in","Entrada")} ${esc(fmtTime(c.in))}</b> <span class="t-meta">${c.method==="qr"?T2("by office QR","con QR de oficina"):T2("by administrator","por el administrador")} · ${hoursBetween(c.in,new Date().toISOString()).toFixed(1)} h</span></div>
-<button class="btn" data-act="clockOut">${T2("Clock out","Marcar salida")}</button></div>`;
+<button class="btn" data-act="clockOut">📷 ${T2("Clock out","Marcar salida")}</button>${DEMO?`<button class="btn" data-act="simOut">${T2("Demo: simulate clock-out scan","Demo: simular escaneo de salida")}</button>`:""}</div>
+${(()=>{ const n=openTasksFor(me.id).length; return n?`<div class="co-hint">${I.today||""} ${n===1?T2("1 task left before you can clock out.","Le queda 1 tarea antes de poder marcar salida."):T2(`${n} tasks left before you can clock out.`,`Le quedan ${n} tareas antes de poder marcar salida.`)}</div>`:""; })()}`;
 }
 function whosHerePanel(){
 const rows=S.staff.filter(x=>staffStatus(x)==="active"&&x.role!=="admin").map(x=>{ const c=clocks.find(k=>k.id===clockId(x.id,today()));
 const st=!c||!c.in?"out":c.out?"left":"in";
 return `<div class="row"><button class="staff-link" data-staff="${esc(x.id)}"><span class="avatar">${esc(initials(x.name))}</span></button><div class="grow"><button class="staff-link" data-staff="${esc(x.id)}"><b>${esc(x.name)}</b></button><div class="t-meta">${c&&c.in?`${T2("In","Entrada")} ${esc(fmtTime(c.in))}${c.out?` · ${T2("Out","Salida")} ${esc(fmtTime(c.out))}`:""} · ${hoursBetween(c.in,c.out||new Date().toISOString()).toFixed(1)} h${c.method==="admin"?` · ${T2("entered by admin","registrado por admin")}${c.note?": "+esc(c.note):""}`:""}`:T2("Not clocked in","Sin entrada")}</div></div>
-<span class="pill ${st==="in"?"ok":st==="left"?"mute":"warn"}">${st==="in"?T2("On the farm","En la finca"):st==="left"?T2("Left","Salió"):T2("Not here","No está")}</span>
+${c&&c.checkout?`<span class="pill ${c.checkout.notDone&&c.checkout.notDone.length?"crit":"ok"}" title="${esc(T2("Tasks at clock-out","Tareas al salir"))}">${c.checkout.done}/${c.checkout.total} ✓${c.checkout.notDone&&c.checkout.notDone.length?` · ${c.checkout.notDone.length} ⚠`:""}</span>`:""}<span class="pill ${st==="in"?"ok":st==="left"?"mute":"warn"}">${st==="in"?T2("On the farm","En la finca"):st==="left"?T2("Left","Salió"):T2("Not here","No está")}</span>
 ${st==="out"&&S.canWrite?`<button class="chip" data-adminclock="${esc(x.id)}">${T2("Clock in for them","Marcar por ellos")}</button>`:""}</div>`; }).join("");
 return `<section class="panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h2 style="margin:0">${T2("Who's on the farm","Quién está en la finca")}</h2>
 <button class="btn primary" data-act="kiosk">${I.qr} ${T2("Office QR code","Código QR de oficina")}</button></div><div class="list" style="margin-top:8px">${rows||`<div class="empty">—</div>`}</div></section>`;
@@ -1381,7 +1423,8 @@ if(tab==="activity"){ const rows=[];
 for(const a of S.animals) for(const e of (a.events||[])) rows.push({ts:e.ts||e.d,d:e.d,who:e.by||"",whoId:e.byId||"",role:e.byRole||"",type:typeL(e.type),animal:animalLabel(a),species:t(a.species),pen:L(e,"pen")||L(a,"pen"),detail:L(e,"note"),via:viaL(e.via),instr:instrL(e.instructedBy)});
 for(const tk of S.tasks){ const an=S.animals.find(x=>x.id===tk.animalId);
 if(tk.recurring) for(const [d,v] of Object.entries(tk.doneOn||{})) rows.push({ts:v.ts||d,d,who:v.by||"",whoId:v.byId||"",role:"",type:typeL("task"),animal:animalLabel(an),species:an?t(an.species):"",pen:L(tk,"area"),detail:L(tk,"title"),via:viaL("checklist"),instr:T2("Admin task","Tarea del admin")});
-else if(tk.done) rows.push({ts:tk.doneAt||tk.date,d:(tk.doneAt||tk.date||"").slice(0,10),who:tk.doneBy||"",whoId:"",role:"",type:typeL("task"),animal:animalLabel(an),species:an?t(an.species):"",pen:L(tk,"area"),detail:L(tk,"title"),via:viaL("checklist"),instr:T2("Admin task","Tarea del admin")}); }
+for(const ex of (tk.recurring?Object.values(tk.missed||{}):(tk.notDoneLog||[]))) rows.push({ts:ex.ts,d:ex.d,who:ex.by||"",whoId:ex.byId||"",role:"",type:T2("Task not done","Tarea no hecha"),animal:animalLabel(an),species:an?t(an.species):"",pen:L(tk,"area"),detail:L(tk,"title")+" — "+L(ex,"note"),via:T2("Clock-out","Salida"),instr:T2("Admin task","Tarea del admin")});
+if(!tk.recurring&&tk.done) rows.push({ts:tk.doneAt||tk.date,d:(tk.doneAt||tk.date||"").slice(0,10),who:tk.doneBy||"",whoId:"",role:"",type:typeL("task"),animal:animalLabel(an),species:an?t(an.species):"",pen:L(tk,"area"),detail:L(tk,"title"),via:viaL("checklist"),instr:T2("Admin task","Tarea del admin")}); }
 for(const c of clockAll){ rows.push({ts:c.in,d:c.date,who:c.name,whoId:c.staffId,role:"",type:typeL("clockin"),animal:"",species:"",pen:T2("Admin office","Oficina"),detail:c.note||"",via:viaL(c.method),instr:c.enteredBy?T2("Entered by ","Entrado por ")+c.enteredBy:""});
 if(c.out) rows.push({ts:c.out,d:c.date,who:c.name,whoId:c.staffId,role:"",type:typeL("clockout"),animal:"",species:"",pen:"",detail:"",via:viaL(c.method),instr:""}); }
 for(const x of directives) rows.push({ts:x.ts,d:x.date||(x.ts||"").slice(0,10),who:x.createdBy||"",whoId:x.createdById||"",role:"admin",type:typeL("directive"),animal:"",species:"",pen:"",detail:(x.priority==="high"?"⚑ ":"")+L(x,"text"),via:viaL("command"),instr:x.to==="all"?T2("To all staff","A todo el personal"):T2("To: ","Para: ")+[].concat(x.to).map(staffName).join(", ")});
@@ -1888,6 +1931,7 @@ ${s.startDate?`<span class="pill mute">${T2("Started","Inició")} ${esc(s.startD
 <dt>${T2("Emergency contact","Contacto de emergencia")}</dt><dd>${esc(s.emergencyName||"—")} ${esc(s.emergencyPhone||"")}</dd>
 <dt>${T2("Today's tasks","Tareas de hoy")}</dt><dd>${dn}/${mine.length} ${T2("done","hechas")}</dd>
 <dt>${T2("Training","Entrenamiento")}</dt><dd>${s.ob?`${passed}/${tk.length} ${T2("passed","aprobados")}`:"—"}</dd></dl>
+<h3 class="sp-h3">${T2("Today's tasks","Tareas de hoy")}</h3><div class="list">${mine.length?mine.map(tk=>{ const ex=taskExcuse(tk), dn=taskDoneToday(tk); return `<div class="row"><div class="grow"><b>${esc(L(tk,"title"))}</b><div class="t-meta">${tk.createdTs?T2("Assigned","Asignada")+" "+esc(tk.createdTs.slice(0,10))+" "+esc(fmtTime(tk.createdTs))+" · ":""}${dn?"✓ "+esc(taskStamp(tk)):ex?"⚠ "+esc(L(ex,"note"))+" · "+esc(fmtTime(ex.ts)):T2("Open","Abierta")}</div></div><span class="pill ${dn?"ok":ex?"crit":"warn"}">${dn?T2("Done","Hecha"):ex?T2("Not done","No hecha"):T2("Open","Abierta")}</span></div>`; }).join(""):`<div class="empty">${T2("No tasks today.","Sin tareas hoy.")}</div>`}</div>
 <form id="dmForm" class="stack sp-msg" data-id="${esc(s.id)}"><label class="label" for="dm-text">${T2("Message to","Mensaje para")} ${esc(String(s.name).split(" ")[0])}</label>
 <textarea id="dm-text" name="text" rows="3" required placeholder="${esc(T2("It shows at the top of their Today screen until they tap Got it.","Aparece arriba en su pantalla Hoy hasta que toquen Entendido."))}"></textarea>
 <div class="inline" style="align-items:center;justify-content:space-between"><label class="consent" style="font-size:14px"><input type="checkbox" name="high"> ${T2("Urgent","Urgente")}</label>
@@ -1938,7 +1982,7 @@ for(const [n,en,es,cen,ces,prio] of list) await createTask({title:en,title_es:es
 
 // ---------- events ----------
 document.addEventListener("click", e=>{
-const el=e.target.closest("[data-staff],[data-legal],[data-theme-set],[data-ack],[data-cmdex],[data-qrmode],[data-adminclock],[data-ev],[data-duedone],[data-nav],[data-lang],[data-act],[data-login],[data-open],[data-sp],[data-suggest],[data-oblang],[data-invite],[data-mic],[data-fill],[data-vpick]"); if(!el) return;
+const el=e.target.closest("[data-codone],[data-coskip],[data-staff],[data-legal],[data-theme-set],[data-ack],[data-cmdex],[data-qrmode],[data-adminclock],[data-ev],[data-duedone],[data-nav],[data-lang],[data-act],[data-login],[data-open],[data-sp],[data-suggest],[data-oblang],[data-invite],[data-mic],[data-fill],[data-vpick]"); if(!el) return;
 if(el.dataset.act==="closeSheet" && e.target!==el) return;
 if(el.dataset.nav){ S.view=el.dataset.nav; if(S.view!=="animals") S.animalId=null; LS.set("sh.view",S.view); render(); window.scrollTo(0,0); }
 else if(el.dataset.themeSet){ theme=el.dataset.themeSet; LS.set("sh.theme",theme); applyTheme(); render(); }
@@ -1952,6 +1996,8 @@ else if(el.dataset.invite){ const st=S.staff.find(x=>x.id===el.dataset.invite); 
 else if(el.dataset.open){ closeSheet(); S.view="animals"; S.animalId=el.dataset.open; S.focusDue=el.dataset.due||null; render();
 const f=document.getElementById("due-focus"); if(f){ f.scrollIntoView({block:"center",behavior:"smooth"}); } else window.scrollTo(0,0); }
 else if(el.dataset.ack){ ackDirective(el.dataset.ack); }
+else if(el.dataset.codone){ coResolve(el.dataset.codone,"done").catch(()=>toast(t("saveErr"))); }
+else if(el.dataset.coskip){ coResolve(el.dataset.coskip,"skip").catch(()=>toast(t("saveErr"))); }
 else if(el.dataset.staff){ staffSheet(el.dataset.staff); }
 else if(el.dataset.legal){ legalSheet(el.dataset.legal); }
 else if(el.dataset.cmdex){ const b=document.getElementById("cmd-in"); if(b){ b.value=(b.value.trim()?b.value.trim()+" ":"")+el.dataset.cmdex; b.focus(); } }
@@ -1983,7 +2029,10 @@ case "cmdClear": cmdPlan=null; render(); break;
 case "resetDemo": resetDemo(); break;
 case "simScan": doClockIn("qr").catch(()=>toast(t("saveErr"))); break;
 case "kiosk": S.view="kiosk"; render(); window.scrollTo(0,0); break;
-case "clockOut": doClockOut().catch(()=>toast(t("saveErr"))); break;
+case "clockOut": startClockOut(); break;
+case "simOut": checkoutSheet(); break;
+case "finishClockOut": doClockOut(true).catch(()=>toast(t("saveErr"))); break;
+case "coSameAll": { const tas=[...document.querySelectorAll("[data-conote]")]; const first=tas.find(x=>x.value.trim().length>=8); if(!first){ toast(T2("Write a reason in one task first.","Escriba primero una razón en una tarea.")); break; } (async()=>{ for(const ta of tas){ const tk=S.tasks.find(x=>x.id===ta.dataset.conote); if(tk) await saveTaskExcuse(tk,ta.value.trim().length>=8?ta.value.trim():first.value.trim()); } toast(T2("Reasons saved","Razones guardadas")); setTimeout(checkoutSheet,250); })(); break; }
 case "toggleSpeak": S.speak=!S.speak; LS.set("sh.speak",S.speak); if(!S.speak) try{speechSynthesis.cancel();}catch{} else sayAloud(T2("Voice replies are on.","Respuestas en voz activadas.")); render(); break;
 case "voiceGo": voiceGo(); break;
 case "hire": hireSheet(); break;
