@@ -13,6 +13,7 @@
 --f-display:"Cinzel","Trajan Pro",Georgia,serif;
 --f-body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
 --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+--bg-art:radial-gradient(900px 520px at 100% -10%,rgba(201,162,63,.22),transparent 60%),radial-gradient(800px 600px at -10% 110%,rgba(76,138,46,.16),transparent 60%),repeating-linear-gradient(135deg,rgba(95,102,80,.045) 0 2px,transparent 2px 14px);
 --r:12px;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
@@ -20,16 +21,16 @@
 --fg:#EEE8D6; --muted:#A9AE96; --pasture:#6FAE4C; --pasture-ink:#0C160E; --leaf:#86BF5E;
 --hay:#D9B65A; --hay-ink:#241A04; --ok:#7CC25A; --warn:#E0A945; --crit:#EE7E6C;
 --ok-bg:#1A3218; --warn-bg:#33280F; --crit-bg:#3A1C16;
---rail:#0A140C; --rail-ink:#EEE8D6; --rail-gold:#D9B65A; color-scheme:dark}}
+--rail:#0A140C; --rail-ink:#EEE8D6; --rail-gold:#D9B65A; color-scheme:dark; --bg-art:radial-gradient(900px 520px at 100% -10%,rgba(217,182,90,.14),transparent 60%),radial-gradient(800px 600px at -10% 110%,rgba(111,174,76,.12),transparent 60%),radial-gradient(1px 1px at 20% 30%,rgba(238,232,214,.35),transparent 1.5px),radial-gradient(1px 1px at 70% 12%,rgba(238,232,214,.3),transparent 1.5px),radial-gradient(1px 1px at 45% 8%,rgba(238,232,214,.25),transparent 1.5px),repeating-linear-gradient(135deg,rgba(238,232,214,.025) 0 2px,transparent 2px 14px);}}
 :root[data-theme="dark"]{
 --bg:#0F1A12; --surface:#16241A; --sunk:#0B140D; --line:#2A3B2C;
 --fg:#EEE8D6; --muted:#A9AE96; --pasture:#6FAE4C; --pasture-ink:#0C160E; --leaf:#86BF5E;
 --hay:#D9B65A; --hay-ink:#241A04; --ok:#7CC25A; --warn:#E0A945; --crit:#EE7E6C;
 --ok-bg:#1A3218; --warn-bg:#33280F; --crit-bg:#3A1C16;
---rail:#0A140C; --rail-ink:#EEE8D6; --rail-gold:#D9B65A; color-scheme:dark}
+--rail:#0A140C; --rail-ink:#EEE8D6; --rail-gold:#D9B65A; color-scheme:dark; --bg-art:radial-gradient(900px 520px at 100% -10%,rgba(217,182,90,.14),transparent 60%),radial-gradient(800px 600px at -10% 110%,rgba(111,174,76,.12),transparent 60%),radial-gradient(1px 1px at 20% 30%,rgba(238,232,214,.35),transparent 1.5px),radial-gradient(1px 1px at 70% 12%,rgba(238,232,214,.3),transparent 1.5px),radial-gradient(1px 1px at 45% 8%,rgba(238,232,214,.25),transparent 1.5px),repeating-linear-gradient(135deg,rgba(238,232,214,.025) 0 2px,transparent 2px 14px);}
 *{box-sizing:border-box}
 html,body{height:100%}
-body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45}
+body{background-color:var(--bg);background-image:var(--bg-art);background-attachment:fixed;color:var(--fg);transition:background-color .25s,color .25s;font-family:var(--f-body);font-size:15px;line-height:1.45}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--hay);outline-offset:2px}
@@ -53,6 +54,8 @@ button{cursor:pointer}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--surface)}
 .seg button{border:0;background:none;padding:6px 12px;font-weight:600;font-size:13px}
 .seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.seg.theme button{padding:6px 10px;display:inline-flex;align-items:center} .seg.theme svg{width:16px;height:16px}
+:root[data-theme="light"]{color-scheme:light}
 .who{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px 4px 4px;font-weight:600;font-size:13px}
 .avatar{width:26px;height:26px;border-radius:50%;background:var(--hay);color:var(--hay-ink);display:grid;place-items:center;font-weight:700;font-size:12px}
 .demo{background:var(--warn-bg);color:var(--fg);border:1px dashed var(--warn);border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:16px}
@@ -200,6 +203,13 @@ fieldset.q.good{border-color:var(--ok)} fieldset.q.bad{border-color:var(--crit);
 .kiosk-title{font-family:var(--f-display);font-size:28px;font-weight:700}
 .qrbox{background:#FFFDF8;padding:16px;border-radius:14px;border:4px solid var(--hay);min-width:292px;min-height:292px;display:grid;place-items:center}
 .btn.primary svg{vertical-align:-3px}
+.dircard{border:2px solid var(--hay);background:var(--surface);border-radius:var(--r);padding:12px 14px;margin-bottom:16px;display:flex;flex-direction:column;gap:8px}
+.dir-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--pasture)} .dir-h svg{width:20px;height:20px}
+.dir{display:flex;gap:12px;align-items:center;padding:10px;border-radius:10px;background:var(--sunk);flex-wrap:wrap} .dir.high{background:var(--crit-bg);border-left:4px solid var(--crit)}
+.plan{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer} .plan.high{border-left:4px solid var(--crit)}
+.plan-ic svg{width:20px;height:20px;color:var(--pasture)}
+.cmd .chips .chip{text-align:left;font-weight:500}
+.nav button svg{flex:none}
 .sheet h2{font-family:var(--f-display);color:var(--pasture);margin:0 0 12px;font-size:22px}
 @media (max-width:820px){
 .app{grid-template-columns:1fr}
@@ -296,7 +306,15 @@ photoFirst:"Empiece con una foto. Shepherd lee el arete y completa lo que puede 
 };
 const LS = { get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch{return d}}, set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}} };
 let lang = LS.get("sh.lang","en");
-const t = k => (STR[lang]&&STR[lang][k]) || STR.en[k] || k;
+let theme = LS.get("sh.theme","auto");
+function applyTheme(){ const r=document.documentElement; if(theme==="auto") r.removeAttribute("data-theme"); else r.dataset.theme=theme;
+const dark = theme==="dark" || (theme==="auto" && matchMedia("(prefers-color-scheme: dark)").matches);
+let m=document.querySelector('meta[name="theme-color"]'); if(!m){ m=document.createElement("meta"); m.name="theme-color"; document.head.appendChild(m); } m.content = dark?"#0F1A12":"#F3EDE0"; }
+applyTheme(); try{ matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{ if(theme==="auto") applyTheme(); }); }catch(e){}
+const TH_IC={light:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',auto:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg>',dark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>'};
+function themeSeg(){ const lab={light:T2("Light mode","Modo claro"),auto:T2("Match device","Según el dispositivo"),dark:T2("Dark mode","Modo oscuro")};
+return `<div class="seg theme" role="group" aria-label="${T2("Theme","Tema")}">${["light","auto","dark"].map(k=>`<button data-theme-set="${k}" aria-pressed="${theme===k}" title="${lab[k]}" aria-label="${lab[k]}">${TH_IC[k]}</button>`).join("")}</div>`; }
+const t = k => k==="command"?(lang==="es"?"Centro de mando":"Command center"):((STR[lang]&&STR[lang][k]) || STR.en[k] || k);
 // Bilingual record fields: "field" holds English, "field_es" holds Spanish. Show the viewer's language, fall back to the other.
 const L = (o,f) => { if(!o) return ""; const en=o[f], es=o[f+"_es"]; const has=v=>Array.isArray(v)?v.length>0:(v!=null&&v!==""); return lang==="es" ? (has(es)?es:en) : (has(en)?en:es); };
 const VOCAB = {Bred:"Preñada",Nursing:"Lactando",Open:"Vacía",Riding:"Monta",Working:"Trabajo","Pre-breeding":"Pre-monta","Breeding sire":"Semental",Laying:"En postura",Growing:"En crecimiento",Pregnant:"Preñada",Active:"Activo",Sold:"Vendido",Quarantine:"Cuarentena",
@@ -322,6 +340,7 @@ camera:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width=
 mic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
 speaker:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>',
 qr:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>',
+megaphone:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10v4h4l7 5V5L7 10z"/><path d="M17 9a4 4 0 0 1 0 6M7 14l1.5 6h3L10 15"/></svg>',
 send:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12 20 4l-6 16-3-7z"/></svg>'
 };
 
@@ -350,7 +369,7 @@ return out.sort((x,y)=>x.n-y.n);
 function recentEvents(days,types){ const d=today(); const out=[];
 for(const a of S.animals) for(const e of (a.events||[])) if(daysBetween(e.d,d)<=days && (!types||types.includes(e.type))) out.push({a,e});
 return out.sort((x,y)=>y.e.d.localeCompare(x.e.d)); }
-function dueText(n){ return n<0 ? `${-n} ${t("days")} ${t("overdueBy")}` : n===0 ? t("dueToday") : `${t("in")} ${n} ${t("days")}`; }
+function dueText(n){ const d=k=>Math.abs(k)===1?T2("day","día"):t("days"); return n<0 ? `${-n} ${d(n)} ${t("overdueBy")}` : n===0 ? t("dueToday") : `${t("in")} ${n} ${d(n)}`; }
 function duePill(n){ return `<span class="pill ${n<0?"crit":n<=3?"warn":"mute"}">${esc(dueText(n))}</span>`; }
 
 // ---------- data writes ----------
@@ -409,7 +428,7 @@ else await writeDoc("tasks",tk.id,()=>S.db.collection("tasks").doc(tk.id).update
 // ---------- render ----------
 function renderNav(){
 if(meObj() && staffStatus(meObj())!=="active"){ document.getElementById("nav").innerHTML=""; document.getElementById("railNote").textContent=meObj().name; return; }
-const items=[["today",I.today],["animals",I.animals],["agent",I.agent]]; if(isAdmin()) items.push(["dash",I.dash]);
+const items=[["today",I.today],["animals",I.animals],["agent",I.agent]]; if(isAdmin()){ items.unshift(["command",I.megaphone]); items.push(["dash",I.dash]); }
 document.getElementById("nav").innerHTML = items.map(([k,ic])=>`<button data-nav="${k}" ${S.view===k?'aria-current="page"':""}>${ic}<span>${t(k)}</span></button>`).join("");
 document.getElementById("railNote").textContent = meObj() ? `${meObj().name} · ${meObj().role==="admin"?t("admin"):t("employee")}` : "";
 }
@@ -417,6 +436,7 @@ function topbar(title,sub,extra=""){
 const me=meObj();
 return `<div class="topbar"><div><h1>${esc(title)}</h1>${sub?`<div class="sub">${esc(sub)}</div>`:""}</div>
 <div class="tools">${extra}
+${themeSeg()}
 <div class="seg" role="group" aria-label="${t("langLabel")}"><button data-lang="en" aria-pressed="${lang==="en"}">EN</button><button data-lang="es" aria-pressed="${lang==="es"}">ES</button></div>
 ${me?`<button class="who" data-act="switch" title="${t("switch")}"><span class="avatar">${esc(initials(me.name))}</span>${esc(me.name.split(" ")[0])}</button>`:""}
 </div></div>`;
@@ -432,7 +452,7 @@ const focusId=document.activeElement&&document.activeElement.id;
 const me=meObj(); let html;
 if(!me) html=renderLogin();
 else if(staffStatus(me)!=="active") html=renderOnboarding(me);
-else { if(S.view==="dash" && !isAdmin()) S.view="today"; if(S.view==="kiosk"&&!isAdmin()) S.view="today"; html=({today:renderToday,animals:renderAnimals,agent:renderAgent,dash:renderDash,kiosk:renderKiosk}[S.view]||renderToday)(); }
+else { if(S.view==="dash" && !isAdmin()) S.view="today"; if((S.view==="kiosk"||S.view==="command")&&!isAdmin()) S.view="today"; html=({today:renderToday,animals:renderAnimals,agent:renderAgent,dash:renderDash,kiosk:renderKiosk,command:renderCommand}[S.view]||renderToday)(); }
 main.innerHTML = html;
 if(!me || staffStatus(me)!=="active"){ for(const [id,val] of Object.entries(keep)){ const x=document.getElementById(id); if(x&&val) x.value=val; } if(focusId) document.getElementById(focusId)?.focus(); return; }
 for(const [id,val] of Object.entries(keep)){ const x=document.getElementById(id); if(x&&val) x.value=val; }
@@ -471,8 +491,8 @@ const doneN = mine.filter(taskDoneToday).length;
 const sorted = mine.slice().sort((a,b)=>(taskDoneToday(a)-taskDoneToday(b)) || ((b.priority==="high")-(a.priority==="high")));
 const care = careItems().filter(x=>x.n<=3);
 const dateStr = new Date().toLocaleDateString(lang==="es"?"es-PR":"en-US",{weekday:"long",month:"long",day:"numeric"});
-return topbar(`${t("hello")}, ${me.name.split(" ")[0]}`, dateStr, (S.canWrite?`<button class="btn voicebtn" data-act="voice">${I.mic} ${T2("Voice log","Registro por voz")}</button>`:"")+(isAdmin()&&S.canWrite?`<button class="btn primary" data-act="assign">${t("assign")}</button>`:"")) + banners() +
-clockCard() + `<div class="grid cols-2" style="align-items:start">
+return topbar(`${t("hello")}, ${me.name.split(" ")[0]}`, dateStr, (S.canWrite?`${isAdmin()?`<button class="btn voicebtn" data-nav="command">${I.megaphone} ${T2("Command center","Centro de mando")}</button>`:`<button class="btn voicebtn" data-act="voice">${I.mic} ${T2("Voice log","Registro por voz")}</button>`}`:"")+(isAdmin()&&S.canWrite?`<button class="btn primary" data-act="assign">${t("assign")}</button>`:"")) + banners() +
+clockCard() + directivesCard() + `<div class="grid cols-2" style="align-items:start">
 <section class="grid" style="gap:10px"><div class="label">${isAdmin()?t("allTasks"):t("tasksFor")+" "+dateStr} · ${doneN}/${mine.length}</div>
 <div class="bar-track"><div class="bar-fill" style="width:${mine.length?Math.round(doneN/mine.length*100):0}%"></div></div>
 ${sorted.length?sorted.map(taskCard).join(""):`<div class="panel empty">${t("noTasks")}</div>`}
@@ -496,7 +516,7 @@ function renderAnimals(){
 if(S.animalId){ const a=S.animals.find(x=>x.id===S.animalId); if(a) return renderProfile(a); S.animalId=null; }
 const counts={}; for(const a of S.animals) counts[a.species]=(counts[a.species]||0)+(a.kind==="group"?(a.count||0):1);
 const list=S.animals.filter(a=>S.species==="all"||a.species===S.species).sort((a,b)=>SPECIES.indexOf(a.species)-SPECIES.indexOf(b.species)||String(a.tag).localeCompare(String(b.tag),undefined,{numeric:true}));
-return topbar(t("animals"), `${S.animals.length} ${t("records")}`, (S.canWrite?`<button class="btn voicebtn" data-act="voice">${I.mic} ${T2("Voice log","Registro por voz")}</button>`:"")+(isAdmin()&&S.canWrite?`<button class="btn primary" data-act="addAnimal">${t("addAnimal")}</button>`:"")) + banners() +
+return topbar(t("animals"), `${S.animals.length} ${t("records")}`, (S.canWrite?`${isAdmin()?`<button class="btn voicebtn" data-nav="command">${I.megaphone} ${T2("Command center","Centro de mando")}</button>`:`<button class="btn voicebtn" data-act="voice">${I.mic} ${T2("Voice log","Registro por voz")}</button>`}`:"")+(isAdmin()&&S.canWrite?`<button class="btn primary" data-act="addAnimal">${t("addAnimal")}</button>`:"")) + banners() +
 `<div class="chips" style="margin-bottom:14px"><button class="chip" data-sp="all" aria-pressed="${S.species==="all"}">${t("all")}</button>${SPECIES.map(s=>`<button class="chip" data-sp="${s}" aria-pressed="${S.species===s}">${t(s)} · ${counts[s]||0}</button>`).join("")}</div>
 ${list.length?`<div class="animals">${list.map(animalCard).join("")}</div>`:`<div class="panel empty">${t("noAnimals")}</div>`}`;
 }
@@ -544,7 +564,7 @@ const care=careItems(); const overdue=care.filter(x=>x.n<0); const health=recent
 const herd=S.animals.reduce((s,a)=>s+(a.kind==="group"?(a.count||0):1),0);
 const counts={}; for(const a of S.animals) counts[a.species]=(counts[a.species]||0)+(a.kind==="group"?(a.count||0):1);
 const staff=S.staff.filter(s=>s.role!=="admin"&&staffStatus(s)==="active").map(s=>{const m=list.filter(tk=>tk.assignee===s.id);return{s,n:m.length,d:m.filter(taskDoneToday).length}});
-return topbar(t("dash"), t("farm"), S.canWrite?`<button class="btn voicebtn" data-act="voice">${I.mic} ${T2("Voice log","Registro por voz")}</button><button class="btn" data-act="hire">${T2("Add employee","Agregar empleado")}</button><button class="btn primary" data-act="assign">${t("assign")}</button>`:"") + banners() +
+return topbar(t("dash"), t("farm"), S.canWrite?`${isAdmin()?`<button class="btn voicebtn" data-nav="command">${I.megaphone} ${T2("Command center","Centro de mando")}</button>`:`<button class="btn voicebtn" data-act="voice">${I.mic} ${T2("Voice log","Registro por voz")}</button>`}<button class="btn" data-act="hire">${T2("Add employee","Agregar empleado")}</button><button class="btn primary" data-act="assign">${t("assign")}</button>`:"") + banners() +
 `<div class="kpis"><div class="kpi"><span class="label">${t("done")}</span><b>${doneN}/${list.length}</b></div>
 <div class="kpi ${overdue.length?"crit":""}"><span class="label">${t("overdue")}</span><b>${overdue.length}</b></div>
 <div class="kpi"><span class="label">${t("health7")}</span><b>${health.length}</b></div>
@@ -769,7 +789,7 @@ ${(e.photoIds&&e.photoIds.length)||e.photoId?row(T2("Photos taken at the time","
 }
 
 // ---------- standalone demo mode (runs with no Claude runtime: phones, any browser) ----------
-const DEMO = !(window.claude && window.claude.use);
+let DEMO = !(window.claude && window.claude.use);
 const DEMO_SEED = {"animals": {"calf104": {"born": "2026-08-02", "breed": "Angus cross", "color": "black with white face", "color_es": "negro con cara blanca", "dam": "248 Bella", "due": [{"d": "2026-10-15", "what": "Weight check", "what_es": "Control de peso"}, {"d": "2026-10-13", "what": "Follow-up: scours watch", "what_es": "Seguimiento: vigilar diarrea"}], "events": [{"by": "Daniel Torres", "byId": "daniel", "byRole": "employee", "d": "2026-10-09", "instructedBy": "self", "note": "Loose stool noted, nursing normally. Watching 48 h.", "note_es": "Heces sueltas, mama normalmente. Vigilar 48 h.", "pen": "Calf pen 2", "pen_es": "Corral de terneros 2", "ts": "2026-10-09T20:50:00.000Z", "type": "health", "via": "form"}, {"by": "Daniel Torres", "byId": "daniel", "byRole": "employee", "d": "2026-10-01", "instructedBy": "self", "note": "162 lb", "note_es": "162 lb", "pen": "Calf pen 2", "pen_es": "Corral de terneros 2", "ts": "2026-10-01T10:05:00.000Z", "type": "obs", "via": "form"}, {"by": "Daniel Torres", "byId": "daniel", "byRole": "employee", "d": "2026-08-02", "instructedBy": "self", "note": "Born unassisted, nursing within 1 h", "note_es": "Nació sin ayuda, mamó en menos de 1 h", "pen": "Calf pen 2", "pen_es": "Corral de terneros 2", "ts": "2026-08-02T11:20:00.000Z", "type": "obs", "via": "form"}], "kind": "individual", "name": "", "pen": "Calf pen 2", "pen_es": "Corral de terneros 2", "sample": true, "sex": "Male", "species": "cow", "status": "Nursing", "tag": "104", "weights": [{"d": "2026-08-02", "lb": 68}, {"d": "2026-09-01", "lb": 118}, {"d": "2026-10-01", "lb": 162}]}, "ram01": {"born": "2023-01-30", "breed": "Katahdin", "color": "white", "color_es": "blanco", "due": [{"d": "2026-10-22", "what": "Breeding soundness exam", "what_es": "Examen de aptitud reproductiva"}], "events": [{"by": "Ana Colón", "byId": "ana", "byRole": "employee", "d": "2026-09-01", "instructedBy": "self", "note": "188 lb", "note_es": "188 lb", "pen": "Ram pen", "pen_es": "Corral del carnero", "ts": "2026-09-01T11:40:00.000Z", "type": "obs", "via": "form"}], "kind": "individual", "name": "Samson", "pen": "Ram pen", "pen_es": "Corral del carnero", "sample": true, "sex": "Male", "species": "sheep", "status": "Breeding sire", "tag": "R-01", "weights": [{"d": "2026-08-01", "lb": 182}, {"d": "2026-09-01", "lb": 188}]}, "horse02": {"born": "2012-02-21", "breed": "Quarter Horse", "color": "bay", "color_es": "castaño", "due": [{"d": "2026-10-14", "what": "Farrier visit", "what_es": "Visita del herrador"}], "events": [{"by": "Ana Colón", "byId": "ana", "byRole": "employee", "d": "2026-08-19", "instructedBy": "vet:Dr. Medina (sample)", "note": "Dewormed", "note_es": "Desparasitado", "pen": "Stable 2", "pen_es": "Establo 2", "ts": "2026-08-19T20:05:00.000Z", "type": "treatment", "via": "form"}], "kind": "individual", "name": "Trueno", "pen": "Stable 2", "pen_es": "Establo 2", "sample": true, "sex": "Castrated male", "species": "horse", "status": "Working", "tag": "H-02", "weights": [{"d": "2026-06-01", "lb": 1105}, {"d": "2026-09-01", "lb": 1112}]}, "pigs-g1": {"born": "2026-05-20", "breed": "Berkshire cross", "count": 12, "due": [{"d": "2026-11-20", "what": "Market weight target", "what_es": "Meta de peso de mercado"}], "events": [{"by": "María Rivera", "byId": "maria", "byRole": "employee", "d": "2026-10-10", "instructedBy": "self", "note": "Avg 181 lb", "note_es": "Promedio 181 lb", "pen": "Hog barn A", "pen_es": "Porqueriza A", "ts": "2026-10-10T20:15:00.000Z", "type": "obs", "via": "form"}], "kind": "group", "name": "Grower pen 1", "name_es": "Corral de crecimiento 1", "pen": "Hog barn A", "pen_es": "Porqueriza A", "sample": true, "species": "pig", "status": "Growing", "tag": "P-G1", "weights": [{"d": "2026-08-15", "lb": 95}, {"d": "2026-09-15", "lb": 142}, {"d": "2026-10-10", "lb": 181}]}, "layers1": {"breed": "Rhode Island Red", "count": 240, "due": [{"d": "2026-10-12", "what": "Water line cleaning", "what_es": "Limpieza de la línea de agua"}], "events": [{"by": "María Rivera", "byId": "maria", "byRole": "employee", "d": "2026-10-08", "instructedBy": "self", "note": "Switched layer feed supplier", "note_es": "Cambio de suplidor de alimento para ponedoras", "pen": "Coop 1", "pen_es": "Gallinero 1", "ts": "2026-10-08T13:05:00.000Z", "type": "feed", "via": "form"}, {"by": "María Rivera", "byId": "maria", "byRole": "employee", "d": "2026-10-03", "instructedBy": "self", "note": "2 mortalities, no visible signs", "note_es": "2 muertes, sin señales visibles", "pen": "Coop 1", "pen_es": "Gallinero 1", "ts": "2026-10-03T12:20:00.000Z", "type": "obs", "via": "form"}], "kind": "group", "name": "Laying flock 1", "name_es": "Lote de ponedoras 1", "pen": "Coop 1", "pen_es": "Gallinero 1", "production": [{"d": "2026-10-01", "eggs": 204}, {"d": "2026-10-02", "eggs": 201}, {"d": "2026-10-03", "eggs": 206}, {"d": "2026-10-04", "eggs": 199}, {"d": "2026-10-05", "eggs": 197}, {"d": "2026-10-06", "eggs": 190}, {"d": "2026-10-07", "eggs": 186}, {"d": "2026-10-08", "eggs": 181}, {"d": "2026-10-09", "eggs": 179}, {"d": "2026-10-10", "eggs": 174}], "sample": true, "species": "chicken", "status": "Laying", "tag": "C-L1"}, "cow212": {"born": "2019-04-02", "breed": "Hereford", "color": "red with white face", "color_es": "rojo con cara blanca", "due": [{"d": "2026-10-18", "what": "Body condition review", "what_es": "Revisión de condición corporal"}], "events": [{"by": "Daniel Torres", "byId": "daniel", "byRole": "employee", "d": "2026-10-07", "instructedBy": "self", "note": "Slight limp, right rear. Hoof looked clean.", "note_es": "Cojera leve, pata trasera derecha. La pezuña se veía limpia.", "pen": "North pasture", "pen_es": "Pasto norte", "ts": "2026-10-07T10:40:00.000Z", "type": "health", "via": "form"}, {"by": "Daniel Torres", "byId": "daniel", "byRole": "employee", "d": "2026-09-10", "instructedBy": "self", "note": "1151 lb, down 2 months running", "note_es": "1151 lb, bajando dos meses seguidos", "pen": "North pasture", "pen_es": "Pasto norte", "ts": "2026-09-10T13:05:00.000Z", "type": "obs", "via": "form"}], "kind": "individual", "name": "Rosa", "pen": "North pasture", "pen_es": "Pasto norte", "sample": true, "sex": "Female", "species": "cow", "status": "Open", "tag": "212", "weights": [{"d": "2026-07-12", "lb": 1190}, {"d": "2026-08-11", "lb": 1176}, {"d": "2026-09-10", "lb": 1151}]}, "horse01": {"born": "2015-05-10", "breed": "Paso Fino", "color": "chestnut", "color_es": "alazán", "due": [{"d": "2026-10-14", "what": "Farrier visit", "what_es": "Visita del herrador"}, {"d": "2026-11-02", "what": "Dental float", "what_es": "Limado dental"}], "events": [{"by": "Ana Colón", "byId": "ana", "byRole": "employee", "d": "2026-08-19", "instructedBy": "vet:Dr. Medina (sample)", "note": "Dewormed", "note_es": "Desparasitada", "pen": "Stable 1", "pen_es": "Establo 1", "ts": "2026-08-19T11:15:00.000Z", "type": "treatment", "via": "form"}, {"by": "Ana Colón", "byId": "ana", "byRole": "employee", "d": "2026-08-12", "instructedBy": "self", "note": "Farrier trim, all four", "note_es": "Recorte del herrador, las cuatro patas", "pen": "Stable 1", "pen_es": "Establo 1", "ts": "2026-08-12T10:40:00.000Z", "type": "obs", "via": "form"}], "kind": "individual", "name": "Gloria", "pen": "Stable 1", "pen_es": "Establo 1", "sample": true, "sex": "Female", "species": "horse", "status": "Riding", "tag": "H-01", "weights": [{"d": "2026-06-01", "lb": 880}, {"d": "2026-09-01", "lb": 874}]}, "broilers1": {"born": "2026-09-06", "breed": "Cornish Cross", "count": 150, "due": [{"d": "2026-10-25", "what": "Processing appointment", "what_es": "Cita de procesamiento"}], "events": [{"by": "María Rivera", "byId": "maria", "byRole": "employee", "d": "2026-10-05", "instructedBy": "self", "note": "Avg sample weight 2.9 lb", "note_es": "Peso promedio de muestra 2.9 lb", "pen": "Brooder barn", "pen_es": "Granero de pollitos", "ts": "2026-10-05T19:15:00.000Z", "type": "obs", "via": "form"}], "kind": "group", "name": "Broiler batch 1", "name_es": "Lote de pollos de engorde 1", "pen": "Brooder barn", "pen_es": "Granero de pollitos", "sample": true, "species": "chicken", "status": "Growing", "tag": "C-B1"}, "cow248": {"born": "2021-03-14", "breed": "Angus", "color": "solid black", "color_es": "negro entero", "due": [{"d": "2026-10-20", "what": "Pregnancy check", "what_es": "Chequeo de preñez"}], "events": [{"by": "Ana Colón", "byId": "ana", "byRole": "employee", "d": "2026-10-11", "instructedBy": "schedule", "note": "Done: Booster vaccine (was due 2026-10-08)", "note_es": "Hecho: Vacuna de refuerzo (tocaba el 2026-10-08)", "pen": "North pasture", "pen_es": "Pasto norte", "ts": "2026-10-11T20:03:44.968Z", "type": "treatment", "via": "due"}, {"by": "Daniel Torres", "byId": "daniel", "byRole": "employee", "d": "2026-10-06", "instructedBy": "self", "note": "Eating well, good body condition", "note_es": "Come bien, buena condición corporal", "pen": "North pasture", "pen_es": "Pasto norte", "ts": "2026-10-06T11:35:00.000Z", "type": "obs", "via": "form"}, {"by": "Daniel Torres", "byId": "daniel", "byRole": "employee", "d": "2026-09-10", "instructedBy": "self", "note": "1120 lb", "note_es": "1120 lb", "pen": "North pasture", "pen_es": "Pasto norte", "ts": "2026-09-10T20:05:00.000Z", "type": "obs", "via": "form"}, {"by": "Daniel Torres", "byId": "daniel", "byRole": "employee", "d": "2026-06-02", "instructedBy": "vet:Dr. Medina (sample)", "note": "Annual vaccines given", "note_es": "Vacunas anuales aplicadas", "pen": "North pasture", "pen_es": "Pasto norte", "ts": "2026-06-02T13:05:00.000Z", "type": "treatment", "via": "form"}, {"by": "Farm Administrator", "byId": "admin", "byRole": "admin", "d": "2026-05-20", "instructedBy": "self", "note": "Bred AI, sire Black Diamond", "note_es": "Inseminación artificial, toro Black Diamond", "pen": "North pasture", "pen_es": "Pasto norte", "ts": "2026-05-20T20:05:00.000Z", "type": "breeding", "via": "form"}], "kind": "individual", "name": "Bella", "pen": "North pasture", "pen_es": "Pasto norte", "sample": true, "sex": "Female", "species": "cow", "status": "Bred", "tag": "248", "weights": [{"d": "2026-06-10", "lb": 1065}, {"d": "2026-07-12", "lb": 1082}, {"d": "2026-08-11", "lb": 1098}, {"d": "2026-09-10", "lb": 1120}]}, "sheep-flock": {"breed": "Katahdin", "count": 18, "due": [{"d": "2026-10-16", "what": "FAMACHA eye check", "what_es": "Examen de ojos FAMACHA"}, {"d": "2026-10-25", "what": "Ram turnout", "what_es": "Entrada del carnero"}], "events": [{"by": "Ana Colón", "byId": "ana", "byRole": "employee", "d": "2026-09-28", "instructedBy": "self", "note": "Rotated to south paddock", "note_es": "Rotadas al potrero sur", "pen": "South paddock", "pen_es": "Potrero sur", "ts": "2026-09-28T14:40:00.000Z", "type": "obs", "via": "form"}, {"by": "Ana Colón", "byId": "ana", "byRole": "employee", "d": "2026-09-15", "instructedBy": "self", "note": "2 ewes pale eyelids, FAMACHA 4. Flagged for vet.", "note_es": "2 ovejas con párpados pálidos, FAMACHA 4. Señaladas para el veterinario.", "pen": "South paddock", "pen_es": "Potrero sur", "ts": "2026-09-15T12:05:00.000Z", "type": "health", "via": "form"}], "kind": "group", "name": "Ewe flock A", "name_es": "Rebaño de ovejas A", "pen": "South paddock", "pen_es": "Potrero sur", "sample": true, "species": "sheep", "status": "Pre-breeding", "tag": "S-A"}, "sow07": {"born": "2023-03-11", "breed": "Berkshire", "color": "black with white points", "color_es": "negra con puntas blancas", "due": [{"d": "2026-10-17", "what": "Expected farrowing", "what_es": "Parto esperado"}], "events": [{"by": "María Rivera", "byId": "maria", "byRole": "employee", "d": "2026-10-04", "instructedBy": "staff:admin", "note": "Hog barn B → Farrowing pen", "note_es": "Porqueriza B → Corral de parto", "pen": "Farrowing pen", "pen_es": "Corral de parto", "ts": "2026-10-04T13:20:00.000Z", "type": "movement", "via": "form"}], "kind": "individual", "name": "Dolly", "pen": "Farrowing pen", "pen_es": "Corral de parto", "sample": true, "sex": "Female", "species": "pig", "status": "Pregnant", "tag": "07"}}, "tasks": {"t-famacha": {"animalId": "sheep-flock", "area": "South paddock", "area_es": "Potrero sur", "assignee": "ana", "checklist": ["Pen the flock", "Card and scorecard ready"], "checklist_es": ["Encerrar el rebaño", "Tarjeta y hoja de puntaje listas"], "checksOnce": [], "date": "__TODAY__", "done": false, "doneBy": "Farm Administrator", "priority": "normal", "title": "Prepare ewes for FAMACHA check", "title_es": "Preparar las ovejas para el examen FAMACHA"}, "t-sow": {"animalId": "sow07", "area": "Farrowing pen", "area_es": "Corral de parto", "assignee": "maria", "checklist": [], "checklist_es": [], "checks": {}, "doneOn": {}, "priority": "high", "recurring": true, "title": "Check Dolly for signs of farrowing", "title_es": "Revisar a Dolly por señales de parto"}, "t-rosa": {"animalId": "cow212", "area": "North pasture", "area_es": "Pasto norte", "assignee": "daniel", "checklist": [], "checklist_es": [], "checksOnce": [], "date": "__TODAY__", "done": false, "priority": "normal", "title": "Look at Rosa's right rear hoof", "title_es": "Revisar la pezuña trasera derecha de Rosa"}, "t-calf": {"animalId": "calf104", "area": "Calf pen 2", "area_es": "Corral de terneros 2", "assignee": "daniel", "checklist": [], "checklist_es": [], "checks": {}, "doneOn": {}, "priority": "high", "recurring": true, "title": "Observe calf 104 stool and nursing", "title_es": "Observar heces y lactancia del ternero 104"}, "t-water": {"area": "Coop & hog barns", "area_es": "Gallinero y porquerizas", "assignee": "maria", "checklist": ["Coop 1", "Brooder barn", "Hog barn A", "Farrowing pen"], "checklist_es": ["Gallinero 1", "Granero de pollitos", "Porqueriza A", "Corral de parto"], "checks": {}, "doneOn": {}, "priority": "normal", "recurring": true, "title": "Check waterers in all barns", "title_es": "Revisar bebederos en todos los establos"}, "t-eggs": {"animalId": "layers1", "area": "Coop 1", "area_es": "Gallinero 1", "assignee": "maria", "checklist": ["Morning collection", "Afternoon collection", "Log count in Shepherd"], "checklist_es": ["Recogida de la mañana", "Recogida de la tarde", "Anotar el conteo en Shepherd"], "checks": {}, "doneOn": {}, "priority": "normal", "recurring": true, "title": "Collect and log eggs", "title_es": "Recoger y anotar huevos"}, "t-headcount": {"area": "North pasture", "area_es": "Pasto norte", "assignee": "daniel", "checklist": ["Count cattle", "Walk north fence", "Check water tank"], "checklist_es": ["Contar el ganado", "Recorrer la cerca norte", "Revisar el tanque de agua"], "checks": {}, "doneOn": {}, "priority": "normal", "recurring": true, "title": "Pasture head count and fence walk", "title_es": "Conteo en el pasto y recorrido de cerca"}, "t-stalls": {"area": "Stables", "area_es": "Establos", "assignee": "ana", "checklist": ["Morning hay", "Grain", "Muck stalls 1-2", "Evening hay"], "checklist_es": ["Heno de la mañana", "Grano", "Limpiar establos 1-2", "Heno de la tarde"], "checks": {}, "doneOn": {}, "priority": "normal", "recurring": true, "title": "Feed horses and muck stalls", "title_es": "Alimentar caballos y limpiar establos"}}, "staff": {"admin": {"area": "All operations", "area_es": "Todas las operaciones", "name": "Farm Administrator", "role": "admin", "sample": true}, "ana": {"area": "Horses & sheep", "area_es": "Caballos y ovejas", "name": "Ana Colón", "role": "employee", "sample": true}, "daniel": {"area": "Cattle & pasture", "area_es": "Ganado y pasto", "name": "Daniel Torres", "role": "employee", "sample": true}, "maria": {"area": "Coop & pigs", "area_es": "Gallinero y cerdos", "name": "María Rivera", "role": "employee", "sample": true}}};
 function blobSrc(id){ if(DEMO){ try{ return localStorage.getItem("sh.demo.blob."+id)||""; }catch{ return ""; } } return "/_blob/"+id; }
 function makeLocalDB(){
@@ -891,6 +911,117 @@ function adminClockSheet(st){ openSheet(`<h2>${T2("Clock in for","Marcar entrada
 <div class="field"><label class="label" for="ac-time">${T2("Arrival time","Hora de llegada")}</label><input id="ac-time" name="time" type="time" required value="${new Date().toTimeString().slice(0,5)}"></div>
 <div class="field"><label class="label" for="ac-note">${T2("Reason (required)","Razón (requerida)")}</label><input id="ac-note" name="note" required placeholder="${esc(T2("Forgot phone","Olvidó el teléfono"))}"></div>
 <div class="inline"><button class="btn primary" type="submit">${T2("Clock in","Marcar entrada")}</button><button class="btn" type="button" data-act="closeSheet">${t("cancel")}</button></div></form>`); }
+// ---------- admin command center & directives ----------
+let directives=[];
+const dirForMe=()=>{ const me=meObj(); if(!me) return []; const d=today(); return directives.filter(x=>(x.date||d)<=d && !(x.until&&x.until<d) && (x.to==="all"||(Array.isArray(x.to)&&x.to.includes(me.id))) && x.createdById!==me.id).sort((a,b)=>(b.priority==="high")-(a.priority==="high")||String(b.ts).localeCompare(String(a.ts))); };
+function directivesCard(){
+const me=meObj(); if(!me||me.role==="admin") return "";
+const list=dirForMe().filter(x=>!(x.acks&&x.acks[me.id])||((x.acks[me.id]||{}).date===today()&&x.keep)); if(!list.length) return "";
+return `<section class="dircard"><div class="dir-h">${I.megaphone} <b>${T2("From the administrator","Del administrador")}</b> <span class="t-meta">${T2("Read and tap Got it","Lea y toque Entendido")}</span></div>
+${list.map(x=>`<div class="dir ${x.priority==="high"?"high":""}"><div class="grow">${x.priority==="high"?`<span class="pill crit">${T2("Priority","Prioridad")}</span> `:""}<b>${esc(L(x,"text"))}</b>
+<div class="t-meta">${esc(x.createdBy||"")} · ${esc(fmtTime(x.ts))}${x.date&&x.date!==today()?" · "+esc(x.date):""}</div></div>
+<button class="btn primary sm" data-ack="${esc(x.id)}">✓ ${T2("Got it","Entendido")}</button></div>`).join("")}</section>`;
+}
+function staffMatch(word){ const w=word.toLowerCase(); return S.staff.find(s=>staffStatus(s)==="active"&&s.role!=="admin"&&s.name.toLowerCase().split(/\s+/).some(p=>p.length>2&&(p===w||p.normalize("NFD").replace(/[̀-ͯ]/g,"")===w.normalize("NFD").replace(/[̀-ͯ]/g,"")))); }
+function localCommand(text){
+const acts=[]; const parts=[]; for(const seg of text.split(/(?<=[.!?;])\s+|\n+/).map(s=>s.trim()).filter(Boolean)){ if(parts.length && seg.split(/\s+/).length<=2) parts[parts.length-1]+=" "+seg; else parts.push(seg); }
+for(const p of parts){
+const low=p.toLowerCase(); const words=low.replace(/[^\p{L}\p{N}\s-]/gu," ").split(/\s+/);
+const people=[...new Set(words.map(staffMatch).filter(Boolean).map(s=>s.id))];
+const all=/\b(everyone|everybody|all staff|all employees|team|todos|todo el mundo|equipo)\b/.test(low);
+const r=localParse(p,null);
+const hasAnimal=!!r.animal_id && /\b(cow|vaca|calf|ternero|horse|caballo|sheep|oveja|pig|cerdo|sow|cerda|hen|gallina|flock|lote|ram|carnero|\d{2,})\b/.test(low);
+const prio=/\b(urgent|asap|priority|important|now|urgente|prioridad|importante|ya)\b/.test(low)?"high":"normal";
+let date=r.due_date||today(); if(/\btomorrow|mañana\b/.test(low)){ const d=new Date(); d.setDate(d.getDate()+1); date=d.toLocaleDateString("en-CA"); }
+if(/\bclock (in|me in)\b|marca(r)? (la )?entrada/.test(low) && people.length){ people.forEach(id=>acts.push({type:"clockin",staff_id:id})); continue; }
+if(hasAnimal && !people.length && !all){ if(r.due_date) acts.push({type:"care",animal_id:r.animal_id,date:r.due_date,what_en:r.due_what_en,what_es:r.due_what_es}); else acts.push({type:"log",animal_id:r.animal_id,entry:r.type,note_en:p,note_es:p,weight_lb:r.weight_lb}); continue; }
+const isTask=/\b(task|tarea|assign|asigna|needs? to|has to|must|clean|limpia|fix|arregla|repair|feed|alimenta|check|revisa|move|mueve|bring|trae|pick up|recoge|build|paint|pinta)\b/.test(low);
+const to=all?"all":(people.length?people:"all");
+if(isTask && to!=="all" ){ to.forEach(id=>acts.push({type:"task",assignee:id,title_en:p,title_es:p,date,priority:prio})); }
+else acts.push({type:"directive",to,text_en:p,text_es:p,priority:prio,date});
+}
+return {actions:acts};
+}
+async function aiCommand(text){
+const staff=S.staff.filter(s=>staffStatus(s)==="active").map(s=>`${s.id}: ${s.name} (${s.role}${s.area?", "+s.area:""})`).join("; ");
+const animals=S.animals.map(a=>`${a.id} | ${a.tag} | ${L(a,"name")||""} | ${a.species}`).join("; ");
+return S.sample.json(`You are the command parser for the administrator of Faith Based Family Farms. Turn the administrator's spoken or typed instructions (English or Spanish) into actions. Today is ${today()}.
+Staff (id: name): ${staff}
+Animals (id | tag | name | species): ${animals}
+Instructions: """${text}"""
+Reply with only JSON: {"actions":[...]} where each action is one of:
+{"type":"directive","to":"all" or [staff ids],"text_en":"...","text_es":"...","priority":"high"|"normal","date":"YYYY-MM-DD"}  — a note or order employees must read first thing (default date today; "tomorrow morning" = tomorrow)
+{"type":"task","assignee":staff id,"title_en":"...","title_es":"...","date":"YYYY-MM-DD","priority":"high"|"normal","checklist_en":[],"checklist_es":[]}  — specific work for one person (repeat per person)
+{"type":"care","animal_id":"...","date":"YYYY-MM-DD","what_en":"...","what_es":"..."}  — schedule future animal care
+{"type":"log","animal_id":"...","entry":"health"|"treatment"|"feed"|"movement"|"breeding"|"obs","note_en":"...","note_es":"...","weight_lb":number|null}
+{"type":"clockin","staff_id":"..."}
+Write text_en/text_es as clean, direct sentences addressed to the employee. Never invent staff or animals that are not listed; if a name is unclear, use a directive to "all" and say who in the text.`,{modelTier:"default",cache:false});
+}
+let cmdPlan=null;
+function actLabel(a){
+const who=v=>v==="all"?T2("Everyone","Todos"):(Array.isArray(v)?v:[v]).map(staffName).join(", ");
+const an=id=>{ const x=S.animals.find(y=>y.id===id); return x?animalLabel(x):id; };
+const tx=(o,k)=>lang==="es"?(o[k+"_es"]||o[k+"_en"]):(o[k+"_en"]||o[k+"_es"]);
+switch(a.type){
+case "directive": return [I.megaphone,T2("Directive","Directiva"),`${who(a.to)}${a.date&&a.date!==today()?" · "+a.date:""}`,tx(a,"text"),a.priority];
+case "task": return [I.today,T2("Task","Tarea"),`${staffName(a.assignee)} · ${a.date||today()}`,tx(a,"title"),a.priority];
+case "care": return [I.animals,T2("Schedule care","Programar cuidado"),`${an(a.animal_id)} · ${a.date}`,tx(a,"what"),"normal"];
+case "log": return [I.animals,T2("Animal log","Registro de animal"),an(a.animal_id),tx(a,"note"),"normal"];
+case "clockin": return [I.qr,T2("Clock in","Marcar entrada"),staffName(a.staff_id),T2("Clock in now, entered by administrator","Entrada ahora, registrada por el administrador"),"normal"];
+} return ["","?","",JSON.stringify(a),"normal"];
+}
+function renderCommand(){
+const d=today(); const recent=directives.slice().sort((a,b)=>String(b.ts).localeCompare(String(a.ts))).slice(0,12);
+const recips=x=>x.to==="all"?S.staff.filter(s=>staffStatus(s)==="active"&&s.role!=="admin"):S.staff.filter(s=>(x.to||[]).includes(s.id));
+const ex=[T2("Everyone: no visitors in the coop today.","Todos: hoy no se permiten visitas en el gallinero."),T2("Daniel, fix the north fence before noon. Urgent.","Daniel, arregla la cerca norte antes del mediodía. Urgente."),T2("María and Ana: start with the farrowing pen tomorrow morning.","María y Ana: mañana temprano empiecen por el corral de parto."),T2("Cow 248 needs her vaccination on November 17.","La vaca 248 necesita su vacuna el 17 de noviembre.")];
+return topbar(T2("Command center","Centro de mando"),T2("Give directives, assign work and update records by voice or text","Dé directivas, asigne trabajo y actualice registros por voz o texto"))+banners()+
+`<div class="grid cols-2" style="align-items:start"><section class="panel cmd">
+<div class="voice"><label class="label" for="cmd-in">${T2("Say or type your instructions","Diga o escriba sus instrucciones")}</label>
+<div class="bar"><textarea id="cmd-in" class="voicebox" rows="4" placeholder="${esc(ex[1])}"></textarea><button type="button" class="iconbtn mic" data-mic="cmd-in" title="${T2("Speak","Hablar")}">${I.mic}</button></div>
+<div class="chips">${ex.map(e=>`<button class="chip" data-cmdex="${esc(e)}">${esc(e)}</button>`).join("")}</div>
+<div class="inline"><button class="btn primary" data-act="cmdParse">✨ ${T2("Prepare actions","Preparar acciones")}</button></div>
+<div class="t-meta" id="cmd-stat" aria-live="polite">${S.sample?T2("Shepherd turns this into directives, tasks and records. You review before anything is sent.","Shepherd lo convierte en directivas, tareas y registros. Usted revisa antes de enviar."):T2("Demo mode uses a simple reader: name people (or say everyone), and one instruction per sentence.","El demo usa un lector simple: nombre a las personas (o diga todos) y una instrucción por oración.")}</div></div>
+<div id="cmd-plan">${cmdPlan?planHTML():""}</div>
+</section>
+<section class="panel"><h2>${T2("Directives sent","Directivas enviadas")}</h2><div class="list">${recent.length?recent.map(x=>{ const r=recips(x); const ack=r.filter(s=>x.acks&&x.acks[s.id]);
+return `<div class="row"><div class="grow">${x.priority==="high"?`<span class="pill crit">${T2("Priority","Prioridad")}</span> `:""}<b>${esc(L(x,"text"))}</b>
+<div class="t-meta">${x.to==="all"?T2("Everyone","Todos"):esc(r.map(s=>s.name).join(", "))} · ${esc(x.date||"")} ${esc(fmtTime(x.ts))}</div>
+<div class="chips" style="margin-top:6px">${r.map(s=>{ const a=x.acks&&x.acks[s.id]; return `<span class="pill ${a?"ok":"mute"}">${a?"✓ ":""}${esc(s.name.split(" ")[0])}${a?" "+esc(fmtTime(a.ts)):""}</span>`; }).join("")}</div></div>
+<span class="pill ${ack.length===r.length&&r.length?"ok":"warn"}">${ack.length}/${r.length}</span></div>`; }).join(""):`<div class="empty">${T2("No directives yet.","Sin directivas aún.")}</div>`}</div></section></div>`;
+}
+function planHTML(){
+if(!cmdPlan.length) return `<div class="demo" style="margin-top:12px">${T2("Couldn't find any actions. Try naming the person or animal.","No se encontraron acciones. Nombre a la persona o al animal.")}</div>`;
+return `<h3 class="label" style="margin:14px 0 8px">${T2("Review before sending","Revise antes de enviar")}</h3>
+${cmdPlan.map((a,i)=>{ const [ic,kind,meta,txt,pr]=actLabel(a); return `<label class="plan ${pr==="high"?"high":""}"><input type="checkbox" class="check sm" data-plan="${i}" ${a._off?"":"checked"}>
+<span class="plan-ic">${ic}</span><span class="grow"><span class="label">${esc(kind)}</span> ${pr==="high"?`<span class="pill crit">${T2("Priority","Prioridad")}</span>`:""}<div><b>${esc(txt||"")}</b></div><div class="t-meta">${esc(meta)}</div></span></label>`; }).join("")}
+<div class="inline" style="margin-top:10px"><button class="btn primary" data-act="cmdRun">${T2("Send / execute","Enviar / ejecutar")} (${cmdPlan.filter(a=>!a._off).length})</button><button class="btn" data-act="cmdClear">${t("cancel")}</button></div>`;
+}
+async function cmdParse(){
+const box=document.getElementById("cmd-in"); const text=(box?.value||"").trim(); if(!text) return; const st=document.getElementById("cmd-stat");
+st.textContent=T2("Preparing actions…","Preparando acciones…");
+try{ const r=S.sample?await aiCommand(text):localCommand(text); cmdPlan=(r&&Array.isArray(r.actions)?r.actions:[]).filter(a=>a&&a.type); cmdPlan._text=text; }
+catch(e){ console.warn(e); const r=localCommand(text); cmdPlan=r.actions; }
+render(); const b=document.getElementById("cmd-in"); if(b) b.value=text;
+}
+async function cmdRun(){
+const me=meObj(); const ts=new Date().toISOString(); let n=0, fail=0;
+for(const a of (cmdPlan||[]).filter(x=>!x._off)){
+try{
+if(a.type==="directive"){ const to=a.to==="all"?"all":(Array.isArray(a.to)?a.to:[a.to]).filter(id=>S.staff.some(s=>s.id===id)); if(to!=="all"&&!to.length) throw 0;
+await S.db.collection("directives").add({to,text:String(a.text_en||a.text_es||""),text_es:String(a.text_es||a.text_en||""),priority:a.priority==="high"?"high":"normal",date:a.date||today(),ts,createdBy:me.name,createdById:me.id,acks:{},said:cmdPlan._text||""}); }
+else if(a.type==="task"){ if(!S.staff.some(s=>s.id===a.assignee)) throw 0; await createTask({title:a.title_en||a.title_es,title_es:a.title_es||a.title_en,assignee:a.assignee,date:a.date||today(),priority:a.priority==="high"?"high":"normal",area:T2("Admin directive","Directiva"),area_es:"Directiva",checklist:a.checklist_en||[],checklist_es:a.checklist_es||[]}); }
+else if(a.type==="care"){ const an=S.animals.find(x=>x.id===a.animal_id); if(!an||!a.date) throw 0; await addEvent(an.id,{type:"obs",due:{d:a.date,what:a.what_en||a.what_es||"Follow-up",what_es:a.what_es||a.what_en||"Seguimiento"},meta:{via:"command"}}); }
+else if(a.type==="log"){ const an=S.animals.find(x=>x.id===a.animal_id); if(!an) throw 0; const o={type:a.entry||"obs",note:a.note_en||a.note_es||"",note_es:a.note_es||a.note_en||"",meta:{via:"command"}}; if(a.weight_lb) o.lb=Number(a.weight_lb); await addEvent(an.id,o); }
+else if(a.type==="clockin"){ const st=S.staff.find(s=>s.id===a.staff_id); if(!st) throw 0; await S.db.collection("clock").doc(clockId(st.id,today())).set({staffId:st.id,name:st.name,date:today(),in:ts,out:"",method:"admin",note:T2("Command center","Centro de mando"),enteredBy:me.name,enteredAt:ts,shifts:[]}); }
+n++;
+}catch(e){ console.warn("cmd",a,e); fail++; }
+}
+cmdPlan=null; render(); const b=document.getElementById("cmd-in"); if(b) b.value="";
+toast(fail?T2(`${n} done, ${fail} couldn't be done`,`${n} hechas, ${fail} no se pudieron`):T2(`${n} sent and saved`,`${n} enviadas y guardadas`));
+}
+async function ackDirective(id){ const me=meObj(); const x=directives.find(d=>d.id===id); if(!x||!me) return;
+try{ await writeDoc("directives",id,()=>S.db.collection("directives").doc(id).update({acks:{[me.id]:{ts:new Date().toISOString(),date:today(),name:me.name}}})); toast(T2("Marked as read","Marcado como leído")); }catch{ toast(t("saveErr")); } }
+
 // ---------- voice logging ----------
 function logFormHTML(a,pre,px){
 pre=pre||{}; px=px||"lf"; const isGroup=a.kind==="group"; const evTypes=["health","treatment","feed","movement","breeding","obs"];
@@ -954,7 +1085,7 @@ rec.lang = lang==="es"?"es-PR":"en-US"; rec.interimResults=true; rec.continuous=
 const base=box.value?box.value.trim()+" ":""; btn.classList.add("live");
 rec.onresult=e=>{ let txt=""; for(const r of e.results) txt+=r[0].transcript; box.value=base+txt; };
 rec.onerror=e=>{ if(e.error==="not-allowed"||e.error==="service-not-allowed"||e.error==="audio-capture") hint(); };
-rec.onend=()=>{ btn.classList.remove("live"); rec=null; if(!box.value.trim()) return; if(targetId==="askIn") ask(box.value); else btn.closest("form")?.querySelector("[data-fill]")?.click(); };
+rec.onend=()=>{ btn.classList.remove("live"); rec=null; if(!box.value.trim()) return; if(targetId==="askIn") ask(box.value); else if(targetId==="cmd-in") cmdParse(); else btn.closest("form")?.querySelector("[data-fill]")?.click(); };
 try{ rec.start(); }catch{ btn.classList.remove("live"); rec=null; hint(); }
 }
 async function fillFromVoice(px){
@@ -1181,9 +1312,10 @@ for(const [n,en,es,cen,ces,prio] of list) await createTask({title:en,title_es:es
 
 // ---------- events ----------
 document.addEventListener("click", e=>{
-const el=e.target.closest("[data-qrmode],[data-adminclock],[data-ev],[data-duedone],[data-nav],[data-lang],[data-act],[data-login],[data-open],[data-sp],[data-suggest],[data-oblang],[data-invite],[data-mic],[data-fill],[data-vpick]"); if(!el) return;
+const el=e.target.closest("[data-theme-set],[data-ack],[data-cmdex],[data-qrmode],[data-adminclock],[data-ev],[data-duedone],[data-nav],[data-lang],[data-act],[data-login],[data-open],[data-sp],[data-suggest],[data-oblang],[data-invite],[data-mic],[data-fill],[data-vpick]"); if(!el) return;
 if(el.dataset.act==="closeSheet" && e.target!==el) return;
 if(el.dataset.nav){ S.view=el.dataset.nav; if(S.view!=="animals") S.animalId=null; LS.set("sh.view",S.view); render(); window.scrollTo(0,0); }
+else if(el.dataset.themeSet){ theme=el.dataset.themeSet; LS.set("sh.theme",theme); applyTheme(); render(); }
 else if(el.dataset.lang){ lang=el.dataset.lang; LS.set("sh.lang",lang); document.documentElement.lang=lang; render(); }
 else if(el.dataset.login){ const st=S.staff.find(x=>x.id===el.dataset.login); if(st) pinSheet(st); }
 else if(el.dataset.mic){ startMic(el.dataset.mic,el); }
@@ -1193,6 +1325,8 @@ else if(el.dataset.oblang){ lang=el.dataset.oblang; LS.set("sh.lang",lang); docu
 else if(el.dataset.invite){ const st=S.staff.find(x=>x.id===el.dataset.invite); if(st) inviteSheet(st); }
 else if(el.dataset.open){ closeSheet(); S.view="animals"; S.animalId=el.dataset.open; S.focusDue=el.dataset.due||null; render();
 const f=document.getElementById("due-focus"); if(f){ f.scrollIntoView({block:"center",behavior:"smooth"}); } else window.scrollTo(0,0); }
+else if(el.dataset.ack){ ackDirective(el.dataset.ack); }
+else if(el.dataset.cmdex){ const b=document.getElementById("cmd-in"); if(b){ b.value=(b.value.trim()?b.value.trim()+" ":"")+el.dataset.cmdex; b.focus(); } }
 else if(el.dataset.qrmode){ S.db.doc("settings/clock").update({mode:el.dataset.qrmode}).catch(()=>toast(t("saveErr"))); }
 else if(el.dataset.adminclock){ const st=S.staff.find(x=>x.id===el.dataset.adminclock); if(st) adminClockSheet(st); }
 else if(el.dataset.ev!=null&&el.dataset.aid){ eventSheet(el.dataset.aid,Number(el.dataset.ev)); }
@@ -1209,6 +1343,9 @@ case "closeSheet": closeSheet(); break;
 case "stop": S.ctl?.abort(); break;
 case "join": codeSheet(); break;
 case "voice": voiceSheet(); break;
+case "cmdParse": cmdParse(); break;
+case "cmdRun": cmdRun(); break;
+case "cmdClear": cmdPlan=null; render(); break;
 case "resetDemo": resetDemo(); break;
 case "simScan": doClockIn("qr").catch(()=>toast(t("saveErr"))); break;
 case "kiosk": S.view="kiosk"; render(); window.scrollTo(0,0); break;
@@ -1226,6 +1363,7 @@ case "clearPhoto": if(S.photo) URL.revokeObjectURL(S.photo.url); S.photo=null; r
 });
 document.addEventListener("change", async e=>{
 const el=e.target;
+if(el.dataset.plan!=null&&cmdPlan){ cmdPlan[Number(el.dataset.plan)]._off=!el.checked; const b=document.querySelector('[data-act="cmdRun"]'); if(b) b.textContent=T2("Send / execute","Enviar / ejecutar")+" ("+cmdPlan.filter(a=>!a._off).length+")"; return; }
 if(el.dataset.phprev){ const box=document.getElementById(el.dataset.phprev); if(!box) return; box.innerHTML="";
 const files=[...(el.files||[])].slice(0,4); for(const f of files){ const img=document.createElement("img"); img.src=URL.createObjectURL(f); img.alt=""; box.appendChild(img); }
 if((el.files||[]).length>4) toast(T2("Only the first 4 photos will be saved.","Solo se guardarán las primeras 4 fotos.")); return; }
@@ -1332,7 +1470,9 @@ document.documentElement.lang=lang;
 render();
 const C = (window.claude&&window.claude.use) ? window.claude : demoClaude();
 (async()=>{
-const [db,sample,user,assets] = await Promise.all([C.use("db"),C.use("sample"),C.use("user"),C.use("assets")]);
+let [db,sample,user,assets] = await Promise.all([C.use("db"),C.use("sample"),C.use("user"),C.use("assets")]);
+// No shared database in this view (public link, phone browser, no permission): run as an on-device demo instead of a dead screen.
+if(!db){ DEMO=true; db=makeLocalDB(); assets=localAssets; user=null; }
 S.assets=assets;
 S.db=db; S.sample=sample; S.ready=true;
 if(user){ try{ const w=await user.can("data.write"); if(w===false) S.canWrite=false; }catch{} }
@@ -1340,6 +1480,7 @@ if(sample){ try{ const l=await sample.limits(); imgOK=!!l.images; if(!l.tools) S
 if(!db){ render(); return; }
 const bind=(col,key,sort)=>db.collection(col).onSnapshot(snap=>{ S[key]=snap.docs.map(d=>Object.assign({id:d.id},d.data())); if(sort) S[key].sort(sort); render(); },err=>console.warn(col,err));
 db.doc("settings/handbook").onSnapshot(d=>{ handbook=d.exists?d.data():null; render(); },err=>console.warn("handbook",err));
+db.collection("directives").onSnapshot(snap=>{ directives=snap.docs.map(d=>Object.assign({id:d.id},d.data())); render(); },err=>console.warn("directives",err));
 bind("animals","animals"); bind("tasks","tasks"); bind("staff","staff",(a,b)=>String(a.name).localeCompare(String(b.name)));
 db.doc("settings/clock").onSnapshot(d=>{ clockCfg=d.exists?d.data():null; if(pendingClock&&pendingClock!=="ok"){ const c=pendingClock; pendingClock=null; location.hash="clockin-"+c; } render(); },err=>console.warn("clock",err));
 db.collection("clock").where("date","==",today()).onSnapshot(snap=>{ clocks=snap.docs.map(d=>Object.assign({id:d.id},d.data())); render(); },err=>console.warn("clocks",err));
