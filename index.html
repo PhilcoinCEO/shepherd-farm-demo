@@ -169,6 +169,7 @@ body.signed-out .main{padding-bottom:0}
 .gate-hello{font-family:var(--f-display);font-weight:800;font-size:22px;color:var(--pasture);margin:-12px 0 20px;text-align:center}
 .gate-face{display:flex;align-items:center;justify-content:center;gap:10px}
 .gate-err{min-height:18px;color:var(--crit);font-size:14px;text-align:center}
+.gate .who-btn.gate-admin{border-color:var(--rail-gold,#A9C27A);border-style:dashed}.gate .who-btn.gate-admin .avatar{background:var(--rail,#18291B);color:var(--rail-gold,#A9C27A);display:grid;place-items:center}
 .gate-foot{margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;max-width:340px}
 .gate-foot .linkish{background:none;border:0;color:var(--pasture);font-weight:700;text-decoration:underline;cursor:pointer;font-size:15px;padding:6px}
 .login-hero{display:flex;gap:14px;align-items:center;margin-bottom:16px}
@@ -605,7 +606,8 @@ if(qrOK()){ const st=deviceStaff();
 if(st) return gateShell(`<div class="gate-ok">✓ ${T2("QR verified","QR verificado")}</div><div class="gate-hello">${T2("Good morning, ","Buenos días, ")}${esc(String(st.name).split(" ")[0])}</div>${pinField(st.id)}
 <div class="gate-foot"><div class="t-meta">${T2("Your PIN signs you in and clocks you in.","Su PIN le da acceso y marca su entrada.")}</div><button class="linkish" data-act="notme">${T2("Not you? Pick your name","¿No es usted? Elija su nombre")}</button></div>`);
 const emp=active.filter(x=>x.role!=="admin");
-return gateShell(`<div class="gate-ok">✓ ${T2("QR verified","QR verificado")}</div><div class="gate-hello">${t("whoWorking")}</div>${emp.length?whoList(emp):`<div class="empty">${t("noStaff")}</div>`}`); }
+return gateShell(`<div class="gate-ok">✓ ${T2("QR verified","QR verificado")}</div><div class="gate-hello">${t("whoWorking")}</div>${emp.length?whoList(emp):`<div class="empty">${t("noStaff")}</div>`}
+<div class="gate-list" style="margin-top:12px"><button class="who-btn gate-admin" data-act="adminMode"><span class="avatar"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="grow">${T2("Administrator","Administrador")}<div class="t-meta">${T2("Owners & managers sign in here","Dueños y gerentes entran aquí")}</div></span></button></div>`); }
 return gateShell(`<div class="gate-scan"><div class="gate-scan-ic">${I.qr}</div>
 <div class="gate-hello" style="margin:0 0 6px">${T2("Scan to start your shift","Escanee para empezar su turno")}</div>
 <p>${T2("Open your phone camera and scan the QR code at the farm office. Then enter your PIN.","Abra la cámara del teléfono y escanee el código QR en la oficina de la finca. Luego ingrese su PIN.")}</p>
