@@ -232,6 +232,15 @@ fieldset.q.good{border-color:var(--ok)} fieldset.q.bad{border-color:var(--crit);
 .kpi,.task,.acard{box-shadow:var(--card-glow)}
 .panel .task,.panel .acard,.panel .who-btn{background:var(--card-row)}
 .kpi{border-top:3px solid var(--hay)}
+.kpi-link{text-align:left;cursor:pointer;font:inherit;color:inherit;display:block;width:100%;transition:transform .12s,box-shadow .12s}
+.kpi-link:hover{transform:translateY(-2px);box-shadow:0 8px 20px -10px rgba(23,61,34,.45)}
+.kpi-go{float:right;font-size:11px;font-weight:700;color:var(--pasture);letter-spacing:0;text-transform:none}
+.kpi-sp{text-decoration:underline dotted;cursor:pointer}.kpi-sp:hover{color:var(--pasture)}
+.asearch{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+.asearch input{flex:1;min-width:220px;border:2px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 14px;font-size:15px}
+.asearch input:focus{border-color:var(--pasture);outline:none}
+.linkbtn{background:none;border:0;padding:0;color:var(--pasture);font-weight:700;text-decoration:underline;cursor:pointer}
+
 .seg.flags button{padding:5px 8px;display:inline-flex;align-items:center;opacity:.55}
 .seg.flags button[aria-pressed="true"]{background:var(--hay);opacity:1}
 .seg.flags svg{border-radius:3px;display:block;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
@@ -566,11 +575,18 @@ return `<button class="acard" data-open="${esc(a.id)}">${a.photoId?`<img class="
 function renderAnimals(){
 if(S.animalId){ const a=S.animals.find(x=>x.id===S.animalId); if(a) return renderProfile(a); S.animalId=null; }
 const counts={}; for(const a of S.animals) counts[a.species]=(counts[a.species]||0)+(a.kind==="group"?(a.count||0):1);
-const list=S.animals.filter(a=>S.species==="all"||a.species===S.species).sort((a,b)=>SPECIES.indexOf(a.species)-SPECIES.indexOf(b.species)||String(a.tag).localeCompare(String(b.tag),undefined,{numeric:true}));
+const q=(S.aq||"").trim().toLowerCase();
+const hay=a=>[a.tag,a.name,a.name_es,a.breed,a.sex,a.status,a.status_es,a.pen,a.pen_es,a.color,a.color_es,a.dam,t(a.species),a.species].filter(Boolean).join(" ").toLowerCase();
+const list=S.animals.filter(a=>(S.species==="all"||a.species===S.species)&&(!q||q.split(/\s+/).every(w=>hay(a).includes(w)))).sort((a,b)=>SPECIES.indexOf(a.species)-SPECIES.indexOf(b.species)||String(a.tag).localeCompare(String(b.tag),undefined,{numeric:true}));
 return topbar(t("animals"), `${S.animals.length} ${t("records")}`, (S.canWrite?`${isAdmin()?`<button class="btn voicebtn" data-nav="command">${I.megaphone} ${T2("Command center","Centro de mando")}</button>`:`<button class="btn voicebtn" data-act="voice">${I.mic} ${T2("Voice log","Registro por voz")}</button>`}`:"")+(isAdmin()&&S.canWrite?`<button class="btn primary" data-act="addAnimal">${t("addAnimal")}</button>`:"")) + banners() +
 `<div class="chips" style="margin-bottom:14px"><button class="chip" data-sp="all" aria-pressed="${S.species==="all"}">${t("all")}</button>${SPECIES.map(s=>`<button class="chip" data-sp="${s}" aria-pressed="${S.species===s}">${t(s)} · ${counts[s]||0}</button>`).join("")}</div>
-${list.length?`<div class="animals">${list.map(animalCard).join("")}</div>`:`<div class="panel empty">${t("noAnimals")}</div>`}`;
+<div class="asearch"><input id="aSearch" type="search" autocomplete="off" placeholder="${T2("Search tag, name, breed, pen, color, status…","Buscar arete, nombre, raza, corral, color, estado…")}" value="${esc(S.aq||"")}"><span class="t-meta">${list.length} ${T2("match","resultado")}${list.length===1?"":(lang==="es"?"s":"es")}${q?` · <button class="linkbtn" data-act="aClear">${T2("Clear","Borrar")}</button>`:""}</span></div>
+<div id="aList">${list.length?`<div class="animals">${list.map(animalCard).join("")}</div>`:`<div class="panel empty">${q?T2("No animal matches that search.","Ningún animal coincide con esa búsqueda."):t("noAnimals")}</div>`}</div>`;
 }
+document.addEventListener("input",e=>{ if(e.target.id!=="aSearch") return; S.aq=e.target.value; if(S.aq.trim()) S.species="all"; const pos=e.target.selectionStart; render(); const el=document.getElementById("aSearch"); if(el){ el.focus(); try{el.setSelectionRange(pos,pos);}catch{} } });
+document.addEventListener("click",e=>{ const go=e.target.closest("[data-sp-go]"); const k=e.target.closest('[data-act="herdSearch"],[data-act="aClear"]'); if(!go&&!k) return;
+if(k&&k.dataset.act==="aClear"){ S.aq=""; render(); return; }
+e.stopPropagation(); S.species=go?go.dataset.spGo:"all"; S.aq=""; S.animalId=null; S.view="animals"; LS.set("sh.view","animals"); render(); window.scrollTo(0,0); setTimeout(()=>document.getElementById("aSearch")?.focus(),60); },true);
 function renderProfile(a){
 const isGroup=a.kind==="group"; const evTypes=["health","treatment","feed","movement","breeding","obs"];
 const due=(a.due||[]).map(it=>({it,n:daysBetween(today(),it.d)})).sort((x,y)=>x.n-y.n);
@@ -619,7 +635,7 @@ return topbar(t("dash"), t("farm"), S.canWrite?`${isAdmin()?`<button class="btn 
 `<div class="kpis"><div class="kpi"><span class="label">${t("done")}</span><b>${doneN}/${list.length}</b></div>
 <div class="kpi ${overdue.length?"crit":""}"><span class="label">${t("overdue")}</span><b>${overdue.length}</b></div>
 <div class="kpi"><span class="label">${t("health7")}</span><b>${health.length}</b></div>
-<div class="kpi"><span class="label">${t("herd")}</span><b>${herd}</b><span class="t-meta">${SPECIES.filter(s=>counts[s]).map(s=>`${counts[s]} ${t(s).toLowerCase()}`).join(" · ")}</span></div></div>
+<button class="kpi kpi-link" data-act="herdSearch" title="${T2("Search every animal","Buscar cualquier animal")}"><span class="label">${t("herd")} <span class="kpi-go">${T2("Search","Buscar")} →</span></span><b>${herd}</b><span class="t-meta">${SPECIES.filter(s=>counts[s]).map(s=>`<span class="kpi-sp" data-sp-go="${s}">${counts[s]} ${t(s).toLowerCase()}</span>`).join(" · ")}</span></button></div>
 <div class="grid cols-2" style="align-items:start">
 ${whosHerePanel()}
 ${newHiresPanel()}
