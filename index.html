@@ -232,6 +232,12 @@ fieldset.q.good{border-color:var(--ok)} fieldset.q.bad{border-color:var(--crit);
 .kpi,.task,.acard{box-shadow:var(--card-glow)}
 .panel .task,.panel .acard,.panel .who-btn{background:var(--card-row)}
 .kpi{border-top:3px solid var(--hay)}
+.apic{display:block;width:92px;height:92px;flex:none;border-radius:12px;overflow:hidden;position:relative;border:2px solid var(--line);align-self:center;background:var(--sunk)}
+.apic img,.apic svg{width:100%;height:100%;object-fit:cover;display:block}
+.apic-big .apic{width:140px;height:140px}
+.apic em{position:absolute;left:4px;bottom:4px;font-style:normal;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:rgba(0,0,0,.55);color:#fff;border-radius:4px;padding:1px 5px}
+@media (max-width:640px){.apic{width:76px;height:76px}}
+
 .kpi-link{text-align:left;cursor:pointer;font:inherit;color:inherit;display:block;width:100%;transition:transform .12s,box-shadow .12s}
 .kpi-link:hover{transform:translateY(-2px);box-shadow:0 8px 20px -10px rgba(23,61,34,.45)}
 .kpi-go{float:right;font-size:11px;font-weight:700;color:var(--pasture);letter-spacing:0;text-transform:none}
@@ -564,13 +570,51 @@ ${sorted.length?sorted.map(taskCard).join(""):`<div class="panel empty">${t("noT
 </div>`;
 }
 
+// ---------- sample animal pictures (placeholders until a real photo is taken) ----------
+function coatOf(a){ const c=String((a.color||"")+" "+(a.breed||"")).toLowerCase();
+const pick=[["rhode island","#8b3a1e"],["cornish","#f1ece0"],["katahdin","#e9e0cc"],["berkshire","#2a2523"],["hereford","#8a3b22"],["angus","#211d1b"],["black","#24201d"],["chestnut","#9a4a22"],["bay","#6b3a1f"],["red","#8a3b22"],["brown","#7a5232"],["white","#efe9dc"]];
+for(const [k,v] of pick) if(c.includes(k)) return v;
+return ({cow:"#5a3b28",horse:"#7a4a2a",sheep:"#ece4d2",pig:"#e5a79e",chicken:"#a8582a"})[a.species]||"#6b5a48"; }
+function animalShape(sp,coat,face){ const dk="#1c1a17", hoof="#2d2620";
+if(sp==="cow") return `<path d="M22 46 q4-9 13-7 l6 3 q8-6 22-5 q14 1 19 9 q3 6 0 16 l-2 3 h-49 q-4-2-5-6 l-6-3 q-4-3-2-7z" fill="${coat}"/>
+<ellipse cx="25" cy="49" rx="8" ry="7" fill="${face||coat}"/><ellipse cx="20" cy="53" rx="4.5" ry="3.5" fill="#d9a69a"/>
+<path d="M23 42 l-4-5 M29 41 l3-5" stroke="#efe6d2" stroke-width="2" stroke-linecap="round"/><path d="M31 44 l6-3" stroke="${coat}" stroke-width="4"/>
+<rect x="38" y="62" width="5" height="17" fill="${coat}"/><rect x="45" y="62" width="5" height="16" fill="${coat}"/><rect x="66" y="62" width="5" height="17" fill="${coat}"/><rect x="73" y="61" width="5" height="16" fill="${coat}"/>
+<path d="M38 78h5M45 77h5M66 78h5M73 76h5" stroke="${hoof}" stroke-width="2.5"/><path d="M83 50 q6 8 3 20" stroke="${coat}" stroke-width="2" fill="none"/><circle cx="24" cy="47" r="1.1" fill="${dk}"/>`;
+if(sp==="horse") return `<path d="M40 50 q-2-12-8-20 l-6-3 q-6 0-9 4 l-1 4 q3 2 7 1 l5 2 q2 8 5 14z" fill="${coat}"/>
+<path d="M38 48 q10-6 26-5 q14 1 18 8 q2 6-1 12 h-40 q-5-5-3-15z" fill="${coat}"/>
+<path d="M27 27 q8 2 12 14 l2 7" stroke="${dk}" stroke-width="3" fill="none"/><path d="M82 52 q7 6 5 22" stroke="${dk}" stroke-width="4" fill="none" stroke-linecap="round"/>
+<rect x="42" y="60" width="4" height="21" fill="${coat}"/><rect x="48" y="60" width="4" height="20" fill="${coat}"/><rect x="71" y="60" width="4" height="21" fill="${coat}"/><rect x="77" y="59" width="4" height="20" fill="${coat}"/>
+<path d="M42 80h4M48 79h4M71 80h4M77 78h4" stroke="${hoof}" stroke-width="2.5"/><circle cx="22" cy="31" r="1" fill="${dk}"/><path d="M28 25 l1-5 l2 5z" fill="${coat}"/>`;
+if(sp==="sheep") return `<g fill="${coat}"><circle cx="45" cy="52" r="10"/><circle cx="57" cy="48" r="11"/><circle cx="70" cy="51" r="10"/><circle cx="52" cy="60" r="10"/><circle cx="66" cy="60" r="10"/><circle cx="78" cy="57" r="7"/></g>
+<ellipse cx="33" cy="52" rx="7" ry="9" fill="#3a302a"/><ellipse cx="29" cy="46" rx="4" ry="2" fill="#3a302a" transform="rotate(-25 29 46)"/><circle cx="31" cy="50" r="1" fill="#fff"/>
+<g stroke="#3a302a" stroke-width="3"><path d="M46 66v14M53 67v13M66 67v13M73 66v14"/></g>`;
+if(sp==="pig") return `<ellipse cx="56" cy="58" rx="27" ry="15" fill="${coat}"/><ellipse cx="31" cy="56" rx="9" ry="8" fill="${coat}"/>
+<rect x="20" y="53" width="7" height="7" rx="3" fill="${face||"#d68f86"}"/><circle cx="22" cy="56" r=".9" fill="${dk}"/><circle cx="25" cy="56" r=".9" fill="${dk}"/>
+<path d="M30 49 l4-8 l4 7z" fill="${coat}"/><circle cx="30" cy="53" r="1" fill="${dk}"/>
+<g fill="${coat}"><rect x="38" y="68" width="6" height="11"/><rect x="47" y="69" width="6" height="10"/><rect x="63" y="69" width="6" height="10"/><rect x="72" y="68" width="6" height="11"/></g>
+${face?`<g fill="${face}"><rect x="38" y="76" width="6" height="3"/><rect x="72" y="76" width="6" height="3"/></g>`:""}<path d="M83 55 q6-3 4 3 q-2 4 3 2" stroke="${coat}" stroke-width="2" fill="none"/>`;
+if(sp==="chicken") return `<path d="M62 44 q14-12 20 0 q-2 10-8 14z" fill="${coat==="#f1ece0"?"#ded6c4":"#3d2a1c"}"/><ellipse cx="56" cy="58" rx="19" ry="15" fill="${coat}"/>
+<circle cx="40" cy="42" r="8" fill="${coat}"/><path d="M36 34 q2-5 4 0 q2-5 4 0 q2-4 3 1z" fill="#c8322a"/><path d="M38 47 q1 5 3 1z" fill="#c8322a"/>
+<path d="M32 42 l-6 2 l6 2z" fill="#e3b33c"/><circle cx="38" cy="41" r="1.1" fill="${dk}"/><path d="M50 56 q8-6 16 2" stroke="rgba(0,0,0,.2)" stroke-width="2" fill="none"/>
+<path d="M52 72v9 l-4 2 M52 81l4 2 M62 72v9 l-4 2 M62 81l4 2" stroke="#e3b33c" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+return ""; }
+function animalArt(a){ const coat=coatOf(a); const c=String(a.color||"").toLowerCase();
+const face=(a.species==="cow"&&/white face/.test(c))?"#efe9dc":(a.species==="pig"&&/white/.test(c+" "+(a.breed||"").toLowerCase()))?"#efe9dc":"";
+const sp=a.species; const one=animalShape(sp,coat,face); const grp=a.kind==="group";
+const id="g"+String(a.id||a.tag).replace(/[^a-z0-9]/gi,"");
+const herd=grp?`<g transform="translate(34 6) scale(.62)" opacity=".85">${one}</g><g transform="translate(-6 14) scale(.7)">${one}</g><g transform="translate(18 22) scale(.78)">${one}</g>`:`<g transform="translate(-2 2)">${one}</g>`;
+return `<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe3e6"/><stop offset=".55" stop-color="#e9efd9"/><stop offset=".56" stop-color="#8fb36a"/><stop offset="1" stop-color="#5e8a3e"/></linearGradient></defs>
+<rect width="100" height="100" fill="url(#${id})"/><path d="M0 52 q20-14 38-6 q16-12 34-2 q14-8 28 2 v10 h-100z" fill="#7fa45c" opacity=".55"/><circle cx="82" cy="18" r="7" fill="#f6e2a0" opacity=".9"/>${herd}</svg>`; }
+function animalPic(a){ return a.photoId?`<span class="apic"><img src="${blobSrc(a.photoId)}" alt=""></span>`:`<span class="apic sample">${animalArt(a)}<em>${T2("Sample","Ejemplo")}</em></span>`; }
+
 function animalCard(a){
 const last=(a.weights||[]).slice(-1)[0]; const prod=(a.production||[]).slice(-1)[0];
 const care=(a.due||[]).map(it=>daysBetween(today(),it.d)).sort((x,y)=>x-y)[0];
-return `<button class="acard" data-open="${esc(a.id)}">${a.photoId?`<img class="athumb" src="${blobSrc(a.photoId)}" alt="">`:""}<span class="tag ${a.kind==="group"?"group":""}"><span>${esc(a.tag)}</span></span>
+return `<button class="acard" data-open="${esc(a.id)}"><span class="tag ${a.kind==="group"?"group":""}"><span>${esc(a.tag)}</span></span>
 <span class="grow"><span class="nm">${esc(L(a,"name")||t(a.species))}</span>
 <div class="meta">${esc(a.breed||"")}${a.kind==="group"?` · ${a.count||0} ${t("head")}`:a.sex?` · ${esc(V(a.sex))}`:""} · ${t("pen")} ${esc(L(a,"pen")||"—")}</div>
-<div class="t-meta">${last?`<span>${last.lb} ${t("lb")}</span>`:""}${prod?`<span>${prod.eggs} ${t("eggs")}</span>`:""}${care!=null&&care<=7?duePill(care):""}</div></span></button>`;
+<div class="t-meta">${last?`<span>${last.lb} ${t("lb")}</span>`:""}${prod?`<span>${prod.eggs} ${t("eggs")}</span>`:""}${care!=null&&care<=7?duePill(care):""}</div></span>${animalPic(a)}</button>`;
 }
 function renderAnimals(){
 if(S.animalId){ const a=S.animals.find(x=>x.id===S.animalId); if(a) return renderProfile(a); S.animalId=null; }
@@ -592,7 +636,7 @@ const isGroup=a.kind==="group"; const evTypes=["health","treatment","feed","move
 const due=(a.due||[]).map(it=>({it,n:daysBetween(today(),it.d)})).sort((x,y)=>x.n-y.n);
 const facts=[[t("species"),t(a.species)],[t("breed"),a.breed],[isGroup?t("count"):t("sex"),isGroup?a.count:V(a.sex)],[t("pen"),L(a,"pen")],[t("born"),a.born],[t("status"),V(a.status)],[t("color"),L(a,"color")],[a.dam?t("dam"):"",a.dam]].filter(f=>f[0]&&f[1]!=null&&f[1]!=="");
 return topbar(L(a,"name")||t(a.species), "", `<button class="btn ghost" data-act="back">← ${t("back")}</button>`) + banners() +
-`<div class="profile-head">${a.photoId?`<img class="aphoto" src="${blobSrc(a.photoId)}" alt="">`:""}<span class="tag ${isGroup?"group":""}"><span>${esc(a.tag)}</span></span><div class="facts" style="flex:1;min-width:0">${facts.map(([k,v])=>`<div><span class="label">${esc(k)}</span><b>${esc(v)}</b></div>`).join("")}</div></div>
+`<div class="profile-head"><span class="apic-big">${animalPic(a)}</span><span class="tag ${isGroup?"group":""}"><span>${esc(a.tag)}</span></span><div class="facts" style="flex:1;min-width:0">${facts.map(([k,v])=>`<div><span class="label">${esc(k)}</span><b>${esc(v)}</b></div>`).join("")}</div></div>
 <div class="grid cols-2" style="align-items:start">
 <section class="grid">
 ${(a.weights||[]).length?`<div class="panel"><h2>${t("weights")}</h2><svg class="spark" id="chartW" role="img" aria-label="${t("weights")}"></svg></div>`:""}
