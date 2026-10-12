@@ -68,6 +68,8 @@ button{cursor:pointer}
 .avatar{width:26px;height:26px;border-radius:50%;background:var(--hay);color:var(--hay-ink);display:grid;place-items:center;font-weight:700;font-size:12px}
 .demo{background:var(--warn-bg);color:var(--fg);border:1px dashed var(--warn);border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:16px}
 .grid{display:grid;gap:16px}
+.dash-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:start}.dash-col{display:grid;gap:16px;align-content:start;min-width:0}
+@media (max-width:720px){.dash-attn{order:-1}}
 .cols-2{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}
 .panel{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--pasture);box-shadow:var(--card-glow);border-radius:var(--r);padding:16px;min-width:0}
 .panel h2{font-family:var(--f-display);font-weight:700;color:var(--pasture);font-size:18px;padding-bottom:8px;border-bottom:2px solid var(--hay);margin:0 0 12px;letter-spacing:.01em}
@@ -867,12 +869,18 @@ return topbar(t("dash"), t("farm"), S.canWrite?`${isAdmin()?`<button class="btn 
 <div class="kpi ${overdue.length?"crit":""}"><span class="label">${t("overdue")}</span><b>${overdue.length}</b></div>
 <div class="kpi"><span class="label">${t("health7")}</span><b>${health.length}</b></div>
 <button class="kpi kpi-link" data-act="herdSearch" title="${T2("Search every animal","Buscar cualquier animal")}"><span class="label">${t("herd")} <span class="kpi-go">${T2("Search","Buscar")} →</span></span><b>${herd}</b><span class="t-meta">${SPECIES.filter(s=>counts[s]).map(s=>`<span class="kpi-sp" data-sp-go="${s}">${counts[s]} ${t(s).toLowerCase()}</span>`).join(" · ")}</span></button></div>
-<div class="grid cols-2" style="align-items:start">
+<div class="dash-cols">
+<div class="dash-col">
 ${whosHerePanel()}
 ${pinResetPanel()}${newHiresPanel()}
+</div>
+<div class="dash-col">
 <section class="panel"><h2>${t("staffProgress")}</h2><div class="list">${staff.map(({s,n,d})=>`<button class="row rowlink" data-staff="${esc(s.id)}"><span class="avatar">${esc(initials(s.name))}</span><div class="grow"><b>${esc(s.name)}</b> <span class="t-meta">${esc(areaLabel(s))}</span><div class="bar-track" style="margin-top:6px"><div class="bar-fill" style="width:${n?Math.round(d/n*100):0}%"></div></div></div><span class="pill ${n&&d===n?"ok":"mute"}">${d}/${n}</span><span class="chev" aria-hidden="true">›</span></button>`).join("")||`<div class="empty">—</div>`}</div></section>
-<section class="panel">${attnHead()}<div class="list">${attnRows()}${care.length?care.slice(0,10).map(({a,it,n})=>`<button class="row rowlink" data-open="${esc(a.id)}" data-due="${esc(it.d+"|"+it.what)}" title="${esc(T2("Open","Abrir"))}"><span class="tag ${a.kind==="group"?"group":""}"><span>${esc(a.tag)}</span></span><div class="grow"><b>${esc(L(it,"what"))}</b><div class="t-meta">${esc(L(a,"name")||t(a.species))}</div></div>${duePill(n)}<span class="chev" aria-hidden="true">›</span></button>`).join(""):(openAttn().length?"":`<div class="empty">—</div>`)}</div></section>
 <section class="panel"><h2>${t("recentHealth")}</h2><div class="list">${health.length?health.slice(0,10).map(({a,e})=>`<div class="row"><span class="when t-meta" style="font-family:var(--f-mono);width:84px">${esc(e.d)}</span><div class="grow"><button class="chip" data-open="${esc(a.id)}">${esc(animalLabel(a))}</button> ${esc(L(e,"note"))}<div class="t-meta">${esc(e.by||"")}</div></div></div>`).join(""):`<div class="empty">—</div>`}</div></section>
+</div>
+<div class="dash-col dash-attn">
+<section class="panel">${attnHead()}<div class="list">${attnRows()}${care.length?care.slice(0,10).map(({a,it,n})=>`<button class="row rowlink" data-open="${esc(a.id)}" data-due="${esc(it.d+"|"+it.what)}" title="${esc(T2("Open","Abrir"))}"><span class="tag ${a.kind==="group"?"group":""}"><span>${esc(a.tag)}</span></span><div class="grow"><b>${esc(L(it,"what"))}</b><div class="t-meta">${esc(L(a,"name")||t(a.species))}</div></div>${duePill(n)}<span class="chev" aria-hidden="true">›</span></button>`).join(""):(openAttn().length?"":`<div class="empty">—</div>`)}</div></section>
+</div>
 </div>`;
 }
 
@@ -1045,6 +1053,8 @@ const wantTask=/\btask\b|tarea|vet check|call the vet|llamar al vet|veterinari/.
 const mv=cmd.match(/\b(?:move|moved|mover|mueve|movida|movido|pasar|pasa|trasladar|traslada)\b.*?\b(?:to|into|a|al|para)\s+(.+?)[.!]?$/i);
 const rest=restOf(cmd);
 const isNote=r.type==="health"||r.type==="treatment"||rest.length>=12;
+const isQ=/\?\s*$/.test(cmd.replace(/\s*\b[a-z]?-?\d{1,6}\s*$/i,"").trim())||/^(what|whats|what's|how|why|should|can|could|is|does|do|which|when|qué|que|cómo|como|por qué|debo|puedo|cuál|cual|cuándo|es)\b/i.test(cmd.trim());
+if(isQ&&r.weight_lb==null&&r.eggs==null&&!wantTask&&!mv){ say(demoProfile(a)+"\n\n"+T2("I can't give medical advice. If an animal is sick or not eating, call the vet. I can create an urgent vet task or log what you see.","No puedo dar consejos médicos. Si un animal está enfermo o no come, llame al veterinario. Puedo crear una tarea urgente de veterinario o anotar lo que ve."),[{label:T2("Create vet task","Crear tarea de veterinario"),say:T2(`vet task for ${a.tag}`,`tarea de veterinario para ${a.tag}`)},{label:T2("Health note","Nota de salud"),fill:T2(`${a.tag} looks `,`${a.tag} se ve `)},{label:T2("Open record","Abrir registro"),open:a.id}]); return; }
 const acts=r.weight_lb!=null||r.eggs!=null||r.due_date||mv||wantTask||wantPhoto||isNote;
 if(!acts){ say(demoProfile(a)+"\n\n"+T2("What do you want to do?","¿Qué desea hacer?"),demoActionChips(a)); return; }
 if(r.weight_lb!=null&&!/confirm|anyway|sí,|yes/.test(lc)){ const prev=(a.weights||[]).slice(-1)[0]; if(prev&&prev.lb&&(r.weight_lb<prev.lb*0.6||r.weight_lb>prev.lb*1.6)){
