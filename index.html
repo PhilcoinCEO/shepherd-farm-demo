@@ -331,6 +331,7 @@ fieldset.q.good{border-color:var(--ok)} fieldset.q.bad{border-color:var(--crit);
 .co-warn{background:color-mix(in srgb,var(--crit) 12%,transparent);border:1px solid color-mix(in srgb,var(--crit) 40%,transparent);border-radius:12px;padding:10px 12px;margin:6px 0 12px;font-weight:600}
 .co-task{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;background:var(--card-row,var(--surface));display:flex;flex-direction:column;gap:8px}.co-or{font-size:13px;color:var(--muted)}.co-note{width:100%;box-sizing:border-box}
 .co-hint{margin-top:8px;font-size:14px;font-weight:600;color:var(--crit)}.stamp.warn{color:var(--crit)}
+.ph-choice{display:flex;gap:10px;margin:10px 0 4px}.ph-choice .btn{flex:1;justify-content:center;cursor:pointer}
 .sq-big{width:180px;height:180px;border-radius:16px;object-fit:cover;border:3px solid var(--pasture);display:grid;place-items:center;font-size:56px}
 .prof-cam{position:absolute;left:8px;right:8px;bottom:8px;background:rgba(0,0,0,.6);color:#fff;border-radius:8px;text-align:center;font-size:12px;font-weight:700;padding:5px}
 .prof-info{flex:1;min-width:180px}
@@ -575,7 +576,7 @@ document.getElementById("railNote").textContent = meObj() ? `${meObj().name} · 
 const FLAG_US='<svg viewBox="0 0 38 20" width="30" height="16" aria-hidden="true"><rect width="38" height="20" fill="#B22234"/><g fill="#fff"><rect y="1.54" width="38" height="1.54"/><rect y="4.62" width="38" height="1.54"/><rect y="7.69" width="38" height="1.54"/><rect y="10.77" width="38" height="1.54"/><rect y="13.85" width="38" height="1.54"/><rect y="16.92" width="38" height="1.54"/></g><rect width="15.2" height="10.77" fill="#3C3B6E"/><g fill="#fff">'+[...Array(20)].map((_,i)=>`<circle cx="${1.5+(i%5)*3.05+(Math.floor(i/5)%2)*1.5}" cy="${1.4+Math.floor(i/5)*2.6}" r=".55"/>`).join("")+'</g></svg>';
 const FLAG_ES='<svg viewBox="0 0 30 20" width="30" height="16" aria-hidden="true"><rect width="30" height="20" fill="#AA151B"/><rect y="5" width="30" height="10" fill="#F1BF00"/></svg>';
 function meSquare(st,cls){ return st&&st.photoId?`<img class="${cls}" src="${blobSrc(st.photoId)}" alt="">`:`<span class="${cls} sq-init">${esc(initials(st?st.name:"?"))}</span>`; }
-function profileSheet(){ const me=meObj(); if(!me) return; openSheet(`<div class="prof"><label class="prof-photo" title="${T2("Change photo","Cambiar foto")}">${meSquare(me,"sq-big")}<span class="prof-cam">${T2("Change photo","Cambiar foto")}</span><input id="profPhotoIn" type="file" accept="image/*" capture="user" hidden></label>
+function profileSheet(){ const me=meObj(); if(!me) return; openSheet(`<div class="prof"><label class="prof-photo" title="${T2("Change photo","Cambiar foto")}">${meSquare(me,"sq-big")}<span class="prof-cam">${T2("Change photo","Cambiar foto")}</span><input id="profPhotoIn" type="file" accept="image/*" hidden></label>
 <div class="prof-info"><h2 style="margin:0">${esc(me.name)}</h2><div class="t-meta">${me.role==="admin"?t("admin"):t("employee")}${areaLabel(me)?" · "+esc(areaLabel(me)):""}</div>
 ${clocks.find(c=>c.staffId===me.id)?`<div class="t-meta">${T2("Clocked in at ","Entrada a las ")}${fmtTime(clocks.find(c=>c.staffId===me.id).in)}</div>`:""}
 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn" data-act="closeSheet">${T2("Close","Cerrar")}</button><button class="btn primary" data-act="switch">${t("switch")}</button></div></div></div>`); }
@@ -855,7 +856,7 @@ ${S.busy?`<div class="msg ai" id="streaming">${esc(S.streamText||t("thinking"))}
 ${S.chat.length===0&&S.sample?`<div class="suggest">${sugg.map(k=>`<button class="chip" data-suggest="${k}">${esc(t(k))}</button>`).join("")}</div>`:""}
 <div class="attach" id="attach" ${S.photo?"":"hidden"}>${S.photo?`<img src="${S.photo.url}" alt=""><span>${esc(S.photo.file.name)}</span><button class="btn ghost" data-act="clearPhoto">✕</button>`:""}</div>
 <form class="bar" id="askForm">
-<label class="iconbtn" id="photoBtn" title="${t("photo")}" ${S.sample?"":"hidden"}>${I.camera}<input type="file" id="photoIn" accept="image/*" capture="environment" hidden></label>
+<label class="iconbtn" id="photoBtn" title="${t("photo")}" ${S.sample?"":"hidden"}>${I.camera}<input type="file" id="photoIn" accept="image/*" hidden></label>
 <button type="button" class="iconbtn mic" data-mic="askIn" title="${T2("Speak to Shepherd","Hablar con Shepherd")}" aria-label="${T2("Speak to Shepherd","Hablar con Shepherd")}" ${S.sample?"":"disabled"}>${I.mic}</button>
 <textarea id="askIn" rows="1" placeholder="${esc(t("ask"))}" ${S.sample?"":"disabled"}></textarea>
 ${S.busy?`<button type="button" class="btn" data-act="stop">${t("stop")}</button>`:`<button class="iconbtn" type="submit" title="${t("send")}" ${S.sample?"":"disabled"} style="background:var(--pasture);color:var(--pasture-ink);border-color:var(--pasture)">${I.send}</button>`}
@@ -968,7 +969,8 @@ if(step!=="form"){
 if(newPhoto){ URL.revokeObjectURL(newPhoto.url); newPhoto=null; }
 openSheet(`<h2>${t("addAnimal")}</h2><p class="t-meta">${t("photoFirst")}</p>
 <label class="photo-drop" for="nf-photo">${I.camera}<b>${t("takePhoto")}</b><span class="t-meta">${t("photoHint")}</span></label>
-<input type="file" id="nf-photo" accept="image/*" capture="environment" hidden>
+<div class="ph-choice"><label class="btn" for="nf-photo-cam">📷 ${T2("Camera","Cámara")}</label><label class="btn" for="nf-photo">🖼️ ${T2("Photo library","Fotos")}</label></div>
+<input type="file" id="nf-photo" accept="image/*" hidden><input type="file" id="nf-photo-cam" accept="image/*" capture="environment" hidden>
 <div id="nf-status" class="t-meta" aria-live="polite"></div>
 <div class="inline"><button class="btn ghost" type="button" data-act="skipPhoto">${t("skipPhoto")}</button><button class="btn" type="button" data-act="closeSheet">${t("cancel")}</button></div>`);
 return;
@@ -1185,7 +1187,7 @@ ov.innerHTML=`<div class="sc-top"><b>${T2("Scan the farm QR code","Escanee el c�
 <div id="scVidWrap" class="sc-vid"><video id="scVid" playsinline muted autoplay></video><div class="sc-frame"></div></div>
 <div id="scMsg" class="sc-msg">${T2("Starting camera…","Abriendo cámara…")}</div>
 <div id="scFallback" class="sc-fb" hidden><label class="btn primary big sc-photo" for="qrScanIn">📷 ${T2("Take photo of code","Tomar foto del código")}</label></div>
-<input type="file" id="qrScanIn" class="qr-file" accept="image/*" capture="environment" hidden>
+<input type="file" id="qrScanIn" class="qr-file" accept="image/*" hidden>
 <div class="sc-type"><button class="linkish" data-scan="type">${T2("Camera not working? Type the code","¿No funciona la cámara? Escriba el código")}</button>
 <div id="scTypeRow" class="sc-typerow" hidden><input id="scCode" inputmode="text" autocomplete="off" autocapitalize="characters" placeholder="ABCD-1234" maxlength="12"><button class="btn primary" data-scan="go">${T2("Clock in","Marcar")}</button></div></div>`;
 document.body.appendChild(ov);
@@ -1539,7 +1541,7 @@ ${S.staff.filter(x=>x.role!=="admin"&&x.id!==meObj()?.id&&staffStatus(x)==="acti
 <div class="field vetname" ${pre.vet?"":"hidden"}><label class="label" for="${px}-vet">${T2("Vet's name","Nombre del veterinario")}</label><input id="${px}-vet" name="vetName" value="${esc(pre.vet||"")}"></div>
 <div class="field"><span class="label">${T2("Photos of the animal now (injury, treatment site, tag, condition)","Fotos del animal ahora (herida, sitio del tratamiento, arete, condición)")}</span>
 ${S.assets?`<div class="ph-row"><label class="btn ph-add" for="${px}-ph">${I.camera} ${T2("Take or add photo","Tomar o añadir foto")}</label>
-<input type="file" id="${px}-ph" name="photos" accept="image/*" capture="environment" multiple hidden data-phprev="${px}-phprev"><div class="ph-prev" id="${px}-phprev"></div></div>
+<input type="file" id="${px}-ph" name="photos" accept="image/*" multiple hidden data-phprev="${px}-phprev"><div class="ph-prev" id="${px}-phprev"></div></div>
 <span class="t-meta">${T2("Up to 4 photos. They're saved with the date, time and who took them.","Hasta 4 fotos. Se guardan con la fecha, hora y quién las tomó.")}</span>`
 :`<span class="t-meta">${T2("Photos can't be saved in this view.","Las fotos no se pueden guardar en esta vista.")}</span>`}</div>
 <input type="hidden" name="said" value="">
@@ -1898,8 +1900,8 @@ return `<h2>${T2("Legal information","Información legal")}</h2><p>${T2("The far
 <div class="field"><label class="label" for="lg-zip">ZIP</label><input id="lg-zip" name="zip" required inputmode="numeric" autocomplete="postal-code" pattern="[0-9]{5}(-[0-9]{4})?" value="${esc(ad.zip||"")}" style="max-width:120px"></div></div>
 <div class="field"><label class="label" for="lg-idt">${T2("ID type","Tipo de identificación")}</label><select id="lg-idt" name="idType">${ID_TYPES.map(([k,en,es])=>`<option value="${k}" ${lg.idType===k?"selected":""}>${T2(en,es)}</option>`).join("")}</select></div>
 <div class="id-grid">
-<label class="id-slot" data-idside="front">${lg.idFront?`<img src="${blobSrc(lg.idFront)}" alt="">`:`<span>📷 ${T2("Photo of ID — front","Foto de la identificación — frente")}</span>`}<input type="file" accept="image/*" capture="environment" name="front" hidden></label>
-<label class="id-slot" data-idside="back">${lg.idBack?`<img src="${blobSrc(lg.idBack)}" alt="">`:`<span>📷 ${T2("Back (optional for passport)","Reverso (opcional para pasaporte)")}</span>`}<input type="file" accept="image/*" capture="environment" name="back" hidden></label>
+<label class="id-slot" data-idside="front">${lg.idFront?`<img src="${blobSrc(lg.idFront)}" alt="">`:`<span>📷 ${T2("Photo of ID — front","Foto de la identificación — frente")}</span>`}<input type="file" accept="image/*" name="front" hidden></label>
+<label class="id-slot" data-idside="back">${lg.idBack?`<img src="${blobSrc(lg.idBack)}" alt="">`:`<span>📷 ${T2("Back (optional for passport)","Reverso (opcional para pasaporte)")}</span>`}<input type="file" accept="image/*" name="back" hidden></label>
 </div>
 <label class="consent"><input type="checkbox" name="consent" required ${lg.consentAt?"checked":""}> ${T2("I confirm this information is true and I allow La Finca Pastoreo to keep it in my employment file.","Confirmo que esta información es verdadera y autorizo a La Finca Pastoreo a guardarla en mi expediente de empleo.")}</label>
 <div id="lg-err" class="t-meta" style="color:var(--crit)"></div>
@@ -2058,7 +2060,7 @@ const ev={d:today(),type:"obs",note:`Rescheduled ${it.what||""}: ${d} → ${el.v
 try{ await writeDoc("animals",a.id,()=>S.db.collection("animals").doc(a.id).update({due,events:[ev].concat(a.events||[]).slice(0,120)})); S.focusDue=el.value+"|"+what; toast(t("saved")); }catch{ toast(t("saveErr")); } return; }
 if(el.dataset.task){ const tk=S.tasks.find(x=>x.id===el.dataset.task); if(tk){ try{await toggleTask(tk,el.checked);}catch{el.checked=!el.checked;} } }
 else if(el.dataset.check){ const tk=S.tasks.find(x=>x.id===el.dataset.check); if(tk){ try{await toggleCheck(tk,Number(el.dataset.i),el.checked);}catch{el.checked=!el.checked;} } }
-else if(el.id==="nf-photo" && el.files && el.files[0]){ readAnimalPhoto(el.files[0]); }
+else if((el.id==="nf-photo"||el.id==="nf-photo-cam") && el.files && el.files[0]){ readAnimalPhoto(el.files[0]); }
 else if(el.id==="photoIn" && el.files && el.files[0]){ const f=el.files[0]; S.photo={file:f,url:URL.createObjectURL(f)}; const draft=document.getElementById("askIn")?.value||""; render(); const ai=document.getElementById("askIn"); if(ai){ai.value=draft;ai.focus();} }
 });
 document.addEventListener("submit", async e=>{
