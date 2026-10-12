@@ -623,7 +623,7 @@ try{ const perm = await BS.requestPermissions(); if(perm && perm.camera && perm.
 const r = await BS.scan({ formats: ["QR_CODE"] }); const txt = r && r.barcodes && r.barcodes[0] && (r.barcodes[0].rawValue || r.barcodes[0].displayValue);
 if(!txt) return true; const code = codeFromText(txt); if(!code){ toast(T2("That isn't the farm clock-in code.","Ese no es el código de entrada de la finca.")); return true; }
 processClockCode(code); return true; }catch(e){ console.warn("native scan", e); return false; } }
-function banners(){ let h=offlineBanner()+installBanner()+(DEMO?`<div class="demo demo-mode"><b>${T2("Demo mode","Modo demostración")}</b> · ${T2("Data is saved only on this device. The AI agent and shared data work in the full version.","Los datos se guardan solo en este dispositivo. El agente IA y los datos compartidos funcionan en la versión completa.")} <button class="chip" data-act="resetDemo">${T2("Reset demo","Reiniciar demo")}</button></div>`:""); if(S.animals.some(a=>a.sample)||S.staff.some(s=>s.sample)) h+=`<div class="demo">${t("sample")}</div>`; if(!S.canWrite) h+=`<div class="demo">${t("readOnly")}</div>`; return h; }
+function banners(){ let h=offlineBanner()+installBanner()+(DEMO?`<div class="demo demo-mode"><b>${T2("Demo mode","Modo demostración")}</b> · ${T2("Data is saved only on this device. The AI agent and shared data work in the full version.","Los datos se guardan solo en este dispositivo. El agente IA y los datos compartidos funcionan en la versión completa.")} <button class="chip" data-act="resetDemo">${T2("Reset demo","Reiniciar demo")}</button></div>`:""); if(S.animals.some(a=>a.sample)||S.staff.some(s=>s.sample)) h+=`<div class="demo">${t("sample")}</div>`; if(!S.canWrite) h+=`<div class="demo">${t("readOnly")}</div>`; if(isAdmin()){ const pend=S.animals.filter(a=>a.review==="pending"); if(pend.length) h+=`<div class="demo">🆕 ${pend.length===1?T2("1 animal added by staff needs your review:","1 animal agregado por el personal necesita su revisión:"):T2(`${pend.length} animals added by staff need your review:`,`${pend.length} animales agregados por el personal necesitan su revisión:`)} ${pend.slice(0,6).map(a=>`<button class="chip" data-open="${esc(a.id)}">${esc(animalLabel(a))} · ${esc(a.addedBy?.name||"")}</button>`).join(" ")}</div>`; } return h; }
 
 function render(){
 renderNav();
@@ -768,7 +768,7 @@ const herd=grp?`<g transform="translate(34 6) scale(.62)" opacity=".85">${one}</
 return `<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe3e6"/><stop offset=".55" stop-color="#e9efd9"/><stop offset=".56" stop-color="#8fb36a"/><stop offset="1" stop-color="#5e8a3e"/></linearGradient></defs>
 <rect width="100" height="100" fill="url(#${id})"/><path d="M0 52 q20-14 38-6 q16-12 34-2 q14-8 28 2 v10 h-100z" fill="#7fa45c" opacity=".55"/><circle cx="82" cy="18" r="7" fill="#f6e2a0" opacity=".9"/>${herd}</svg>`; }
 const STOCK={"calf104":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ac/A_black_calf_in_Ireland.jpg/500px-A_black_calf_in_Ireland.jpg","a":"Eoin Gardiner","l":"CC BY 2.0","d":"https://commons.wikimedia.org/w/index.php?curid=14776107"},"cow212":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Hereford_cattle_Big_Sur_May_2011_003.jpg/500px-Hereford_cattle_Big_Sur_May_2011_003.jpg","a":"King of Hearts","l":"CC BY-SA 4.0","d":"https://commons.wikimedia.org/w/index.php?curid=76227220"},"cow248":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Aberdeen_Angus_cattle_at_Camborne_Show%2C_Cornwall_-_July_2026.jpg/500px-Aberdeen_Angus_cattle_at_Camborne_Show%2C_Cornwall_-_July_2026.jpg","a":"Mutney","l":"CC BY 4.0","d":"https://commons.wikimedia.org/w/index.php?curid=196250439"},"horse01":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/Puerto_rican-Paso-Fino-Horse-chestnut.jpg/500px-Puerto_rican-Paso-Fino-Horse-chestnut.jpg","a":"Arsdelicata","l":"CC BY-SA 3.0","d":"https://commons.wikimedia.org/w/index.php?curid=5613586"},"horse02":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/0/09/QuarterHorseBai.jpg/500px-QuarterHorseBai.jpg","a":"evelynbelgium","l":"CC BY-SA 2.0","d":"https://commons.wikimedia.org/w/index.php?curid=6280480"},"ram01":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/5/52/Katahdin_ewe_with_twin_lambs.jpg/500px-Katahdin_ewe_with_twin_lambs.jpg","a":"Thesheepdog","l":"CC BY-SA 4.0","d":"https://commons.wikimedia.org/w/index.php?curid=124916580"},"sheep-flock":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2f/Registered-katahdin-ewes.jpg/500px-Registered-katahdin-ewes.jpg","a":"Rockinrick3000","l":"CC BY-SA 4.0","d":"https://commons.wikimedia.org/w/index.php?curid=144283395"},"sow07":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Berkshire_Sow%2C_Best_of_Breed.jpg/500px-Berkshire_Sow%2C_Best_of_Breed.jpg","a":"David Merrett","l":"CC BY 2.0","d":"https://commons.wikimedia.org/w/index.php?curid=7396790"},"pigs-g1":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/1/13/Berkshire_pigs_at_a_farm_in_Los_Altos_Hills%2C_CA_-_2_%28cropped%29.jpg/500px-Berkshire_pigs_at_a_farm_in_Los_Altos_Hills%2C_CA_-_2_%28cropped%29.jpg","a":"Suiren2022","l":"CC BY-SA 4.0","d":"https://commons.wikimedia.org/w/index.php?curid=197353595"},"broilers1":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1f/Broiler_Chickens_002.jpg/500px-Broiler_Chickens_002.jpg","a":"Icem4k","l":"CC BY-SA 4.0","d":"https://commons.wikimedia.org/w/index.php?curid=75379696"},"layers1":{"u":"https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d2/Rhode_Island_Red_hen_-_geograph.org.uk_-_5455945.jpg/500px-Rhode_Island_Red_hen_-_geograph.org.uk_-_5455945.jpg","a":"Evelyn Simak","l":"CC BY-SA 2.0","d":"https://commons.wikimedia.org/w/index.php?curid=137904826"}};
-function animalPic(a,big){ const can=S.canWrite&&meObj()&&canWork(a.species);
+function animalPic(a,big){ const can=S.canWrite&&meObj()&&canWork(a.species)&&(isAdmin()||!a.photoId);
 const cam=can?`<b class="apic-cam" title="${a.photoId?T2("Change photo","Cambiar foto"):T2("Add photo","Agregar foto")}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>${big?`<span>${a.photoId?T2("Change photo","Cambiar foto"):T2("Add photo","Agregar foto")}</span>`:""}</b>`:"";
 const attr=can?` data-photo-for="${esc(a.id)}" role="button" tabindex="0"`:"";
 const st=STOCK[a.id];
@@ -779,11 +779,11 @@ document.addEventListener("click",e=>{ const pt=e.target.closest("[data-photo-fo
 const a=S.animals.find(x=>x.id===photoTarget); if(!a) return;
 openSheet(`<h2>${a.photoId?T2("Change photo","Cambiar foto"):T2("Add photo","Agregar foto")} · ${esc(a.tag)}${L(a,"name")?" "+esc(L(a,"name")):""}</h2>
 <div class="ph-choose"><button class="btn primary big" type="button" data-ph="camera">📷 ${T2("Take photo","Tomar foto")}</button><button class="btn big" type="button" data-ph="library">🖼️ ${T2("Choose from photos","Elegir de la galería")}</button>
-${a.photoId?`<button class="btn big danger" type="button" data-ph="remove">${T2("Remove photo","Quitar foto")}</button>`:""}<button class="btn big" type="button" data-act="closeSheet">${t("cancel")}</button></div>
+${a.photoId&&isAdmin()?`<button class="btn big danger" type="button" data-ph="remove">${T2("Remove photo","Quitar foto")}</button>`:""}<button class="btn big" type="button" data-act="closeSheet">${t("cancel")}</button></div>
 <p class="t-meta">${T2("The photo is saved to this animal's record and logged in its history with your name and the time.","La foto se guarda en el expediente del animal y queda en su historial con su nombre y la hora.")}</p>`); },true);
 document.addEventListener("keydown",e=>{ if((e.key==="Enter"||e.key===" ")&&e.target.matches&&e.target.matches("[data-photo-for]")){ e.preventDefault(); e.target.click(); } });
 document.addEventListener("click",async e=>{ const b=e.target.closest("[data-ph]"); if(!b) return; const a=S.animals.find(x=>x.id===photoTarget); if(!a) return;
-if(b.dataset.ph==="remove"){ try{ await writeDoc("animals",a.id,()=>S.db.collection("animals").doc(a.id).update({photoId:""})); await addEvent(a.id,{type:"obs",note:"Profile photo removed",note_es:"Foto de perfil quitada",meta:{via:"photo"}}); closeSheet(); toast(T2("Photo removed","Foto quitada")); }catch(err){ console.warn(err); toast(t("saveErr")); } return; }
+if(b.dataset.ph==="remove"){ if(!isAdmin()) return; try{ await writeDoc("animals",a.id,()=>S.db.collection("animals").doc(a.id).update({photoId:""})); await addEvent(a.id,{type:"obs",note:"Profile photo removed",note_es:"Foto de perfil quitada",meta:{via:"photo"}}); closeSheet(); toast(T2("Photo removed","Foto quitada")); }catch(err){ console.warn(err); toast(t("saveErr")); } return; }
 const inp=animalPhotoInput(); if(b.dataset.ph==="camera") inp.setAttribute("capture","environment"); else inp.removeAttribute("capture"); inp.value=""; inp.click(); });
 document.addEventListener("change",async e=>{ if(e.target.id!=="animalPhotoIn"||!e.target.files||!e.target.files[0]) return; const a=S.animals.find(x=>x.id===photoTarget); if(!a||!S.assets) return;
 toast(T2("Saving photo…","Guardando foto…"));
@@ -806,7 +806,7 @@ const counts={}; for(const a of S.animals) counts[a.species]=(counts[a.species]|
 const q=(S.aq||"").trim().toLowerCase();
 const hay=a=>[a.tag,a.name,a.name_es,a.breed,a.sex,a.status,a.status_es,a.pen,a.pen_es,a.color,a.color_es,a.dam,t(a.species),a.species].filter(Boolean).join(" ").toLowerCase();
 const list=S.animals.filter(a=>(S.species==="all"||a.species===S.species)&&(!q||q.split(/\s+/).every(w=>hay(a).includes(w)))).sort((a,b)=>SPECIES.indexOf(a.species)-SPECIES.indexOf(b.species)||String(a.tag).localeCompare(String(b.tag),undefined,{numeric:true}));
-return topbar(t("animals"), `${S.animals.length} ${t("records")}`, (S.canWrite?`${isAdmin()?`<button class="btn voicebtn" data-nav="command">${I.megaphone} ${T2("Command center","Centro de mando")}</button>`:`<button class="btn voicebtn" data-act="voice">${I.mic} ${T2("Voice log","Registro por voz")}</button>`}`:"")+(isAdmin()&&S.canWrite?`<button class="btn primary" data-act="addAnimal">${t("addAnimal")}</button>`:"")) + banners() +
+return topbar(t("animals"), `${S.animals.length} ${t("records")}`, (S.canWrite?`${isAdmin()?`<button class="btn voicebtn" data-nav="command">${I.megaphone} ${T2("Command center","Centro de mando")}</button>`:`<button class="btn voicebtn" data-act="voice">${I.mic} ${T2("Voice log","Registro por voz")}</button>`}`:"")+(S.canWrite&&meObj()&&(isAdmin()||SPECIES.some(canWork))?`<button class="btn primary" data-act="addAnimal">${t("addAnimal")}</button>`:"")) + banners() +
 `<div class="chips" style="margin-bottom:14px"><button class="chip" data-sp="all" aria-pressed="${S.species==="all"}">${t("all")}</button>${SPECIES.map(s=>`<button class="chip" data-sp="${s}" aria-pressed="${S.species===s}">${t(s)} · ${counts[s]||0}</button>`).join("")}</div>
 <div class="asearch"><input id="aSearch" type="search" autocomplete="off" placeholder="${T2("Search tag, name, breed, pen, color, status…","Buscar arete, nombre, raza, corral, color, estado…")}" value="${esc(S.aq||"")}"><span class="t-meta">${list.length} ${T2("match","resultado")}${list.length===1?"":(lang==="es"?"s":"es")}${q?` · <button class="linkbtn" data-act="aClear">${T2("Clear","Borrar")}</button>`:""}</span></div>
 <div id="aList">${list.length?`<div class="animals">${list.map(animalCard).join("")}</div>`:`<div class="panel empty">${q?T2("No animal matches that search.","Ningún animal coincide con esa búsqueda."):t("noAnimals")}</div>`}</div>`;
@@ -820,6 +820,7 @@ const isGroup=a.kind==="group"; const evTypes=["health","treatment","feed","move
 const due=(a.due||[]).map(it=>({it,n:daysBetween(today(),it.d)})).sort((x,y)=>x.n-y.n);
 const facts=[[t("species"),t(a.species)],[t("breed"),a.breed],[isGroup?t("count"):t("sex"),isGroup?a.count:V(a.sex)],[t("pen"),L(a,"pen")],[t("born"),a.born],[t("status"),V(a.status)],[t("color"),L(a,"color")],[a.dam?t("dam"):"",a.dam]].filter(f=>f[0]&&f[1]!=null&&f[1]!=="");
 return topbar(L(a,"name")||t(a.species), "", `<button class="btn ghost" data-act="back">← ${t("back")}</button>`) + banners() +
+(a.review==="pending"?`<div class="demo" style="margin-bottom:12px">🆕 ${T2("Added by","Agregado por")} <b>${esc(a.addedBy?.name||"—")}</b>${a.addedBy?.ts?` · ${esc(a.addedBy.ts.slice(0,10))} ${esc(fmtTime(a.addedBy.ts))}`:""}${a.addedBy?.instructedBy&&a.addedBy.instructedBy!=="self"?` · ${T2("supervised by","supervisado por")} ${esc(instrLabel(a.addedBy.instructedBy))}`:""}${a.addedBy?.gps?` · ${gpsLink(a.addedBy.gps)}`:""}. ${isAdmin()?`<button class="chip" data-approve="${esc(a.id)}">✓ ${T2("Approve record","Aprobar registro")}</button>`:T2("Waiting for administrator review.","Esperando revisión del administrador.")}</div>`:"") +
 `<div class="profile-head"><span class="apic-big">${animalPic(a,true)}</span><span class="tag ${isGroup?"group":""}"><span>${esc(a.tag)}</span></span><div class="facts" style="flex:1;min-width:0">${facts.map(([k,v])=>`<div><span class="label">${esc(k)}</span><b>${esc(v)}</b></div>`).join("")}</div></div>
 <div class="grid cols-2" style="align-items:start">
 <section class="grid">
@@ -1110,15 +1111,35 @@ ${newPhoto.ai?`<div class="t-meta" style="margin-top:4px">${t("checkFields")}</d
 <button class="btn ghost" type="button" data-act="addAnimal" style="margin-top:6px;padding-inline:0">${t("retake")}</button></div></div>`:""}
 ${dup?`<div class="demo" style="margin:12px 0 0">${t("dupTag")} <b>${esc(animalLabel(dup))}</b> <button class="chip" type="button" data-open="${esc(dup.id)}">${t("openIt")}</button></div>`:""}
 <form class="stack" id="animalForm" style="margin-top:12px">
-<div class="inline"><div class="field"><label class="label" for="nf-sp">${t("species")}</label><select id="nf-sp" name="species">${SPECIES.map(x=>`<option value="${x}" ${sel(x,v.species)}>${t(x)}</option>`).join("")}</select></div>
+<div class="inline"><div class="field"><label class="label" for="nf-sp">${t("species")}</label><select id="nf-sp" name="species">${SPECIES.filter(x=>isAdmin()||canWork(x)).map(x=>`<option value="${x}" ${sel(x,v.species)}>${t(x)}</option>`).join("")}</select></div>
 <div class="field"><label class="label" for="nf-kind">${t("kind")}</label><select id="nf-kind" name="kind"><option value="individual">${t("individual")}</option><option value="group" ${sel("group",v.kind)}>${t("group")}</option></select></div></div>
 <div class="inline"><div class="field"><label class="label" for="nf-tag">${t("tagNo")}</label><input id="nf-tag" name="tag" required value="${esc(v.tag||"")}"></div><div class="field"><label class="label" for="nf-name">${t("name")}</label><input id="nf-name" name="name"></div></div>
 <div class="inline"><div class="field"><label class="label" for="nf-breed">${t("breed")}</label><input id="nf-breed" name="breed" value="${esc(v.breed||"")}"></div><div class="field"><label class="label" for="nf-pen">${t("pen")}</label><input id="nf-pen" name="pen"></div></div>
 <div class="field"><label class="label" for="nf-color">${t("color")}</label><input id="nf-color" name="color" value="${esc((lang==="es"?(v.color_es||v.color):(v.color||v.color_es))||"")}"></div>
 <div class="inline"><div class="field"><label class="label" for="nf-sex">${t("sex")}</label><select id="nf-sex" name="sex"><option value=""></option>${["Female","Male","Castrated male","Mixed"].map(x=>`<option value="${x}" ${sel(x,v.sex)}>${esc(V(x))}</option>`).join("")}</select></div>
 <div class="field"><label class="label" for="nf-born">${t("born")}</label><input id="nf-born" name="born" type="date"></div><div class="field"><label class="label" for="nf-count">${t("count")}</label><input id="nf-count" name="count" type="number" min="1" value="${esc(v.count&&v.kind==="group"?v.count:"")}"></div></div>
-<div class="inline"><button class="btn primary" type="submit">${t("save")}</button><button class="btn" type="button" data-act="closeSheet">${t("cancel")}</button></div></form>`);
+<div class="field"><label class="label" for="nf-instr">${T2("Under whose supervision?","¿Bajo la supervisión de quién?")}</label>
+<select id="nf-instr" name="instr"><option value="self">${T2("My own decision","Decisión propia")}</option>
+${S.staff.filter(x=>x.role==="admin"&&x.id!==meObj()?.id&&staffStatus(x)==="active").map(x=>`<option value="staff:${esc(x.id)}" ${!isAdmin()?"selected":""}>${esc(x.name)} (${t("admin")})</option>`).join("")}
+<option value="vet">${T2("Veterinarian","Veterinario")}</option>
+${S.staff.filter(x=>x.role!=="admin"&&x.id!==meObj()?.id&&staffStatus(x)==="active").map(x=>`<option value="staff:${esc(x.id)}">${esc(x.name)}</option>`).join("")}</select></div>
+<div class="field vetname" hidden><label class="label" for="nf-vet">${T2("Vet's name","Nombre del veterinario")}</label><input id="nf-vet" name="vetName"></div>
+<div class="field"><span class="label">${T2("Where it was recorded","Dónde se registró")}</span>
+<div class="inline" style="align-items:center"><button class="btn" type="button" data-act="nfGps">📍 ${T2("Add GPS location","Agregar ubicación GPS")}</button><span class="t-meta" id="nf-gps-st">${T2("Optional. Saves where you are standing.","Opcional. Guarda dónde está parado.")}</span></div>
+<input type="hidden" name="lat" id="nf-lat"><input type="hidden" name="lng" id="nf-lng"><input type="hidden" name="acc" id="nf-acc"></div>
+${!isAdmin()?`<p class="t-meta">${T2("Your name, the time, how you added it and who supervised are saved. The administrator reviews new animals; only the administrator can change tag, species, breed, sex or birth date later.","Se guardan su nombre, la hora, cómo lo agregó y quién supervisó. El administrador revisa los animales nuevos; solo el administrador puede cambiar arete, especie, raza, sexo o fecha de nacimiento.")}</p>`:""}
+<div class="inline"><button class="btn primary" type="submit" ${dup&&!isAdmin()?"disabled":""}>${t("save")}</button><button class="btn" type="button" data-act="closeSheet">${t("cancel")}</button></div></form>`);
 }
+function nfGps(){ const st=document.getElementById("nf-gps-st"); if(!navigator.geolocation){ if(st) st.textContent=T2("This phone can't share location.","Este teléfono no puede compartir ubicación."); return; }
+if(st) st.textContent=T2("Finding location…","Buscando ubicación…");
+navigator.geolocation.getCurrentPosition(p=>{ const c=p.coords; const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.value=v; };
+set("nf-lat",c.latitude.toFixed(6)); set("nf-lng",c.longitude.toFixed(6)); set("nf-acc",Math.round(c.accuracy||0));
+const s2=document.getElementById("nf-gps-st"); if(s2) s2.textContent=`✓ ${c.latitude.toFixed(5)}, ${c.longitude.toFixed(5)} (±${Math.round(c.accuracy||0)} m)`; },
+()=>{ const s2=document.getElementById("nf-gps-st"); if(s2) s2.textContent=T2("Location not shared. You can still save.","No se compartió la ubicación. Puede guardar igual."); },{enableHighAccuracy:true,timeout:15000,maximumAge:60000}); }
+function gpsLink(g){ return g&&g.lat?`<a href="https://maps.google.com/?q=${encodeURIComponent(g.lat+","+g.lng)}" target="_blank" rel="noopener">📍 ${esc(Number(g.lat).toFixed(5))}, ${esc(Number(g.lng).toFixed(5))}</a>${g.acc?` <span class="t-meta">±${esc(g.acc)} m</span>`:""}`:""; }
+async function approveAnimal(id){ const a=S.animals.find(x=>x.id===id); if(!a||!isAdmin()) return;
+try{ await writeDoc("animals",a.id,()=>S.db.collection("animals").doc(a.id).update({review:"ok",reviewedBy:meObj()?.name||"",reviewedAt:new Date().toISOString()}));
+await addEvent(a.id,{type:"obs",note:"Record reviewed and approved by the administrator",note_es:"Registro revisado y aprobado por el administrador",meta:{via:"form"}}); toast(T2("Approved","Aprobado")); }catch(e){ console.warn(e); toast(t("saveErr")); } }
 async function readAnimalPhoto(file){
 newPhoto={file,url:URL.createObjectURL(file),ai:null,err:""};
 const st=document.getElementById("nf-status"); if(st) st.textContent=t("reading");
@@ -1170,6 +1191,7 @@ ${row(T2("Day","Día"),esc(dayStr))}
 ${row(T2("Time","Hora"),when?esc(fmtTime(e.ts)):nr)}
 ${row(T2("Under whose instructions","Bajo instrucciones de"),e.instructedBy?esc(instrLabel(e.instructedBy)):nr)}
 ${row(T2("Location / pasture at the time","Ubicación / pasto en ese momento"),e.ts?esc((lang==="es"?(e.pen_es||e.pen):(e.pen||e.pen_es))||"—"):nr)}
+${e.gps?row(T2("GPS location","Ubicación GPS"),gpsLink(e.gps)):""}
 ${row(T2("How it was recorded","Cómo se registró"),e.via?esc(viaLabel(e.via)):nr)}
 ${e.said?row(T2("Words spoken","Palabras dichas"),`<i>“${esc(e.said)}”</i>`):""}
 ${(e.photoIds&&e.photoIds.length)||e.photoId?row(T2("Photos taken at the time","Fotos tomadas en el momento"),`<div class="ph-grid">${[...(e.photoIds||[]),...(e.photoId?[e.photoId]:[])].map(id=>`<a href="${blobSrc(id)}" target="_blank" rel="noopener"><img src="${blobSrc(id)}" alt=""></a>`).join("")}</div><div class="t-meta">${T2("Tap a photo to open it full size.","Toque una foto para verla en grande.")}</div>`):""}
@@ -2109,7 +2131,7 @@ for(const [n,en,es,cen,ces,prio] of list) await createTask({title:en,title_es:es
 
 // ---------- events ----------
 document.addEventListener("click", e=>{
-const el=e.target.closest("[data-codone],[data-coskip],[data-staff],[data-legal],[data-theme-set],[data-ack],[data-cmdex],[data-qrmode],[data-adminclock],[data-ev],[data-duedone],[data-nav],[data-lang],[data-act],[data-login],[data-open],[data-sp],[data-suggest],[data-oblang],[data-invite],[data-mic],[data-fill],[data-vpick],[data-say],[data-sayfill]"); if(!el) return;
+const el=e.target.closest("[data-codone],[data-coskip],[data-staff],[data-legal],[data-theme-set],[data-ack],[data-cmdex],[data-qrmode],[data-adminclock],[data-ev],[data-duedone],[data-nav],[data-lang],[data-act],[data-login],[data-open],[data-sp],[data-suggest],[data-oblang],[data-invite],[data-mic],[data-fill],[data-vpick],[data-say],[data-sayfill],[data-approve]"); if(!el) return;
 if(el.dataset.act==="closeSheet" && e.target!==el) return;
 if(el.dataset.nav){ S.view=el.dataset.nav; if(S.view!=="animals") S.animalId=null; LS.set("sh.view",S.view); render(); window.scrollTo(0,0); }
 else if(el.dataset.themeSet){ theme=el.dataset.themeSet; LS.set("sh.theme",theme); applyTheme(); render(); }
@@ -2134,6 +2156,7 @@ else if(el.dataset.ev!=null&&el.dataset.aid){ eventSheet(el.dataset.aid,Number(e
 else if(el.dataset.duedone){ completeDue(el.dataset.duedone,el.dataset.key,el); }
 else if(el.dataset.sp){ S.species=el.dataset.sp; render(); }
 else if(el.dataset.suggest){ ask(t(el.dataset.suggest)); }
+else if(el.dataset.approve){ approveAnimal(el.dataset.approve); }
 else if(el.dataset.say!=null){ ask(el.dataset.say); }
 else if(el.dataset.sayfill!=null){ const ai=document.getElementById("askIn"); if(ai){ ai.value=el.dataset.sayfill; ai.focus(); const i=ai.value.indexOf("  "); try{ ai.setSelectionRange(i>=0?i+1:ai.value.length,i>=0?i+1:ai.value.length); }catch{} } }
 else switch(el.dataset.act){
@@ -2142,6 +2165,7 @@ case "profile": profileSheet(); break;
 case "back": S.animalId=null; render(); break;
 case "assign": assignSheet(); break;
 case "addAnimal": animalSheet(); break;
+case "nfGps": nfGps(); break;
 case "skipPhoto": animalSheet("form"); break;
 case "closeSheet": closeSheet(); break;
 case "stop": S.ctl?.abort(); break;
@@ -2270,14 +2294,20 @@ else if(f.id==="animalForm"){ const tag=String(fd.get("tag")||"").trim(); if(!ta
 const btn=f.querySelector('button[type="submit"]'); if(btn){btn.disabled=true;btn.textContent=t("translating");}
 const name=String(fd.get("name")||"").trim(), pen=String(fd.get("pen")||"").trim(), color=String(fd.get("color")||"").trim();
 const b=await bilingual([pen,color]);
+if(!isAdmin()&&S.animals.some(a=>String(a.tag).toLowerCase()===tag.toLowerCase())){ toast(T2("That tag is already on file. Ask the administrator.","Ese arete ya está registrado. Consulte al administrador.")); if(btn){btn.disabled=false;btn.textContent=t("save");} return; }
+if(!isAdmin()&&!canWork(fd.get("species"))){ toast(T2("Finish that area's training first.","Termine primero el entrenamiento de esa área.")); if(btn){btn.disabled=false;btn.textContent=t("save");} return; }
 const doc={tag,name,species:fd.get("species"),kind,breed:String(fd.get("breed")||"").trim(),pen:b.en[0],pen_es:b.es[0],color:b.en[1],color_es:b.es[1],sex:fd.get("sex")||"",born:fd.get("born")||"",status:"Active",weights:[],events:[],due:[]};
 if(kind==="group") doc.count=Number(fd.get("count")||0);
-if(newPhoto){
+const instrRaw=String(fd.get("instr")||"self"); const instructedBy=instrRaw==="vet"?("vet:"+String(fd.get("vetName")||"").trim()):instrRaw;
+const lat=String(fd.get("lat")||""), lng=String(fd.get("lng")||""); const gps=lat&&lng?{lat:Number(lat),lng:Number(lng),acc:Number(fd.get("acc")||0)}:null;
+const me=meObj()||{}; const via=newPhoto?"photo":"form";
+doc.addedBy={id:me.id||"",name:me.name||"",role:me.role||"",ts:new Date().toISOString(),via,instructedBy,gps};
+doc.review=isAdmin()?"ok":"pending";
+let ai={}; if(newPhoto){
 if(S.assets){ try{ const up=await S.assets.upload(newPhoto.file); doc.photoId=up.id; }catch(e){ console.warn("upload",e&&e.code); } }
-const ai=newPhoto.ai||{};
-doc.events=[{d:today(),type:"obs",note:(STR.en.created+" "+(ai.summary_en||"")).trim(),note_es:(STR.es.created+" "+(ai.summary_es||"")).trim(),...evMeta(doc,{via:"photo",photoId:doc.photoId||""})}];
-URL.revokeObjectURL(newPhoto.url); newPhoto=null;
-}
+ai=newPhoto.ai||{}; URL.revokeObjectURL(newPhoto.url); newPhoto=null; }
+const ev={d:today(),type:"obs",note:via==="photo"?(STR.en.created+" "+(ai.summary_en||"")).trim():"Added to records",note_es:via==="photo"?(STR.es.created+" "+(ai.summary_es||"")).trim():"Agregado a los registros",...evMeta(doc,{via,instructedBy,photoId:doc.photoId||""})};
+if(gps) ev.gps=gps; doc.events=[ev];
 await S.db.collection("animals").add(doc); closeSheet(); toast(t("saved")); }
 }catch(err){ console.warn(err); toast(err&&err.code==="quota_exceeded"?t("storageFull"):t("saveErr")); }
 });
