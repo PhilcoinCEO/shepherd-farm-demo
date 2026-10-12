@@ -2420,7 +2420,9 @@ case "toggleSpeak": S.speak=!S.speak; LS.set("sh.speak",S.speak); if(!S.speak) t
 case "voiceGo": voiceGo(); break;
 case "hire": hireSheet(); break;
 case "handbook": handbookSheet(); break;
-case "copyInvite": { const ta=document.getElementById("inv-msg"); const done=()=>toast(T2("Copied","Copiado")); try{ navigator.clipboard.writeText(ta.value).then(done,()=>{ta.select();}); }catch{ ta.select(); } break; }
+case "copyInvite": { const ta=document.getElementById("inv-msg"); const done=()=>toast(T2("Copied. Paste it into a text message.","Copiado. Péguelo en un mensaje de texto.")); const det=ta.closest("details"); if(det) det.open=true;
+const legacy=()=>{ ta.focus(); ta.select(); ta.setSelectionRange(0,ta.value.length); let ok=false; try{ ok=document.execCommand("copy"); }catch{} if(ok) done(); else toast(T2("Select the message below and copy it.","Seleccione el mensaje abajo y cópielo.")); };
+try{ navigator.clipboard.writeText(ta.value).then(done,legacy); }catch{ legacy(); } break; }
 case "obBack": { const me=meObj(); const st=obSteps(me); const i=st.indexOf(obStep); if(i>0){ obStep=st[i-1]; render(); window.scrollTo(0,0);} break; }
 case "obWelcome": { const me=meObj(); saveStaff(me.id,{langPref:lang,ob:{welcome:today()}}).then(()=>{ obNext(me); render(); window.scrollTo(0,0); }).catch(()=>toast(t("saveErr"))); break; }
 case "obFinish": if(LIVE){ (async()=>{ try{ const r=await callFn("completeOnboarding",{}); await liveSignInToken(r.token); obStep=null; S.view="today"; render(); }catch(e2){ toast(liveErr(e2)); } })(); break; }
