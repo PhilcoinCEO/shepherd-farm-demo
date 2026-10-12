@@ -588,7 +588,28 @@ function meSquare(st,cls){ return st&&st.photoId?`<img class="${cls}" src="${blo
 function profileSheet(){ const me=meObj(); if(!me) return; openSheet(`<div class="prof"><label class="prof-photo" title="${T2("Change photo","Cambiar foto")}">${meSquare(me,"sq-big")}<span class="prof-cam">${T2("Change photo","Cambiar foto")}</span><input id="profPhotoIn" type="file" accept="image/*" hidden></label>
 <div class="prof-info"><h2 style="margin:0">${esc(me.name)}</h2><div class="t-meta">${me.role==="admin"?t("admin"):t("employee")}${areaLabel(me)?" · "+esc(areaLabel(me)):""}</div>
 ${clocks.find(c=>c.staffId===me.id)?`<div class="t-meta">${T2("Clocked in at ","Entrada a las ")}${fmtTime(clocks.find(c=>c.staffId===me.id).in)}</div>`:""}
-<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn" data-act="closeSheet">${T2("Close","Cerrar")}</button><button class="btn primary" data-act="switch">${t("switch")}</button></div></div></div>`); }
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn" data-act="closeSheet">${T2("Close","Cerrar")}</button><button class="btn" data-act="switch">${t("switch")}</button></div></div></div>
+${personalInfoForm(me)}`); setTimeout(()=>{ const f=document.getElementById("piForm"); if(f) f.scrollIntoView({block:"start",behavior:"smooth"}); },80); }
+function personalInfoForm(me){ const lg=me.legal||{}; const ad=lg.address||{}; const v=x=>esc(x||"");
+return `<form class="stack pi" id="piForm" style="margin-top:16px"><h3 class="label" style="margin:0">${T2("Personal information","Información personal")}</h3>
+<p class="t-meta" style="margin:0">${T2("Only you and the administrator can see this. Changes are saved with the date and time.","Solo usted y el administrador pueden verla. Los cambios se guardan con la fecha y la hora.")}${me.infoUpdatedAt?` ${T2("Last updated","Actualizada")} ${esc(me.infoUpdatedAt.slice(0,10))} ${esc(fmtTime(me.infoUpdatedAt))}.`:""}</p>
+<div class="field"><label class="label" for="pi-name">${T2("Full legal name","Nombre legal completo")}</label><input id="pi-name" name="legalName" autocomplete="name" value="${v(lg.name||me.name)}"></div>
+<div class="inline"><div class="field"><label class="label" for="pi-phone">${T2("Mobile phone","Teléfono móvil")}</label><input id="pi-phone" name="phone" type="tel" autocomplete="tel" value="${v(me.phone)}"></div>
+<div class="field"><label class="label" for="pi-email">${T2("Email","Correo")}</label><input id="pi-email" name="email" type="email" autocomplete="email" value="${v(me.email||lg.email)}"></div></div>
+<div class="field"><label class="label" for="pi-a1">${T2("Street address","Dirección")}</label><input id="pi-a1" name="a1" autocomplete="address-line1" value="${v(ad.line1)}"></div>
+<div class="field"><label class="label" for="pi-a2">${T2("Apt, unit, barrio (optional)","Apto, unidad, barrio (opcional)")}</label><input id="pi-a2" name="a2" autocomplete="address-line2" value="${v(ad.line2)}"></div>
+<div class="inline"><div class="field"><label class="label" for="pi-city">${T2("Town / city","Pueblo / ciudad")}</label><input id="pi-city" name="city" autocomplete="address-level2" value="${v(ad.city)}"></div>
+<div class="field" style="max-width:110px"><label class="label" for="pi-state">${T2("State","Estado")}</label><input id="pi-state" name="state" autocomplete="address-level1" value="${v(ad.state||"PR")}"></div>
+<div class="field" style="max-width:130px"><label class="label" for="pi-zip">${T2("ZIP","Código postal")}</label><input id="pi-zip" name="zip" inputmode="numeric" autocomplete="postal-code" value="${v(ad.zip)}"></div></div>
+<div class="inline"><div class="field"><label class="label" for="pi-ecn">${T2("Emergency contact","Contacto de emergencia")}</label><input id="pi-ecn" name="ecName" value="${v(me.emergencyName)}"></div>
+<div class="field"><label class="label" for="pi-ecp">${T2("Emergency phone","Teléfono de emergencia")}</label><input id="pi-ecp" name="ecPhone" type="tel" value="${v(me.emergencyPhone)}"></div></div>
+<div class="inline"><button class="btn primary" type="submit">${T2("Save my information","Guardar mi información")}</button></div></form>`; }
+document.addEventListener("submit",async e=>{ if(e.target.id!=="piForm") return; e.preventDefault(); e.stopImmediatePropagation(); const me=meObj(); if(!me) return;
+const fd=new FormData(e.target); const g=k=>String(fd.get(k)||"").trim(); const lg=Object.assign({},me.legal||{});
+lg.name=g("legalName")||lg.name||me.name; lg.email=g("email"); lg.address=Object.assign({},lg.address||{},{line1:g("a1"),line2:g("a2"),city:g("city"),state:g("state").toUpperCase(),zip:g("zip")});
+const ts=new Date().toISOString(); const hist=(me.infoLog||[]).concat([{ts,by:me.name}]).slice(-20);
+try{ await saveStaff(me.id,{phone:g("phone"),email:g("email"),emergencyName:g("ecName"),emergencyPhone:g("ecPhone"),legal:lg,infoUpdatedAt:ts,infoLog:hist}); closeSheet(); toast(T2("Your information was saved","Su información se guardó")); }
+catch(err){ console.warn(err); toast(t("saveErr")); } },true);
 document.addEventListener("change",async e=>{ if(e.target.id!=="profPhotoIn"||!e.target.files||!e.target.files[0]) return; const me=meObj(); if(!me||!S.assets) return;
 try{ const up=await S.assets.upload(e.target.files[0]); await S.db.collection("staff").doc(me.id).update({photoId:up.id}); closeSheet(); toast(T2("Profile photo saved","Foto de perfil guardada")); }catch(err){ console.warn(err); toast(t("saveErr")); } });
 function topbar(title,sub,extra=""){
