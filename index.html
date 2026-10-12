@@ -146,6 +146,7 @@ form.stack{display:flex;flex-direction:column;gap:10px}
 .attach{display:flex;gap:8px;align-items:center;font-size:13px}
 .attach img{width:44px;height:44px;object-fit:cover;border-radius:6px}
 .suggest{display:flex;gap:6px;flex-wrap:wrap}
+.mchips{align-self:flex-start;max-width:min(640px,92%)}
 .empty{color:var(--muted);text-align:center;padding:28px 12px}
 .login{max-width:520px;margin:6vh auto 0}
 body.signed-out .app{grid-template-columns:1fr}
@@ -879,21 +880,21 @@ const canTalk="speechSynthesis" in window;
 return topbar(t("agent"), t("vetNote"), canTalk?`<button class="btn ${S.speak?"voicebtn":""}" data-act="toggleSpeak" aria-pressed="${!!S.speak}">${I.speaker} ${S.speak?T2("Voice replies on","Respuestas en voz: sí"):T2("Voice replies off","Respuestas en voz: no")}</button>`:"") +
 `<div class="agent"><div class="msgs" id="msgs" aria-live="polite">
 <div class="msg ai">${esc(t("agentIntro"))}</div>
-${S.chat.map(m=>m.kind==="receipt"?`<div class="receipt">${esc(m.text)}</div>`:`<div class="msg ${m.role==="user"?"user":"ai"}">${m.img?`<img src="${m.img}" alt="">`:""}${esc(m.text)}</div>`).join("")}
+${S.chat.map(m=>m.kind==="receipt"?`<div class="receipt">${esc(m.text)}</div>`:`<div class="msg ${m.role==="user"?"user":"ai"}">${m.img?`<img src="${m.img}" alt="">`:""}${esc(m.text)}</div>${m.chips&&m.chips.length?`<div class="suggest mchips">${m.chips.map(c=>c.open?`<button class="chip" data-open="${esc(c.open)}">${esc(c.label)}</button>`:c.fill?`<button class="chip" data-sayfill="${esc(c.fill)}">${esc(c.label)}</button>`:`<button class="chip" data-say="${esc(c.say)}">${esc(c.label)}</button>`).join("")}</div>`:""}`).join("")}
 ${S.busy?`<div class="msg ai" id="streaming">${esc(S.streamText||t("thinking"))}</div>`:""}
 </div>
-<div class="composer">${!S.sample?`<div class="t-meta">${DEMO?T2("Shepherd AI chat is part of the full version. In this demo, try the Voice log button on Today or any animal's page.","El chat de Shepherd IA es parte de la versión completa. En este demo, pruebe el Registro por voz en Hoy o en la página de un animal."):t("noAgent")}</div>`:""}
-${S.chat.length===0&&S.sample?`<div class="suggest">${sugg.map(k=>`<button class="chip" data-suggest="${k}">${esc(t(k))}</button>`).join("")}</div>`:""}
-<div class="attach" id="attach" ${S.photo?"":"hidden"}>${S.photo?`<img src="${S.photo.url}" alt=""><span>${esc(S.photo.file.name)}</span><button class="btn ghost" data-act="clearPhoto">✕</button>`:""}</div>
+<div class="composer">${!S.sample?`<div class="t-meta">${DEMO?T2("Demo: Shepherd understands tags, names, weights, egg counts, health notes, treatments, dates, moves and vet tasks. Recognizing animals from photos is in the full version.","Demo: Shepherd entiende números de arete, nombres, pesos, huevos, notas de salud, tratamientos, fechas, movimientos y tareas de veterinario. Reconocer animales por foto es parte de la versión completa."):t("noAgent")}</div>`:""}
+${S.chat.length===0&&(S.sample||DEMO)?`<div class="suggest">${sugg.map(k=>`<button class="chip" data-suggest="${k}">${esc(t(k))}</button>`).join("")}</div>`:""}
+<div class="attach" id="attach" ${S.photo?"":"hidden"}>${S.photo?`<img src="${S.photo.url}" alt=""><span>${S.photo.video?"🎥 ":""}${esc(S.photo.name||S.photo.file.name)}</span><button class="btn ghost" data-act="clearPhoto">✕</button>`:""}</div>
 <form class="bar" id="askForm">
-<label class="iconbtn" id="photoBtn" title="${t("photo")}" ${S.sample?"":"hidden"}>${I.camera}<input type="file" id="photoIn" accept="image/*" hidden></label>
-<button type="button" class="iconbtn mic" data-mic="askIn" title="${T2("Speak to Shepherd","Hablar con Shepherd")}" aria-label="${T2("Speak to Shepherd","Hablar con Shepherd")}" ${S.sample?"":"disabled"}>${I.mic}</button>
-<textarea id="askIn" rows="1" placeholder="${esc(t("ask"))}" ${S.sample?"":"disabled"}></textarea>
-${S.busy?`<button type="button" class="btn" data-act="stop">${t("stop")}</button>`:`<button class="iconbtn" type="submit" title="${t("send")}" ${S.sample?"":"disabled"} style="background:var(--pasture);color:var(--pasture-ink);border-color:var(--pasture)">${I.send}</button>`}
+<label class="iconbtn" id="photoBtn" title="${T2("Photo or video","Foto o video")}" aria-label="${T2("Add photo or video","Agregar foto o video")}" ${S.sample||DEMO?"":"hidden"}>${I.camera}<input type="file" id="photoIn" accept="image/*,video/*" hidden></label>
+<button type="button" class="iconbtn mic" data-mic="askIn" title="${T2("Speak to Shepherd","Hablar con Shepherd")}" aria-label="${T2("Speak to Shepherd","Hablar con Shepherd")}" ${S.sample||DEMO?"":"disabled"}>${I.mic}</button>
+<textarea id="askIn" rows="1" placeholder="${esc(t("ask"))}" ${S.sample||DEMO?"":"disabled"}></textarea>
+${S.busy?`<button type="button" class="btn" data-act="stop">${t("stop")}</button>`:`<button class="iconbtn" type="submit" title="${t("send")}" ${S.sample||DEMO?"":"disabled"} style="background:var(--pasture);color:var(--pasture-ink);border-color:var(--pasture)">${I.send}</button>`}
 </form></div></div>`;
 }
 let imgOK=false;
-function afterAgentRender(){ const m=document.getElementById("msgs"); if(m) m.scrollTop=m.scrollHeight; const pb=document.getElementById("photoBtn"); if(pb && !imgOK) pb.hidden=true; }
+function afterAgentRender(){ const m=document.getElementById("msgs"); if(m) m.scrollTop=m.scrollHeight; const pb=document.getElementById("photoBtn"); if(pb && !imgOK && !DEMO) pb.hidden=true; }
 function summary(a){ return {id:a.id,tag:a.tag,name:a.name||"",species:a.species,kind:a.kind,breed:a.breed||"",sex:a.sex||"",pen:a.pen||"",count:a.count,status:a.status||"",color:a.color||"",
 lastWeight:(a.weights||[]).slice(-1)[0]||null,lastEggs:(a.production||[]).slice(-1)[0]||null}; }
 function findAnimal(q){ q=String(q||"").toLowerCase().trim(); if(!q) return [];
@@ -956,7 +957,7 @@ Rules:
 6. Staff read records in English and Spanish. Every note and task you save must be written in both languages (the _en and _es fields), whichever language the person used.`;
 }
 async function ask(text){
-if(S.busy||!S.sample) return; text=String(text||"").trim(); const photo=S.photo;
+if(S.busy) return; if(!S.sample){ if(DEMO) return demoAsk(text); return; } text=String(text||"").trim(); const photo=S.photo;
 if(!text && !photo) return;
 const shown = text || t("whichAnimal");
 S.chat.push({role:"user",text:shown,img:photo?photo.url:null});
@@ -976,6 +977,99 @@ const msg = e&&e.code in map ? map[e.code] : (lang==="es"?"Algo falló. Intenta 
 if(msg) S.chat.push({kind:"receipt",text:msg});
 if(e&&["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"].includes(e.code)) S.sample=null;
 }finally{ S.busy=false; S.ctl=null; S.streamText=""; render(); }
+}
+
+// ---------- demo agent (no AI model): understands tags, names, weights, notes, dates, moves, tasks, photos ----------
+function videoFrame(file){ return new Promise((res,rej)=>{ const v=document.createElement("video"); v.muted=true; v.playsInline=true; v.setAttribute("playsinline",""); v.preload="auto"; const u=URL.createObjectURL(file); let done=false;
+const fail=e=>{ if(done) return; done=true; URL.revokeObjectURL(u); rej(e||new Error("video")); };
+const grab=()=>{ if(done) return; try{ const cv=document.createElement("canvas"); cv.width=v.videoWidth||640; cv.height=v.videoHeight||360; cv.getContext("2d").drawImage(v,0,0,cv.width,cv.height);
+cv.toBlob(b=>{ if(done) return; done=true; URL.revokeObjectURL(u); b?res(new File([b],(file.name||"video").replace(/\.\w+$/,"")+"-frame.jpg",{type:"image/jpeg"})):rej(new Error("frame")); },"image/jpeg",0.82); }catch(e){ fail(e); } };
+v.onloadeddata=()=>{ try{ v.currentTime=Math.min(1,(v.duration||2)/2); }catch{ grab(); } }; v.onseeked=grab; v.onerror=()=>fail(); setTimeout(()=>fail(new Error("timeout")),10000); v.src=u; v.load(); }); }
+function demoProfile(a){
+const nm=L(a,"name"), out=[];
+out.push(T2(`This is ${nm?nm+" ("+a.tag+")":"#"+a.tag} · ${t(a.species)}`,`Este es ${nm?nm+" ("+a.tag+")":"#"+a.tag} · ${t(a.species)}`)+(a.kind==="group"&&a.count?` (${a.count})`:"")+(L(a,"pen")?` — ${L(a,"pen")}.`:"."));
+const w=(a.weights||[]).slice(-1)[0]; if(w) out.push(T2(`Last weight: ${Number(w.lb).toLocaleString()} lb (${w.d}).`,`Último peso: ${Number(w.lb).toLocaleString()} lb (${w.d}).`));
+const p=(a.production||[]).slice(-1)[0]; if(p) out.push(T2(`Last egg count: ${p.eggs} (${p.d}).`,`Último conteo: ${p.eggs} huevos (${p.d}).`));
+for(const it of (a.due||[]).slice().sort((x,y)=>x.d.localeCompare(y.d)).slice(0,2)) out.push(`${L(it,"what")}: ${dueText(daysBetween(today(),it.d))}.`);
+const tr=(a.events||[]).find(e=>e.type==="treatment"); if(tr) out.push(T2(`Last treatment: ${L(tr,"note")} (${tr.d}).`,`Último tratamiento: ${L(tr,"note")} (${tr.d}).`));
+const h=(a.events||[]).find(e=>e.type==="health"); if(h&&daysBetween(h.d,today())<=30) out.push(T2(`Recent health note: ${L(h,"note")} (${h.d}).`,`Nota de salud reciente: ${L(h,"note")} (${h.d}).`));
+return out.join("\n");
+}
+function demoActionChips(a){ const lab=a.tag; const c=[];
+if(S.demoPhoto) c.push({label:"📷 "+T2("Save photo to record","Guardar foto en el registro"),say:T2(`save photo ${lab}`,`guardar foto ${lab}`)});
+c.push({label:T2("Record weight","Anotar peso"),say:"",fill:a.kind==="group"&&a.species==="chicken"?T2(`${lab} eggs `,`${lab} huevos `):T2(`${lab} weight  lb`,`${lab} peso  lb`)});
+c.push({label:T2("Health note","Nota de salud"),say:"",fill:T2(`${lab} looks `,`${lab} se ve `)});
+c.push({label:T2("Create vet task","Crear tarea de veterinario"),say:T2(`vet task for ${lab}`,`tarea de veterinario para ${lab}`)});
+c.push({label:T2("Open record","Abrir registro"),open:a.id});
+return c; }
+function demoPickChips(){ return S.animals.filter(x=>canWork(x.species)).slice(0,10).map(x=>({label:animalLabel(x),say:String(x.tag)})); }
+async function demoAsk(text){
+text=String(text||"").trim(); const photo=S.photo;
+if(!text&&!photo) return;
+S.chat.push({role:"user",text:text||(photo&&photo.video?T2("🎥 Video","🎥 Video"):t("whichAnimal")),img:photo?photo.url:null});
+const box=document.getElementById("askIn"); if(box) box.value="";
+if(photo){ if(S.demoPhoto&&S.demoPhoto.url&&S.demoPhoto.url!==photo.url) URL.revokeObjectURL(S.demoPhoto.url); S.demoPhoto=photo; }
+S.photo=null;
+const say=(txt,chips)=>{ S.chat.push({role:"assistant",text:txt,chips:chips||null}); if(S.speak) sayAloud(txt); };
+const receipt=txt=>S.chat.push({kind:"receipt",text:"✓ "+txt});
+S.busy=true; render();
+try{
+const low=text.toLowerCase();
+// 1. which animal?
+let a=null; const r0=text?localParse(text,null):null;
+if(r0&&r0.heard_tag){ const scrub=low.replace(/\d+(?:\.\d+)?\s*(lb|lbs|libras|pounds|eggs|huevos|kg|%|days|días|dias)\b/g," ").replace(/\b\d{1,2}\/\d{1,2}\b/g," ").replace(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|ene|abr|ago|dic)[a-z]*\.?\s+\d{1,2}\b/g," ").replace(/\b\d{1,2}\s+de\s+[a-z]+/g," ");
+const m=scrub.match(/\b(\d{2,6}|[a-z]-\d{1,3})\b/); r0.heard_tag=m?m[1]:""; }
+if(r0&&r0.animal_id) a=S.animals.find(x=>x.id===r0.animal_id);
+if(!a&&text){ const hits=findAnimal(low.replace(/\b(the|this|that|is|a|an|el|la|los|las|este|esta|es|un|una|for|para|de|show|me|find|log|record|weight|peso|history|historial|how|cómo|como|doing|va|of|her|his|su)\b/g," "));
+if(hits.length===1) a=S.animals.find(x=>x.id===hits[0].id);
+else if(hits.length>1&&!S.demoCtx){ S.demoPending=text; say(T2("I found more than one match. Which one?","Encontré más de uno. ¿Cuál es?"),hits.map(h=>({label:h.tag+(h.name?" "+h.name:""),say:String(h.tag)}))); return; } }
+const farmQ=/attention|needs|due today|what.*today|atenci|pendiente|qué.*hoy|que.*hoy/.test(low);
+if(!a&&farmQ){ const c=careItems().slice(0,6);
+say(c.length?T2("Due soon or overdue:","Próximo o atrasado:")+"\n"+c.map(({a,it,n})=>`• ${animalLabel(a)} — ${L(it,"what")} (${dueText(n)})`).join("\n"):T2("Nothing due in the next 14 days.","Nada pendiente en los próximos 14 días."),c.slice(0,4).map(({a})=>({label:animalLabel(a),say:String(a.tag)}))); return; }
+if(!a&&S.demoCtx&&text&&!(r0&&r0.heard_tag)) a=S.animals.find(x=>x.id===S.demoCtx)||null;
+if(!a){
+if(text) S.demoPending=text;
+say(photo&&!text?T2("Got it. In the full version Shepherd reads the ear tag and markings to recognize the animal by itself. In this demo, tell me the tag or name, or tap one:","Recibido. En la versión completa Shepherd lee el arete y las marcas para reconocer el animal. En este demo, dime el número o nombre, o toca uno:")
+:(r0&&r0.heard_tag?T2(`No animal on file with tag ${r0.heard_tag}. Which one did you mean?`,`No hay animal registrado con el número ${r0.heard_tag}. ¿Cuál quiso decir?`):T2("Which animal? Tell me the tag or name, or tap one:","¿Qué animal? Dime el número o nombre, o toca uno:")),demoPickChips()); return; }
+S.demoCtx=a.id;
+// 2. merge a pending instruction that was waiting for an animal
+const restOf=x=>x.toLowerCase().replace(new RegExp("\\b("+[a.tag,a.name,a.name_es,t(a.species),"this","that","the","is","este","esta","es","el","la","show","me","find","open","who","quién","quien","history","historial","how","doing","cómo","como","va","record","registro","of","de","please","por","favor","photo","foto","here","aquí","aqui","it","for","para","yes","sí","si","confirm","confirmar"].filter(Boolean).map(z=>String(z).toLowerCase().replace(/[.*+?^${}()|[\]\\-]/g,"\\$&")).join("|")+")\\b","gi")," ").replace(/[^a-záéíóúñü0-9]+/g," ").trim();
+let cmd=text; if(S.demoPending){ const pr=localParse(S.demoPending,null); if(!pr.animal_id&&restOf(text).length<12&&!/\d/.test(restOf(text))) cmd=S.demoPending+" "+text; S.demoPending=null; }
+const lc=cmd.toLowerCase(); const r=localParse(cmd,a);
+if(!canWork(a.species)){ say(T2(`You need to finish the ${TRAIN[AREA_OF[a.species]].title[0]} training before changing ${animalLabel(a)}'s record.`,`Debe terminar el entrenamiento de ${TRAIN[AREA_OF[a.species]].title[1]} antes de cambiar el registro de ${animalLabel(a)}.`)); return; }
+const wantPhoto=/save (the )?(photo|picture|video)|guardar (la )?(foto|video)/.test(lc);
+const wantTask=/\btask\b|tarea|vet check|call the vet|llamar al vet|veterinari/.test(lc);
+const mv=cmd.match(/\b(?:move|moved|mover|mueve|movida|movido|pasar|pasa|trasladar|traslada)\b.*?\b(?:to|into|a|al|para)\s+(.+?)[.!]?$/i);
+const rest=restOf(cmd);
+const isNote=r.type==="health"||r.type==="treatment"||rest.length>=12;
+const acts=r.weight_lb!=null||r.eggs!=null||r.due_date||mv||wantTask||wantPhoto||isNote;
+if(!acts){ say(demoProfile(a)+"\n\n"+T2("What do you want to do?","¿Qué desea hacer?"),demoActionChips(a)); return; }
+if(r.weight_lb!=null&&!/confirm|anyway|sí,|yes/.test(lc)){ const prev=(a.weights||[]).slice(-1)[0]; if(prev&&prev.lb&&(r.weight_lb<prev.lb*0.6||r.weight_lb>prev.lb*1.6)){
+say(T2(`${r.weight_lb} lb is a big change from ${animalLabel(a)}'s last weight (${prev.lb} lb on ${prev.d}). Is that right?`,`${r.weight_lb} lb es un cambio grande del último peso de ${animalLabel(a)} (${prev.lb} lb el ${prev.d}). ¿Es correcto?`),
+[{label:T2("Yes, save it","Sí, guardar"),say:`${a.tag} ${r.weight_lb} lb confirm`},{label:T2("No, cancel","No, cancelar"),say:T2(`show ${a.tag}`,`muéstrame ${a.tag}`)}]); return; } }
+if(!S.canWrite){ say(T2("You have view-only access, so I can't change records.","Tiene acceso de solo lectura; no puedo cambiar registros.")); return; }
+// 3. photo (attached once, to the first entry written)
+let photoIds=[]; if(S.demoPhoto&&S.assets){ try{ photoIds=[(await S.assets.upload(S.demoPhoto.file)).id]; }catch(e){ console.warn("demo photo",e&&e.code); toast(T2("The photo couldn't be saved (storage full?).","No se pudo guardar la foto (¿almacenamiento lleno?).")); } }
+const meta=()=>{ const m={via:"agent",said:cmd}; if(photoIds.length){ m.photoIds=photoIds; photoIds=[]; } return m; };
+const lines=[];
+if(r.weight_lb!=null){ await addEvent(a.id,{type:"obs",lb:r.weight_lb,meta:meta()}); receipt(`${t("weight")} ${r.weight_lb} lb · ${animalLabel(a)}`);
+const prev=(a.weights||[]).slice(-2)[0]; lines.push(T2(`Weight ${r.weight_lb} lb saved for ${animalLabel(a)}.`,`Peso ${r.weight_lb} lb guardado para ${animalLabel(a)}.`)+(prev&&prev.lb?" "+T2(`Previous: ${prev.lb} lb (${prev.d}).`,`Anterior: ${prev.lb} lb (${prev.d}).`):"")); }
+if(r.eggs!=null){ await addEvent(a.id,{type:"obs",eggs:r.eggs,meta:meta()}); receipt(`${r.eggs} ${t("eggs")} · ${animalLabel(a)}`); lines.push(T2(`${r.eggs} eggs saved for today.`,`${r.eggs} huevos guardados para hoy.`)); }
+if(r.due_date){ await addEvent(a.id,{type:"obs",due:{d:r.due_date,what:r.due_what_en,what_es:r.due_what_es},meta:meta()}); receipt(`${T2("Scheduled","Programado")}: ${T2(r.due_what_en,r.due_what_es)} · ${r.due_date}`); lines.push(T2(`${r.due_what_en} scheduled for ${r.due_date}.`,`${r.due_what_es} programado para el ${r.due_date}.`)); }
+if(mv){ const pen=mv[1].trim().replace(/^\w/,c=>c.toUpperCase()); await addEvent(a.id,{type:"movement",pen,meta:meta()}); receipt(`${t("movement")} → ${pen} · ${animalLabel(a)}`); lines.push(T2(`Moved to ${pen}.`,`Movido a ${pen}.`)); }
+if(wantTask){ const adm=S.staff.find(s=>s.role==="admin"); const who=(meObj()&&meObj().role==="admin")?meObj().id:(adm?adm.id:(meObj()?.id||""));
+await createTask({title:`Vet check: ${animalLabel(a)}`,title_es:`Revisión veterinaria: ${animalLabel(a)}`,assignee:who,date:today(),priority:"high",animalId:a.id,checklist:[],checklist_es:[]});
+receipt(`${T2("Task","Tarea")}: ${T2("Vet check","Revisión veterinaria")} → ${staffName(who)}`); lines.push(T2(`High-priority vet check task created for ${staffName(who)}.`,`Tarea urgente de revisión veterinaria creada para ${staffName(who)}.`)); }
+const plain=!(r.weight_lb!=null||r.eggs!=null||r.due_date||mv||wantTask);
+if(plain&&(isNote||photoIds.length)){ const note=isNote?cmd:"";
+await addEvent(a.id,{type:isNote?r.type:"obs",note:note||(wantPhoto?"Photo record":""),note_es:note||(wantPhoto?"Registro con foto":""),meta:meta()});
+receipt(`${t(isNote?r.type:"obs")} · ${animalLabel(a)}`); lines.push(isNote?T2(`${t(r.type)} note saved for ${animalLabel(a)}.`,`Nota de ${t(r.type)} guardada para ${animalLabel(a)}.`):T2(`Photo saved to ${animalLabel(a)}'s history.`,`Foto guardada en el historial de ${animalLabel(a)}.`)); }
+if(S.demoPhoto&&!photoIds.length){ URL.revokeObjectURL(S.demoPhoto.url); S.demoPhoto=null; if(!wantPhoto) lines.push(T2("Photo attached to the entry.","Foto adjunta al registro.")); }
+const chips=[{label:T2("Open record","Abrir registro"),open:a.id}];
+if(r.type==="health"&&!wantTask){ lines.push(T2("I can't diagnose. If it doesn't improve, have the vet look.","No puedo diagnosticar. Si no mejora, que lo vea el veterinario.")); chips.unshift({label:T2("Create vet task","Crear tarea de veterinario"),say:T2(`vet task for ${a.tag}`,`tarea de veterinario para ${a.tag}`)}); }
+say(lines.join("\n"),chips);
+}catch(e){ console.warn("demoAsk",e); S.chat.push({kind:"receipt",text:t("saveErr")}); }
+finally{ S.busy=false; render(); }
 }
 
 // ---------- sheets ----------
@@ -2015,7 +2109,7 @@ for(const [n,en,es,cen,ces,prio] of list) await createTask({title:en,title_es:es
 
 // ---------- events ----------
 document.addEventListener("click", e=>{
-const el=e.target.closest("[data-codone],[data-coskip],[data-staff],[data-legal],[data-theme-set],[data-ack],[data-cmdex],[data-qrmode],[data-adminclock],[data-ev],[data-duedone],[data-nav],[data-lang],[data-act],[data-login],[data-open],[data-sp],[data-suggest],[data-oblang],[data-invite],[data-mic],[data-fill],[data-vpick]"); if(!el) return;
+const el=e.target.closest("[data-codone],[data-coskip],[data-staff],[data-legal],[data-theme-set],[data-ack],[data-cmdex],[data-qrmode],[data-adminclock],[data-ev],[data-duedone],[data-nav],[data-lang],[data-act],[data-login],[data-open],[data-sp],[data-suggest],[data-oblang],[data-invite],[data-mic],[data-fill],[data-vpick],[data-say],[data-sayfill]"); if(!el) return;
 if(el.dataset.act==="closeSheet" && e.target!==el) return;
 if(el.dataset.nav){ S.view=el.dataset.nav; if(S.view!=="animals") S.animalId=null; LS.set("sh.view",S.view); render(); window.scrollTo(0,0); }
 else if(el.dataset.themeSet){ theme=el.dataset.themeSet; LS.set("sh.theme",theme); applyTheme(); render(); }
@@ -2040,6 +2134,8 @@ else if(el.dataset.ev!=null&&el.dataset.aid){ eventSheet(el.dataset.aid,Number(e
 else if(el.dataset.duedone){ completeDue(el.dataset.duedone,el.dataset.key,el); }
 else if(el.dataset.sp){ S.species=el.dataset.sp; render(); }
 else if(el.dataset.suggest){ ask(t(el.dataset.suggest)); }
+else if(el.dataset.say!=null){ ask(el.dataset.say); }
+else if(el.dataset.sayfill!=null){ const ai=document.getElementById("askIn"); if(ai){ ai.value=el.dataset.sayfill; ai.focus(); const i=ai.value.indexOf("  "); try{ ai.setSelectionRange(i>=0?i+1:ai.value.length,i>=0?i+1:ai.value.length); }catch{} } }
 else switch(el.dataset.act){
 case "switch": endSession(); break;
 case "profile": profileSheet(); break;
@@ -2094,7 +2190,10 @@ try{ await writeDoc("animals",a.id,()=>S.db.collection("animals").doc(a.id).upda
 if(el.dataset.task){ const tk=S.tasks.find(x=>x.id===el.dataset.task); if(tk){ try{await toggleTask(tk,el.checked);}catch{el.checked=!el.checked;} } }
 else if(el.dataset.check){ const tk=S.tasks.find(x=>x.id===el.dataset.check); if(tk){ try{await toggleCheck(tk,Number(el.dataset.i),el.checked);}catch{el.checked=!el.checked;} } }
 else if((el.id==="nf-photo"||el.id==="nf-photo-cam") && el.files && el.files[0]){ readAnimalPhoto(el.files[0]); }
-else if(el.id==="photoIn" && el.files && el.files[0]){ const f=el.files[0]; S.photo={file:f,url:URL.createObjectURL(f)}; const draft=document.getElementById("askIn")?.value||""; render(); const ai=document.getElementById("askIn"); if(ai){ai.value=draft;ai.focus();} }
+else if(el.id==="photoIn" && el.files && el.files[0]){ const f=el.files[0]; const draft=document.getElementById("askIn")?.value||""; el.value="";
+const put=p=>{ if(S.photo&&S.photo.url) URL.revokeObjectURL(S.photo.url); S.photo=p; render(); const ai=document.getElementById("askIn"); if(ai){ai.value=draft;ai.focus();} };
+if(/^video\//.test(f.type)||/\.(mov|mp4|m4v|webm)$/i.test(f.name||"")){ toast(T2("Reading video…","Leyendo video…")); videoFrame(f).then(fr=>put({file:fr,url:URL.createObjectURL(fr),video:true,name:f.name})).catch(()=>toast(T2("Couldn't read that video. Try a photo instead.","No se pudo leer ese video. Pruebe con una foto."))); }
+else put({file:f,url:URL.createObjectURL(f)}); }
 });
 document.addEventListener("submit", async e=>{
 e.preventDefault(); const f=e.target; const fd=new FormData(f);
