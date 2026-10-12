@@ -2331,7 +2331,7 @@ else if(f.id==="pinForm"){ const st=S.staff.find(x=>x.id===f.dataset.id); if(!st
 if(st.role!=="admin"&&!qrOK()){ closeSheet(); render(); toast(T2("Scan the office QR code first.","Escanee primero el código QR de la oficina.")); return; }
 if(await checkPin(st,String(fd.get("pin")||""),document.getElementById("pf-err"),f)) signIn(st); }
 else if(f.id==="codeForm"){ const code=String(fd.get("code")||"").trim(); const st=S.staff.find(x=>x.code===code && staffStatus(x)!=="active");
-if(!st){ document.getElementById("cf-err").textContent=T2("That code isn't valid. Check it with the administrator.","Ese código no es válido. Verifíquelo con el administrador."); return; }
+if(!st){ document.getElementById("cf-err").textContent=DEMO?T2("This phone doesn't have that invite. In the demo each phone keeps its own data, so open the invite link from the text message on this phone first (it carries the invite), or have the administrator create it on this phone.","Este teléfono no tiene esa invitación. En el demo cada teléfono guarda sus propios datos: abra primero el enlace del mensaje de texto en este teléfono (lleva la invitación), o pida al administrador que la cree en este teléfono."):T2("That code isn't valid. Check it with the administrator.","Ese código no es válido. Verifíquelo con el administrador."); return; }
 if(st.langPref){ lang=st.langPref; LS.set("sh.lang",lang); }
 if(staffStatus(st)==="invited") await saveStaff(st.id,{status:"onboarding"});
 S.me=st.id; LS.set("sh.me",S.me); LS.set("sh.since",new Date().toISOString()); obStep=null; closeSheet(); render(); }
@@ -2437,7 +2437,11 @@ db.doc("settings/clock").onSnapshot(d=>{ clockCfg=d.exists?d.data():null; if(pen
 bind("sales","sales"); bind("attention","attention"); bind("vision","vision");
 db.collection("clock").onSnapshot(snap=>{ clockAll=snap.docs.map(d=>Object.assign({id:d.id},d.data())); if(S.view==="records") render(); },err=>console.warn("clockAll",err));
 db.collection("clock").where("date","==",today()).onSnapshot(snap=>{ clocks=snap.docs.map(d=>Object.assign({id:d.id},d.data())); render(); },err=>console.warn("clocks",err));
-window.addEventListener("hashchange",()=>{ if(/^#clockin-/.test(location.hash)) setTimeout(handleClockHash,400); });
+window.addEventListener("hashchange",()=>{ if(/^#clockin-/.test(location.hash)) setTimeout(handleClockHash,400);
+else if(/^#join-/.test(location.hash)) setTimeout(handleJoinHash,200);
+else if(location.hash==="#join"){ history.replaceState(null,"",location.pathname); S.me=null; LS.set("sh.me",null); render(); codeSheet(); } });
+// iOS can bring back an already-open tab without reloading; re-check the link when the page becomes visible again.
+window.addEventListener("pageshow",()=>{ if(/^#join-/.test(location.hash)) setTimeout(handleJoinHash,200); });
 setTimeout(handleClockHash,1200);
 // Deep link: #join opens the invite-code screen for new employees
 if(location.hash==="#join"){ S.me=null; LS.set("sh.me",null); setTimeout(()=>{ render(); codeSheet(); },300); }
