@@ -193,6 +193,8 @@ body.signed-out .main{padding-bottom:0}
 .sc-msg.ok{color:#9BC53D;font-weight:700;font-size:1.5rem}.sc-msg.bad{color:#FFB4A2;font-weight:600}.sc-big{font-size:2rem;vertical-align:middle}
 .sc-fb{width:100%;max-width:460px}.sc-photo{width:100%;justify-content:center;font-size:1.25rem;padding:20px}
 .sc-type{width:100%;max-width:460px;text-align:center;margin-bottom:90px}.sc-type .linkish{color:#dfe8d8;font-size:1rem}
+@media (max-width:700px){.profile-head{align-items:flex-start}.profile-head .facts{flex-basis:100%!important}}
+.apic-col{display:flex;flex-direction:column;align-items:center;gap:6px;flex:none}.apic-name{font-family:var(--f-display);font-size:1.3rem;text-align:center;max-width:180px;line-height:1.2;color:var(--pasture)}
 .sc-typerow{display:flex;gap:8px;margin-top:10px}.sc-typerow input{flex:1;font-size:1.3rem;letter-spacing:.12em;text-transform:uppercase;padding:12px;border-radius:10px;border:0;text-align:center}.sc-typerow input{color:#111;background:#fff;-webkit-text-fill-color:#111}.sc-type .linkish{background:none;border:0;color:#fff;text-decoration:underline;font-weight:600;padding:8px}
 .qrtxt{margin-top:10px;font-size:1.05rem}.qrtxt b{font-size:1.6rem;letter-spacing:.14em;font-family:ui-monospace,monospace}
 .toast.toast{z-index:10000}
@@ -470,7 +472,7 @@ return `<div class="seg theme" role="group" aria-label="${T2("Theme","Tema")}">$
 const t = k => k==="command"?(lang==="es"?"Centro de mando":"Command center"):((STR[lang]&&STR[lang][k]) || STR.en[k] || k);
 // Bilingual record fields: "field" holds English, "field_es" holds Spanish. Show the viewer's language, fall back to the other.
 const L = (o,f) => { if(!o) return ""; const en=o[f], es=o[f+"_es"]; const has=v=>Array.isArray(v)?v.length>0:(v!=null&&v!==""); return lang==="es" ? (has(es)?es:en) : (has(en)?en:es); };
-const VOCAB = {Bred:"Preñada",Nursing:"Lactando",Open:"Vacía",Riding:"Monta",Working:"Trabajo","Pre-breeding":"Pre-monta","Breeding sire":"Semental",Laying:"En postura",Growing:"En crecimiento",Pregnant:"Preñada",Active:"Activo",Sold:"Vendido",Quarantine:"Cuarentena",
+const VOCAB = {Deceased:"Muerto",Bred:"Preñada",Nursing:"Lactando",Open:"Vacía",Riding:"Monta",Working:"Trabajo","Pre-breeding":"Pre-monta","Breeding sire":"Semental",Laying:"En postura",Growing:"En crecimiento",Pregnant:"Preñada",Active:"Activo",Sold:"Vendido",Quarantine:"Cuarentena",
 Female:"Hembra",Male:"Macho","Castrated male":"Macho castrado",Mixed:"Mixto"};
 const V = v => lang==="es" && VOCAB[v] ? VOCAB[v] : (v||"");
 
@@ -857,13 +859,30 @@ document.addEventListener("input",e=>{ if(e.target.id!=="aSearch") return; S.aq=
 document.addEventListener("click",e=>{ const go=e.target.closest("[data-sp-go]"); const k=e.target.closest('[data-act="herdSearch"],[data-act="aClear"]'); if(!go&&!k) return;
 if(k&&k.dataset.act==="aClear"){ S.aq=""; render(); return; }
 e.stopPropagation(); S.species=go?go.dataset.spGo:"all"; S.aq=""; S.animalId=null; S.view="animals"; LS.set("sh.view","animals"); render(); window.scrollTo(0,0); setTimeout(()=>document.getElementById("aSearch")?.focus(),60); },true);
+function editAnimalSheet(id){ const a=S.animals.find(x=>x.id===id); if(!a||!isAdmin()) return; const sel=(x,y)=>String(x)===String(y)?"selected":"";
+const isGroup=a.kind==="group";
+openSheet(`<h2>✏️ ${T2("Edit","Editar")} · ${esc(animalLabel(a))}</h2>
+<form class="stack" id="editAnimalForm" data-id="${esc(a.id)}">
+<div class="inline"><div class="field"><label class="label" for="ea-tag">${t("tagNo")}</label><input id="ea-tag" name="tag" required value="${esc(a.tag||"")}"></div>
+<div class="field"><label class="label" for="ea-name">${t("name")}</label><input id="ea-name" name="name" value="${esc(a.name||"")}"></div></div>
+<div class="inline"><div class="field"><label class="label" for="ea-sp">${t("species")}</label><select id="ea-sp" name="species">${SPECIES.map(x=>`<option value="${x}" ${sel(x,a.species)}>${t(x)}</option>`).join("")}</select></div>
+<div class="field"><label class="label" for="ea-breed">${t("breed")}</label><input id="ea-breed" name="breed" value="${esc(a.breed||"")}"></div></div>
+<div class="inline"><div class="field"><label class="label" for="ea-sex">${t("sex")}</label><select id="ea-sex" name="sex"><option value=""></option>${["Female","Male","Castrated male","Mixed"].map(x=>`<option value="${x}" ${sel(x,a.sex)}>${esc(V(x))}</option>`).join("")}</select></div>
+<div class="field"><label class="label" for="ea-born">${t("born")}</label><input id="ea-born" name="born" type="date" value="${esc(a.born||"")}"></div>
+${isGroup?`<div class="field"><label class="label" for="ea-count">${t("count")}</label><input id="ea-count" name="count" type="number" min="0" value="${esc(a.count||0)}"></div>`:""}</div>
+<div class="inline"><div class="field"><label class="label" for="ea-pen">${t("pen")}</label><input id="ea-pen" name="pen" value="${esc(L(a,"pen")||"")}"></div>
+<div class="field"><label class="label" for="ea-color">${t("color")}</label><input id="ea-color" name="color" value="${esc(L(a,"color")||"")}"></div></div>
+<div class="inline"><div class="field"><label class="label" for="ea-status">${t("status")}</label><select id="ea-status" name="status">${[...new Set(["Active","Bred","Pregnant","Open","Nursing","Laying","Growing","Riding","Working","Pre-breeding","Breeding sire","Quarantine","Sold","Deceased"].concat(a.status?[a.status]:[]))].map(x=>`<option value="${x}" ${sel(x,a.status||"Active")}>${esc(V(x))}</option>`).join("")}</select></div>
+<div class="field"><label class="label" for="ea-dam">${t("dam")}</label><input id="ea-dam" name="dam" value="${esc(a.dam||"")}"></div></div>
+<p class="t-meta">${T2("Every change is saved to the animal's history with your name and the time.","Cada cambio se guarda en el historial del animal con su nombre y la hora.")}</p>
+<div class="inline"><button class="btn primary" type="submit">${t("save")}</button><button class="btn" type="button" data-act="closeSheet">${t("cancel")}</button></div></form>`); }
 function renderProfile(a){
 const isGroup=a.kind==="group"; const evTypes=["health","treatment","feed","movement","breeding","obs"];
 const due=(a.due||[]).map(it=>({it,n:daysBetween(today(),it.d)})).sort((x,y)=>x.n-y.n);
 const facts=[[t("species"),t(a.species)],[t("breed"),a.breed],[isGroup?t("count"):t("sex"),isGroup?a.count:V(a.sex)],[t("pen"),L(a,"pen")],[t("born"),a.born],[t("status"),V(a.status)],[t("color"),L(a,"color")],[a.dam?t("dam"):"",a.dam]].filter(f=>f[0]&&f[1]!=null&&f[1]!=="");
-return topbar(L(a,"name")||t(a.species), "", `<button class="btn ghost" data-act="back">← ${t("back")}</button>`) + banners() +
+return topbar(L(a,"name")||t(a.species), "", `<button class="btn ghost" data-act="back">← ${t("back")}</button>${S.canWrite&&isAdmin()?`<button class="btn" data-editanimal="${esc(a.id)}">✏️ ${T2("Edit","Editar")}</button>`:""}`) + banners() +
 (a.review==="pending"?`<div class="demo" style="margin-bottom:12px">🆕 ${T2("Added by","Agregado por")} <b>${esc(a.addedBy?.name||"—")}</b>${a.addedBy?.ts?` · ${esc(a.addedBy.ts.slice(0,10))} ${esc(fmtTime(a.addedBy.ts))}`:""}${a.addedBy?.instructedBy&&a.addedBy.instructedBy!=="self"?` · ${T2("supervised by","supervisado por")} ${esc(instrLabel(a.addedBy.instructedBy))}`:""}${a.addedBy?.gps?` · ${gpsLink(a.addedBy.gps)}`:""}. ${isAdmin()?`<button class="chip" data-approve="${esc(a.id)}">✓ ${T2("Approve record","Aprobar registro")}</button>`:T2("Waiting for administrator review.","Esperando revisión del administrador.")}</div>`:"") +
-`<div class="profile-head"><span class="apic-big">${animalPic(a,true)}</span><span class="tag ${isGroup?"group":""}"><span>${esc(a.tag)}</span></span><div class="facts" style="flex:1;min-width:0">${facts.map(([k,v])=>`<div><span class="label">${esc(k)}</span><b>${esc(v)}</b></div>`).join("")}</div></div>
+`<div class="profile-head"><div class="apic-col"><span class="apic-big">${animalPic(a,true)}</span>${L(a,"name")?`<b class="apic-name">${esc(L(a,"name"))}</b>`:""}</div><span class="tag ${isGroup?"group":""}"><span>${esc(a.tag)}</span></span><div class="facts" style="flex:1;min-width:0">${facts.map(([k,v])=>`<div><span class="label">${esc(k)}</span><b>${esc(v)}</b></div>`).join("")}</div></div>
 <div class="grid cols-2" style="align-items:start">
 <section class="grid">
 ${(a.weights||[]).length?`<div class="panel"><h2>${t("weights")}</h2><svg class="spark" id="chartW" role="img" aria-label="${t("weights")}"></svg></div>`:""}
@@ -1234,7 +1253,7 @@ function fmtTime(ts){ try{ return new Date(ts).toLocaleTimeString(lang==="es"?"e
 function instrLabel(v){ if(!v||v==="self") return T2("Own observation / decision","Observación / decisión propia"); if(v==="schedule") return T2("Care schedule","Calendario de cuidado");
 if(v.startsWith("staff:")){ const st=S.staff.find(x=>x.id===v.slice(6)); return st?st.name:T2("Former staff member","Antiguo empleado"); }
 if(v.startsWith("vet:")) return T2("Veterinarian","Veterinario")+(v.slice(4)?": "+v.slice(4):""); return v; }
-function viaLabel(v){ return ({form:T2("Typed in Log an entry","Escrito en Registrar"),voice:T2("Voice log","Registro por voz"),agent:"Shepherd AI",due:T2("Coming up list","Lista Próximo"),photo:T2("Photo intake","Ingreso con foto"),task:T2("Task checklist","Lista de tareas")})[v]||v; }
+function viaLabel(v){ return ({edit:T2("Edited profile (administrator)","Perfil editado (administrador)"),form:T2("Typed in Log an entry","Escrito en Registrar"),voice:T2("Voice log","Registro por voz"),agent:"Shepherd AI",due:T2("Coming up list","Lista Próximo"),photo:T2("Photo intake","Ingreso con foto"),task:T2("Task checklist","Lista de tareas")})[v]||v; }
 function eventSheet(aid,i){
 const a=S.animals.find(x=>x.id===aid); const e=a&&(a.events||[])[i]; if(!e) return;
 const nr=`<span class="t-meta">${T2("Not captured (this entry is older than detailed tracking)","No capturado (entrada anterior al registro detallado)")}</span>`;
@@ -2350,8 +2369,9 @@ for(const [n,en,es,cen,ces,prio] of list) await createTask({title:en,title_es:es
 
 // ---------- events ----------
 document.addEventListener("click", e=>{
-const el=e.target.closest("[data-codone],[data-coskip],[data-staff],[data-legal],[data-theme-set],[data-ack],[data-cmdex],[data-qrmode],[data-adminclock],[data-ev],[data-duedone],[data-nav],[data-lang],[data-act],[data-login],[data-open],[data-sp],[data-suggest],[data-oblang],[data-invite],[data-mic],[data-fill],[data-vpick],[data-say],[data-sayfill],[data-approve],[data-attnok],[data-viskind],[data-visplan],[data-visdone],[data-visarch],[data-lesson]"); if(!el) return;
+const el=e.target.closest("[data-codone],[data-coskip],[data-staff],[data-legal],[data-theme-set],[data-ack],[data-cmdex],[data-qrmode],[data-adminclock],[data-ev],[data-duedone],[data-nav],[data-lang],[data-act],[data-login],[data-open],[data-sp],[data-suggest],[data-oblang],[data-invite],[data-mic],[data-fill],[data-vpick],[data-say],[data-sayfill],[data-approve],[data-attnok],[data-viskind],[data-visplan],[data-visdone],[data-visarch],[data-lesson],[data-editanimal]"); if(!el) return;
 if(el.dataset.act==="closeSheet" && e.target!==el) return;
+if(el.dataset.editanimal){ editAnimalSheet(el.dataset.editanimal); return; }
 if(el.dataset.lesson!==undefined){ closeSheet(); S.lessonK=el.dataset.lesson||null; render(); window.scrollTo(0,0); return; }
 if(el.dataset.nav){ S.lessonK=null; S.view=el.dataset.nav; if(S.view!=="animals") S.animalId=null; LS.set("sh.view",S.view); render(); window.scrollTo(0,0); }
 else if(el.dataset.themeSet){ theme=el.dataset.themeSet; LS.set("sh.theme",theme); applyTheme(); render(); }
@@ -2535,6 +2555,24 @@ const b=await bilingual([title,area,...list]);
 await createTask({title:b.en[0],title_es:b.es[0],area:b.en[1],area_es:b.es[1],checklist:b.en.slice(2),checklist_es:b.es.slice(2),
 assignee:fd.get("assignee"),date:fd.get("date"),priority:fd.get("priority"),animalId:fd.get("animalId"),recurring:!!fd.get("recurring")});
 closeSheet(); toast(b.en[0]&&b.es[0]?t("autoTr"):t("saved")); }
+else if(f.id==="editAnimalForm"){ const a=S.animals.find(x=>x.id===f.dataset.id); if(!a||!isAdmin()) return;
+const tag=String(fd.get("tag")||"").trim(); if(!tag) return;
+if(S.animals.some(x=>x.id!==a.id&&String(x.tag).toLowerCase()===tag.toLowerCase())){ toast(T2("Another animal already has that tag.","Otro animal ya tiene ese arete.")); return; }
+const btn=f.querySelector('button[type="submit"]'); if(btn){btn.disabled=true;}
+const nv={tag,name:String(fd.get("name")||"").trim(),species:fd.get("species"),breed:String(fd.get("breed")||"").trim(),sex:fd.get("sex")||"",born:fd.get("born")||"",status:fd.get("status")||"Active",dam:String(fd.get("dam")||"").trim()};
+if(a.kind==="group") nv.count=Number(fd.get("count")||0);
+const penIn=String(fd.get("pen")||"").trim(), colIn=String(fd.get("color")||"").trim();
+const patch={}, changes=[];
+for(const [k,v] of Object.entries(nv)){ const ov=a[k]==null?"":a[k]; if(String(ov)!==String(v)){ patch[k]=v; changes.push(`${k}: ${ov||"—"} → ${v||"—"}`); } }
+const curPen=L(a,"pen")||"", curCol=L(a,"color")||"";
+if(penIn!==curPen||colIn!==curCol){ const b=await bilingual([penIn,colIn]);
+if(penIn!==curPen){ patch.pen=b.en[0]; patch.pen_es=b.es[0]; changes.push(`pen: ${curPen||"—"} → ${penIn||"—"}`); }
+if(colIn!==curCol){ patch.color=b.en[1]; patch.color_es=b.es[1]; changes.push(`color: ${curCol||"—"} → ${colIn||"—"}`); } }
+if(!changes.length){ closeSheet(); toast(T2("No changes.","Sin cambios.")); return; }
+const ev=Object.assign({d:today(),type:"obs",note:"Profile edited: "+changes.join("; "),note_es:"Perfil editado: "+changes.join("; ")},evMeta(a,{via:"edit"}));
+patch.events=[ev].concat(a.events||[]).slice(0,120);
+try{ await writeDoc("animals",a.id,()=>S.db.collection("animals").doc(a.id).update(patch)); closeSheet(); toast(T2("Saved","Guardado")); }
+catch(err){ console.warn(err); if(btn) btn.disabled=false; toast(t("saveErr")); } }
 else if(f.id==="animalForm"){ const tag=String(fd.get("tag")||"").trim(); if(!tag) return; const kind=fd.get("kind");
 const btn=f.querySelector('button[type="submit"]'); if(btn){btn.disabled=true;btn.textContent=t("translating");}
 const name=String(fd.get("name")||"").trim(), pen=String(fd.get("pen")||"").trim(), color=String(fd.get("color")||"").trim();
