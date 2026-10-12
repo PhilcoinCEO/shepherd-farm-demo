@@ -332,6 +332,9 @@ fieldset.q.good{border-color:var(--ok)} fieldset.q.bad{border-color:var(--crit);
 .co-task{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;background:var(--card-row,var(--surface));display:flex;flex-direction:column;gap:8px}.co-or{font-size:13px;color:var(--muted)}.co-note{width:100%;box-sizing:border-box}
 .co-hint{margin-top:8px;font-size:14px;font-weight:600;color:var(--crit)}.stamp.warn{color:var(--crit)}
 .ph-choice{display:flex;gap:10px;margin:10px 0 4px}.ph-choice .btn{flex:1;justify-content:center;cursor:pointer}
+.inst{position:relative;display:flex;flex-direction:column;gap:6px;background:var(--rail,#18291B);color:#f3efe2;border-radius:14px;padding:14px 40px 14px 14px;margin:0 0 12px;width:100%;max-width:520px;box-sizing:border-box;text-align:left}.inst b{font-size:16px}.inst span,.inst li{font-size:14px;opacity:.92}.inst ol{margin:2px 0 0 18px;padding:0}.inst .btn{align-self:flex-start;margin-top:4px}.inst-x{position:absolute;top:8px;right:8px;background:none;border:0;color:inherit;font-size:18px;cursor:pointer;padding:6px}.inst-ic{display:inline-block;border:1px solid currentColor;border-radius:4px;padding:0 4px;font-size:12px}
+.gate .inst{margin-top:48px}
+.demo.offline{background:color-mix(in srgb,var(--crit) 14%,transparent)}
 .sq-big{width:180px;height:180px;border-radius:16px;object-fit:cover;border:3px solid var(--pasture);display:grid;place-items:center;font-size:56px}
 .prof-cam{position:absolute;left:8px;right:8px;bottom:8px;background:rgba(0,0,0,.6);color:#fff;border-radius:8px;text-align:center;font-size:12px;font-weight:700;padding:5px}
 .prof-info{flex:1;min-width:180px}
@@ -592,7 +595,34 @@ ${me?`<button class="me-tile desk-only" data-act="profile" title="${T2("My profi
 </div></div>
 <div class="tb-me phone-only">${themeSeg()}${me?`<button class="me-card" data-act="profile" title="${T2("My profile","Mi perfil")}">${meSquare(me,"sq")}<span class="me-name">${esc(me.name.split(" ")[0])}</span></button>`:""}</div></div>`;
 }
-function banners(){ let h=DEMO?`<div class="demo demo-mode"><b>${T2("Demo mode","Modo demostración")}</b> · ${T2("Data is saved only on this device. The AI agent and shared data work in the full version.","Los datos se guardan solo en este dispositivo. El agente IA y los datos compartidos funcionan en la versión completa.")} <button class="chip" data-act="resetDemo">${T2("Reset demo","Reiniciar demo")}</button></div>`:""; if(S.animals.some(a=>a.sample)||S.staff.some(s=>s.sample)) h+=`<div class="demo">${t("sample")}</div>`; if(!S.canWrite) h+=`<div class="demo">${t("readOnly")}</div>`; return h; }
+// ---------- install as an app (PWA) + native shell (Capacitor) ----------
+const IS_NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+const IS_STANDALONE = IS_NATIVE || (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
+const IS_IOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const IN_APP_BROWSER = /FBAN|FBAV|Instagram|Line\/|WhatsApp|GSA\/|CriOS.*Mobile.*wv|; wv\)/i.test(navigator.userAgent);
+let installEvt = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; render(); });
+window.addEventListener("appinstalled", () => { installEvt = null; LS.set("sh.installDismiss", Date.now()); render(); });
+window.addEventListener("online", () => render()); window.addEventListener("offline", () => render());
+function installBanner(){
+if(IS_STANDALONE || (window.claude && window.claude.use)) return "";
+const d = LS.get("sh.installDismiss", 0); if(d && Date.now() - d < 7*864e5) return "";
+const close = `<button class="inst-x" data-act="installDismiss" aria-label="${T2("Dismiss","Cerrar")}">✕</button>`;
+if(installEvt) return `<div class="inst">${close}<b>📲 ${T2("Install La Finca on this phone","Instale La Finca en este teléfono")}</b><span>${T2("Opens full screen from your home screen, like any app.","Abre en pantalla completa desde su pantalla de inicio, como cualquier app.")}</span><button class="btn primary" data-act="installApp">${T2("Install app","Instalar app")}</button></div>`;
+if(IS_IOS) return `<div class="inst">${close}<b>📲 ${T2("Add La Finca to your home screen","Agregue La Finca a su pantalla de inicio")}</b>
+${IN_APP_BROWSER?`<span>${T2("First open this link in Safari: tap ⋯ or the compass icon, then “Open in Safari”.","Primero abra este enlace en Safari: toque ⋯ o el ícono de brújula y luego “Abrir en Safari”.")}</span>`:""}
+<ol><li>${T2("Tap the Share button","Toque el botón Compartir")} <span class="inst-ic">⬆︎</span></li><li>${T2("Choose “Add to Home Screen”","Elija “Agregar a pantalla de inicio”")}</li><li>${T2("Open La Finca from the new icon","Abra La Finca desde el ícono nuevo")}</li></ol></div>`;
+return "";
+}
+const offlineBanner = () => navigator.onLine === false ? `<div class="demo offline">📶 ${T2("No signal. You can keep working; changes save on this phone.","Sin señal. Puede seguir trabajando; los cambios se guardan en este teléfono.")}</div>` : "";
+// Native QR scanner when running inside the store app (Capacitor + @capacitor-mlkit/barcode-scanning).
+async function nativeScan(){
+const BS = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.BarcodeScanner; if(!BS) return false;
+try{ const perm = await BS.requestPermissions(); if(perm && perm.camera && perm.camera !== "granted" && perm.camera !== "limited") return false;
+const r = await BS.scan({ formats: ["QR_CODE"] }); const txt = r && r.barcodes && r.barcodes[0] && (r.barcodes[0].rawValue || r.barcodes[0].displayValue);
+if(!txt) return true; const code = codeFromText(txt); if(!code){ toast(T2("That isn't the farm clock-in code.","Ese no es el código de entrada de la finca.")); return true; }
+processClockCode(code); return true; }catch(e){ console.warn("native scan", e); return false; } }
+function banners(){ let h=offlineBanner()+installBanner()+(DEMO?`<div class="demo demo-mode"><b>${T2("Demo mode","Modo demostración")}</b> · ${T2("Data is saved only on this device. The AI agent and shared data work in the full version.","Los datos se guardan solo en este dispositivo. El agente IA y los datos compartidos funcionan en la versión completa.")} <button class="chip" data-act="resetDemo">${T2("Reset demo","Reiniciar demo")}</button></div>`:""); if(S.animals.some(a=>a.sample)||S.staff.some(s=>s.sample)) h+=`<div class="demo">${t("sample")}</div>`; if(!S.canWrite) h+=`<div class="demo">${t("readOnly")}</div>`; return h; }
 
 function render(){
 renderNav();
@@ -625,7 +655,7 @@ return me.role==="admin" ? (Date.now()-new Date(since).getTime())<ADMIN_TTL : ne
 function endSession(msgEn,msgEs){ S.me=null; LS.set("sh.me",null); LS.set("sh.since",null); closeSheet(); render(); window.scrollTo(0,0); if(msgEn) toast(T2(msgEn,msgEs)); }
 function gateShell(inner){ const em=document.querySelector(".brand img")?.src||"";
 return `<div class="gate"><div class="gate-tools"><div class="seg flags" role="group" aria-label="${t("langLabel")}"><button data-lang="en" aria-pressed="${lang==="en"}" aria-label="English">${FLAG_US}</button><button data-lang="es" aria-pressed="${lang==="es"}" aria-label="Español">${FLAG_ES}</button></div></div>
-<img class="gate-logo" src="${em}" alt="La Finca Pastoreo · Regenerativo · Puerto Rico"><div class="gate-tag">Shepherd Farm OS</div>${inner}</div>`; }
+${installBanner()}<img class="gate-logo" src="${em}" alt="La Finca Pastoreo · Regenerativo · Puerto Rico"><div class="gate-tag">Shepherd Farm OS</div>${inner}</div>`; }
 const pinField=(id)=>`<form class="gate-form" id="gateForm" data-id="${esc(id)}"><div class="field"><label class="label" for="gt-pin">PIN</label>
 <input id="gt-pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required autocomplete="current-password"></div>
 <div class="gate-err" id="gt-err" role="alert"></div><button class="btn primary" type="submit">${T2("Sign in","Entrar")}</button><button class="linkbtn" type="button" data-forgot="${esc(id)}" style="align-self:center">${T2("Forgot PIN?","¿Olvidó su PIN?")}</button></form>`;
@@ -1182,6 +1212,7 @@ const v=document.getElementById("scVidWrap"); if(v) v.hidden=true;
 scanMsg(reason||T2("Tap the big button, take a photo of the QR code, then tap “Use Photo”.","Toque el botón grande, tome una foto del código QR y luego toque “Usar foto”.")); }
 async function openScanner(){
 closeScanner();
+if(IS_NATIVE && await nativeScan()) return;
 const ov=document.createElement("div"); ov.id="scanOv"; ov.className="scan-ov"; ov.setAttribute("role","dialog");
 ov.innerHTML=`<div class="sc-top"><b>${T2("Scan the farm QR code","Escanee el código QR de la finca")}</b><button class="sc-x" data-scan="close" aria-label="${T2("Close","Cerrar")}">✕</button></div>
 <div id="scVidWrap" class="sc-vid"><video id="scVid" playsinline muted autoplay></video><div class="sc-frame"></div></div>
@@ -2033,6 +2064,8 @@ case "simScan": doClockIn("qr").catch(()=>toast(t("saveErr"))); break;
 case "kiosk": S.view="kiosk"; render(); window.scrollTo(0,0); break;
 case "clockOut": startClockOut(); break;
 case "simOut": checkoutSheet(); break;
+case "installApp": if(installEvt){ installEvt.prompt(); installEvt.userChoice.finally(()=>{ installEvt=null; render(); }); } break;
+case "installDismiss": LS.set("sh.installDismiss", Date.now()); render(); break;
 case "finishClockOut": doClockOut(true).catch(()=>toast(t("saveErr"))); break;
 case "coSameAll": { const tas=[...document.querySelectorAll("[data-conote]")]; const first=tas.find(x=>x.value.trim().length>=8); if(!first){ toast(T2("Write a reason in one task first.","Escriba primero una razón en una tarea.")); break; } (async()=>{ for(const ta of tas){ const tk=S.tasks.find(x=>x.id===ta.dataset.conote); if(tk) await saveTaskExcuse(tk,ta.value.trim().length>=8?ta.value.trim():first.value.trim()); } toast(T2("Reasons saved","Razones guardadas")); setTimeout(checkoutSheet,250); })(); break; }
 case "toggleSpeak": S.speak=!S.speak; LS.set("sh.speak",S.speak); if(!S.speak) try{speechSynthesis.cancel();}catch{} else sayAloud(T2("Voice replies are on.","Respuestas en voz activadas.")); render(); break;
