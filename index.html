@@ -662,6 +662,7 @@ if(me&&staffStatus(me)==="active"&&!sessionOK(me)){ S.me=null; LS.set("sh.me",nu
 document.body.classList.toggle("signed-out",!me);
 if(!me) html=renderLogin();
 else if(staffStatus(me)!=="active") html=renderOnboarding(me);
+else if(S.lessonK&&TRAIN[S.lessonK]) html=renderLesson(me,S.lessonK);
 else { if(S.view==="dash" && !isAdmin()) S.view="today"; if((S.view==="kiosk"||S.view==="command"||S.view==="records")&&!isAdmin()) S.view="today"; html=({today:renderToday,animals:renderAnimals,agent:renderAgent,dash:renderDash,kiosk:renderKiosk,command:renderCommand,records:renderRecords}[S.view]||renderToday)(); }
 main.innerHTML = html;
 if(!me || staffStatus(me)!=="active"){ for(const [id,val] of Object.entries(keep)){ const x=document.getElementById(id); if(x&&val) x.value=val; } if(focusId) document.getElementById(focusId)?.focus(); return; }
@@ -835,7 +836,7 @@ const counts={}; for(const a of S.animals) counts[a.species]=(counts[a.species]|
 const q=(S.aq||"").trim().toLowerCase();
 const hay=a=>[a.tag,a.name,a.name_es,a.breed,a.sex,a.status,a.status_es,a.pen,a.pen_es,a.color,a.color_es,a.dam,t(a.species),a.species].filter(Boolean).join(" ").toLowerCase();
 const list=S.animals.filter(a=>(S.species==="all"||a.species===S.species)&&(!q||q.split(/\s+/).every(w=>hay(a).includes(w)))).sort((a,b)=>SPECIES.indexOf(a.species)-SPECIES.indexOf(b.species)||String(a.tag).localeCompare(String(b.tag),undefined,{numeric:true}));
-return topbar(t("animals"), `${S.animals.length} ${t("records")}`, (S.canWrite?`${isAdmin()?`<button class="btn voicebtn" data-nav="command">${I.megaphone} ${T2("Command center","Centro de mando")}</button>`:`<button class="btn voicebtn" data-act="voice">${I.mic} ${T2("Voice log","Registro por voz")}</button>`}`:"")+(S.canWrite&&meObj()&&(isAdmin()||SPECIES.some(canWork))?`<button class="btn primary" data-act="addAnimal">${t("addAnimal")}</button>`:"")) + banners() +
+return topbar(t("animals"), `${S.animals.length} ${t("records")}`, (S.canWrite?`${isAdmin()?`<button class="btn voicebtn" data-nav="command">${I.megaphone} ${T2("Command center","Centro de mando")}</button>`:`<button class="btn voicebtn" data-act="voice">${I.mic} ${T2("Voice log","Registro por voz")}</button>`}`:"")+(S.canWrite&&meObj()?`<button class="btn primary" data-act="addAnimal">${t("addAnimal")}</button>`:"")) + banners() +
 `<div class="chips" style="margin-bottom:14px"><button class="chip" data-sp="all" aria-pressed="${S.species==="all"}">${t("all")}</button>${SPECIES.map(s=>`<button class="chip" data-sp="${s}" aria-pressed="${S.species===s}">${t(s)} · ${counts[s]||0}</button>`).join("")}</div>
 <div class="asearch"><input id="aSearch" type="search" autocomplete="off" placeholder="${T2("Search tag, name, breed, pen, color, status…","Buscar arete, nombre, raza, corral, color, estado…")}" value="${esc(S.aq||"")}"><span class="t-meta">${list.length} ${T2("match","resultado")}${list.length===1?"":(lang==="es"?"s":"es")}${q?` · <button class="linkbtn" data-act="aClear">${T2("Clear","Borrar")}</button>`:""}</span></div>
 <div id="aList">${list.length?`<div class="animals">${list.map(animalCard).join("")}</div>`:`<div class="panel empty">${q?T2("No animal matches that search.","Ningún animal coincide con esa búsqueda."):t("noAnimals")}</div>`}</div>`;
@@ -1126,8 +1127,18 @@ openSheet(`<h2>${t("assign")}</h2><form class="stack" id="assignForm">
 <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" class="check sm" id="af-rep" name="recurring">${t("repeat")}</label>
 <div class="inline"><button class="btn primary" type="submit">${t("save")}</button><button class="btn" type="button" data-act="closeSheet">${t("cancel")}</button></div></form>`);
 }
+function noAnimalAccessSheet(){
+const me=meObj(); const mine=(me.areas||[]).filter(sp=>SPECIES.includes(sp)); const todo=mine.map(sp=>AREA_OF[sp]).filter(k=>k&&TRAIN[k]&&!(me.ob&&me.ob.train&&me.ob.train[k]&&me.ob.train[k].passed));
+openSheet(`<h2>${t("addAnimal")}</h2>`+(todo.length?`<p>${T2("To add animals you need to pass the short safety lesson for your animal area first.","Para agregar animales primero debe aprobar la lección corta de seguridad de su área.")}</p>
+<div class="stack">${[...new Set(todo)].map(k=>`<button class="btn primary" data-lesson="${k}">${esc(tr(TRAIN[k].title))}</button>`).join("")}</div>`
+:`<p>${T2("You aren't assigned to any animal area yet (cattle, horses, sheep, pigs or poultry), so you can't add animals.","Todavía no tiene un área de animales asignada (ganado, caballos, ovejas, cerdos o aves), así que no puede agregar animales.")}</p>
+<p class="t-meta">${T2("Ask the administrator to add an animal area to your profile. The safety lesson will then appear here.","Pida al administrador que agregue un área de animales a su perfil. La lección de seguridad aparecerá aquí.")}</p>`)+
+`<div class="inline" style="margin-top:12px"><button class="btn" type="button" data-act="closeSheet">${t("cancel")}</button></div>`); }
+function renderLesson(me,k){ const body=trainBody(me,k);
+return topbar(T2("Safety lesson","Lección de seguridad"),"")+`<section class="card"><div><button class="btn ghost" data-lesson="">← ${T2("Back","Volver")}</button></div>${body}</section>`; }
 let newPhoto=null; // {file,url,ai,err}
 function animalSheet(step){
+if(!isAdmin()&&!SPECIES.some(canWork)){ noAnimalAccessSheet(); return; }
 if(step!=="form"){
 if(newPhoto){ URL.revokeObjectURL(newPhoto.url); newPhoto=null; }
 openSheet(`<h2>${t("addAnimal")}</h2><p class="t-meta">${t("photoFirst")}</p>
@@ -2070,6 +2081,15 @@ if(Object.keys(pub).length) jobs.push(writeDoc("staff",id,()=>staffRef(id).updat
 return writeDoc("staff",id,()=>staffRef(id).update(patch)); }
 let obStep=null, quizState={};
 
+function trainBody(me,k){ const m=TRAIN[k], rec=(me.ob&&me.ob.train&&me.ob.train[k])||{}; const qs=quizState[k]||{};
+return `<h2>${esc(tr(m.title))}</h2><ul class="lesson">${m.points.map(p=>`<li>${esc(tr(p))}</li>`).join("")}</ul>
+<h3 class="label" style="margin-top:18px">${T2("Quick check","Comprobación rápida")} · ${T2("all answers must be correct","todas las respuestas deben ser correctas")}</h3>
+<form class="stack" id="obQuiz" data-k="${k}">${m.quiz.map((q,qi)=>`<fieldset class="q ${qs.checked?(qs.wrong&&qs.wrong.includes(qi)?"bad":"good"):""}"><legend>${qi+1}. ${esc(tr(q[0]))}</legend>
+${q[1].map((o,oi)=>`<label><input type="radio" name="q${qi}" value="${oi}" required ${qs.ans&&qs.ans[qi]===oi?"checked":""}> ${esc(tr(o))}</label>`).join("")}</fieldset>`).join("")}
+${qs.checked&&qs.wrong.length?`<div class="demo">${T2("Some answers are wrong. Read the lesson again and retry.","Algunas respuestas están mal. Lea la lección de nuevo e intente otra vez.")}</div>`:""}
+${rec.attempts?`<div class="t-meta">${T2("Attempts","Intentos")}: ${rec.attempts}</div>`:""}
+<div><button class="btn primary" type="submit">${T2("Check answers","Revisar respuestas")}</button></div></form>`;
+}
 function renderOnboarding(me){
 const steps=obSteps(me); if(obStep==null||!steps.includes(obStep)) obStep=steps.find(st=>!stepDone(me,st))||"done";
 const idx=steps.indexOf(obStep); const doneN=steps.filter(st=>st!=="done"&&stepDone(me,st)).length; const total=steps.length-1;
@@ -2099,14 +2119,7 @@ ${isDraftValues()?`<div class="demo">${T2("Draft text. The administrator should 
 <form class="stack" id="obValues"><label style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" class="check sm" id="ob-agree" name="agree" required> ${T2("I have read these values and rules and agree to follow them.","He leído estos valores y reglas y me comprometo a seguirlos.")}</label>
 <div class="field"><label class="label" for="ob-sign">${T2("Type your full name to sign","Escriba su nombre completo para firmar")}</label><input id="ob-sign" name="sign" required></div>
 <div><button class="btn primary" type="submit">${T2("Sign and continue","Firmar y continuar")}</button></div></form>`;
-else if(obStep.startsWith("train:")){ const k=obStep.slice(6), m=TRAIN[k], rec=(me.ob&&me.ob.train&&me.ob.train[k])||{}; const qs=quizState[k]||{};
-body=`<h2>${esc(tr(m.title))}</h2><ul class="lesson">${m.points.map(p=>`<li>${esc(tr(p))}</li>`).join("")}</ul>
-<h3 class="label" style="margin-top:18px">${T2("Quick check","Comprobación rápida")} · ${T2("all answers must be correct","todas las respuestas deben ser correctas")}</h3>
-<form class="stack" id="obQuiz" data-k="${k}">${m.quiz.map((q,qi)=>`<fieldset class="q ${qs.checked?(qs.wrong&&qs.wrong.includes(qi)?"bad":"good"):""}"><legend>${qi+1}. ${esc(tr(q[0]))}</legend>
-${q[1].map((o,oi)=>`<label><input type="radio" name="q${qi}" value="${oi}" required ${qs.ans&&qs.ans[qi]===oi?"checked":""}> ${esc(tr(o))}</label>`).join("")}</fieldset>`).join("")}
-${qs.checked&&qs.wrong.length?`<div class="demo">${T2("Some answers are wrong. Read the lesson again and retry.","Algunas respuestas están mal. Lea la lección de nuevo e intente otra vez.")}</div>`:""}
-${rec.attempts?`<div class="t-meta">${T2("Attempts","Intentos")}: ${rec.attempts}</div>`:""}
-<div><button class="btn primary" type="submit">${T2("Check answers","Revisar respuestas")}</button></div></form>`; }
+else if(obStep.startsWith("train:")) body=trainBody(me,obStep.slice(6));
 else body=`<h2>${T2("You're all set","Todo listo")}</h2><p>${T2("Your training is complete. Your first-week tasks are on your Today list, starting with a farm tour with the administrator.","Su entrenamiento está completo. Sus tareas de la primera semana están en su lista de Hoy, comenzando con un recorrido con el administrador.")}</p>
 <div><button class="btn primary" data-act="obFinish">${T2("Go to my tasks","Ir a mis tareas")}</button></div>`;
 return topbar(T2("New employee setup","Ingreso de nuevo empleado"), `${doneN}/${total} ${T2("steps done","pasos completos")}`) +
@@ -2271,6 +2284,10 @@ ${s.startDate?`<span class="pill mute">${T2("Started","Inició")} ${esc(s.startD
 <dt>${T2("Today's tasks","Tareas de hoy")}</dt><dd>${dn}/${mine.length} ${T2("done","hechas")}</dd>
 <dt>${T2("Training","Entrenamiento")}</dt><dd>${s.ob?`${passed}/${tk.length} ${T2("passed","aprobados")}`:"—"}</dd></dl>
 <h3 class="sp-h3">${T2("Today's tasks","Tareas de hoy")}</h3><div class="list">${mine.length?mine.map(tk=>{ const ex=taskExcuse(tk), dn=taskDoneToday(tk); return `<div class="row"><div class="grow"><b>${esc(L(tk,"title"))}</b><div class="t-meta">${tk.createdTs?T2("Assigned","Asignada")+" "+esc(tk.createdTs.slice(0,10))+" "+esc(fmtTime(tk.createdTs))+" · ":""}${dn?"✓ "+esc(taskStamp(tk)):ex?"⚠ "+esc(L(ex,"note"))+" · "+esc(fmtTime(ex.ts)):T2("Open","Abierta")}</div></div><span class="pill ${dn?"ok":ex?"crit":"warn"}">${dn?T2("Done","Hecha"):ex?T2("Not done","No hecha"):T2("Open","Abierta")}</span></div>`; }).join(""):`<div class="empty">${T2("No tasks today.","Sin tareas hoy.")}</div>`}</div>
+${s.role!=="admin"?`<form id="areasForm" class="stack sp-msg" data-id="${esc(s.id)}"><span class="label">${T2("Work areas","Áreas de trabajo")}</span>
+<div class="chips">${SPECIES.concat(DEPTS).map(sp=>`<label class="chip"><input type="checkbox" name="areas" value="${sp}" ${(s.areas||[]).includes(sp)?"checked":""}> ${t(sp)}</label>`).join("")}</div>
+<div class="t-meta">${T2("New animal areas need a short safety lesson. They'll take it from the Add animal button.","Las áreas nuevas de animales requieren una lección corta. La tomarán desde el botón Agregar animal.")}</div>
+<div><button class="btn" type="submit">${T2("Save areas","Guardar áreas")}</button></div></form>`:""}
 <form id="dmForm" class="stack sp-msg" data-id="${esc(s.id)}"><label class="label" for="dm-text">${T2("Message to","Mensaje para")} ${esc(String(s.name).split(" ")[0])}</label>
 <textarea id="dm-text" name="text" rows="3" required placeholder="${esc(T2("It shows at the top of their Today screen until they tap Got it.","Aparece arriba en su pantalla Hoy hasta que toquen Entendido."))}"></textarea>
 <div class="inline" style="align-items:center;justify-content:space-between"><label class="consent" style="font-size:14px"><input type="checkbox" name="high"> ${T2("Urgent","Urgente")}</label>
@@ -2321,9 +2338,10 @@ for(const [n,en,es,cen,ces,prio] of list) await createTask({title:en,title_es:es
 
 // ---------- events ----------
 document.addEventListener("click", e=>{
-const el=e.target.closest("[data-codone],[data-coskip],[data-staff],[data-legal],[data-theme-set],[data-ack],[data-cmdex],[data-qrmode],[data-adminclock],[data-ev],[data-duedone],[data-nav],[data-lang],[data-act],[data-login],[data-open],[data-sp],[data-suggest],[data-oblang],[data-invite],[data-mic],[data-fill],[data-vpick],[data-say],[data-sayfill],[data-approve],[data-attnok],[data-viskind],[data-visplan],[data-visdone],[data-visarch]"); if(!el) return;
+const el=e.target.closest("[data-codone],[data-coskip],[data-staff],[data-legal],[data-theme-set],[data-ack],[data-cmdex],[data-qrmode],[data-adminclock],[data-ev],[data-duedone],[data-nav],[data-lang],[data-act],[data-login],[data-open],[data-sp],[data-suggest],[data-oblang],[data-invite],[data-mic],[data-fill],[data-vpick],[data-say],[data-sayfill],[data-approve],[data-attnok],[data-viskind],[data-visplan],[data-visdone],[data-visarch],[data-lesson]"); if(!el) return;
 if(el.dataset.act==="closeSheet" && e.target!==el) return;
-if(el.dataset.nav){ S.view=el.dataset.nav; if(S.view!=="animals") S.animalId=null; LS.set("sh.view",S.view); render(); window.scrollTo(0,0); }
+if(el.dataset.lesson!==undefined){ closeSheet(); S.lessonK=el.dataset.lesson||null; render(); window.scrollTo(0,0); return; }
+if(el.dataset.nav){ S.lessonK=null; S.view=el.dataset.nav; if(S.view!=="animals") S.animalId=null; LS.set("sh.view",S.view); render(); window.scrollTo(0,0); }
 else if(el.dataset.themeSet){ theme=el.dataset.themeSet; LS.set("sh.theme",theme); applyTheme(); render(); }
 else if(el.dataset.lang){ lang=el.dataset.lang; LS.set("sh.lang",lang); document.documentElement.lang=lang; render(); }
 else if(el.dataset.login){ const st=S.staff.find(x=>x.id===el.dataset.login); if(st) pinSheet(st); }
@@ -2452,12 +2470,13 @@ const wrong=m.quiz.map((q,i)=>ans[i]===q[2]?-1:i).filter(i=>i>=0); const prev=((
 quizState[k]={ans,checked:true,wrong};
 const rec={attempts,score:m.quiz.length-wrong.length,date:today(),passed:wrong.length===0};
 await saveStaff(me.id,{ob:{train:{[k]:rec}}});
-if(rec.passed){ delete quizState[k]; obNext(me); toast(T2("Passed","Aprobado")); window.scrollTo(0,0); }
+if(rec.passed){ delete quizState[k]; if(S.lessonK){ S.lessonK=null; S.view="animals"; toast(T2("Passed. You can add animals now.","Aprobado. Ya puede agregar animales.")); } else { obNext(me); toast(T2("Passed","Aprobado")); } window.scrollTo(0,0); }
 render(); }
 else if(f.id==="dmForm"){ const id=f.dataset.id, text=String(fd.get("text")||"").trim(); if(!text) return; const me=meObj();
 const btn=f.querySelector('button[type="submit"]'); if(btn) btn.disabled=true;
 try{ await S.db.collection("directives").add({to:[id],text,text_es:text,priority:fd.get("high")?"high":"normal",date:today(),ts:new Date().toISOString(),createdBy:me?me.name:"",createdById:me?me.id:"",acks:{},direct:true});
 toast(T2("Sent. It's on their Today screen.","Enviado. Está en su pantalla Hoy.")); setTimeout(()=>staffSheet(id),150); }catch{ toast(t("saveErr")); if(btn) btn.disabled=false; } }
+else if(f.id==="areasForm"){ const id=f.dataset.id; const areas=fd.getAll("areas").map(String); try{ await saveStaff(id,{areas}); toast(T2("Areas saved","Áreas guardadas")); staffSheet(id); }catch(err){ console.warn(err); toast(t("saveErr")); } }
 else if(f.id==="hireForm"&&LIVE){ const name=String(fd.get("name")||"").trim(); if(!name) return; const areas=fd.getAll("areas").map(String); const btn=f.querySelector('button[type="submit"]'); if(btn) btn.disabled=true;
 const start=String(fd.get("start")||today()), phone=String(fd.get("phone")||"").replace(/[^\d+]/g,"");
 try{ const r=await callFn("createInvite",{name,phone,role:fd.get("role"),areas,startDate:start,langPref:fd.get("lang")});
