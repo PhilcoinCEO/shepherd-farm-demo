@@ -192,7 +192,7 @@ body.signed-out .main{padding-bottom:0}
 .sc-msg{max-width:460px;text-align:center;font-size:1.15rem;line-height:1.4;min-height:1.6em}
 .sc-msg.ok{color:#9BC53D;font-weight:700;font-size:1.5rem}.sc-msg.bad{color:#FFB4A2;font-weight:600}.sc-big{font-size:2rem;vertical-align:middle}
 .sc-fb{width:100%;max-width:460px}.sc-photo{width:100%;justify-content:center;font-size:1.25rem;padding:20px}
-.sc-type{width:100%;max-width:460px;text-align:center;margin-top:auto}.sc-type .linkish{color:#dfe8d8;font-size:1rem}
+.sc-type{width:100%;max-width:460px;text-align:center;margin-bottom:90px}.sc-type .linkish{color:#dfe8d8;font-size:1rem}
 .sc-typerow{display:flex;gap:8px;margin-top:10px}.sc-typerow input{flex:1;font-size:1.3rem;letter-spacing:.12em;text-transform:uppercase;padding:12px;border-radius:10px;border:0;text-align:center}
 .qrtxt{margin-top:10px;font-size:1.05rem}.qrtxt b{font-size:1.6rem;letter-spacing:.14em;font-family:ui-monospace,monospace}
 .toast.toast{z-index:10000}
@@ -1459,7 +1459,7 @@ function stopScanStream(){ if(scanLoop){ clearInterval(scanLoop); scanLoop=null;
 function closeScanner(){ stopScanStream(); scanBusy=false; document.getElementById("scanOv")?.remove(); }
 async function acceptCode(code){
 if(scanBusy) return; scanBusy=true;
-if(clockCfg&&!(await validCode(code))){ scanMsg(T2("That code has expired or isn't the farm code. Try again.","Ese código expiró o no es el de la finca. Intente de nuevo."),"bad"); setTimeout(()=>{ scanBusy=false; },1800); return; }
+if(!LIVE&&clockCfg&&!(await validCode(code))){ scanMsg(T2("That code has expired or isn't the farm code. Try again.","Ese código expiró o no es el de la finca. Intente de nuevo."),"bad"); setTimeout(()=>{ scanBusy=false; },1800); return; }
 stopScanStream(); try{ navigator.vibrate&&navigator.vibrate(120); }catch{}
 scanMsg(`<span class="sc-big">✓</span> ${T2("Got it!","¡Listo!")}`,"ok");
 setTimeout(()=>{ closeScanner(); processClockCode(code); },700); }
