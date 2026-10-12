@@ -146,6 +146,8 @@ form.stack{display:flex;flex-direction:column;gap:10px}
 .attach{display:flex;gap:8px;align-items:center;font-size:13px}
 .attach img{width:44px;height:44px;object-fit:cover;border-radius:6px}
 .suggest{display:flex;gap:6px;flex-wrap:wrap}
+.attn-h{display:flex;align-items:center;justify-content:space-between;gap:8px}.attn-add{font-size:13px}
+.row.attn{background:var(--wheat-soft,rgba(214,170,60,.12));border-radius:10px}.row.attn.high{box-shadow:inset 3px 0 0 var(--crit,#b3261e)}.tag.pin{background:transparent;border-color:transparent}
 .mchips{align-self:flex-start;max-width:min(640px,92%)}
 .empty{color:var(--muted);text-align:center;padding:28px 12px}
 .login{max-width:520px;margin:6vh auto 0}
@@ -458,7 +460,7 @@ Female:"Hembra",Male:"Macho","Castrated male":"Macho castrado",Mixed:"Mixto"};
 const V = v => lang==="es" && VOCAB[v] ? VOCAB[v] : (v||"");
 
 // ---------- state ----------
-const S = { sales:[], speak: LS.get("sh.speak",false), view: LS.get("sh.view","today"), animals:[], tasks:[], staff:[], me: LS.get("sh.me",null),
+const S = { sales:[], attention:[], speak: LS.get("sh.speak",false), view: LS.get("sh.view","today"), animals:[], tasks:[], staff:[], me: LS.get("sh.me",null),
 species:"all", animalId:null, db:null, sample:null, canWrite:true, ready:false, chat:[], busy:false, ctl:null, photo:null };
 const today = () => new Date().toLocaleDateString("en-CA");
 const daysBetween = (a,b) => Math.round((new Date(b+"T12:00")-new Date(a+"T12:00"))/864e5);
@@ -724,8 +726,8 @@ clockCard() + directivesCard() + `<div class="grid cols-2" style="align-items:st
 <div class="bar-track"><div class="bar-fill" style="width:${mine.length?Math.round(doneN/mine.length*100):0}%"></div></div>
 ${sorted.length?sorted.map(taskCard).join(""):`<div class="panel empty">${t("noTasks")}</div>`}
 </section>
-<section class="panel"><h2>${t("alerts")}</h2>
-<div class="list">${care.length?care.map(({a,it,n})=>`<button class="row rowlink" data-open="${esc(a.id)}" data-due="${esc(it.d+"|"+it.what)}" title="${esc(T2("Open","Abrir"))}"><span class="tag ${a.kind==="group"?"group":""}"><span>${esc(a.tag)}</span></span><div class="grow"><b>${esc(L(it,"what"))}</b><div class="t-meta">${esc(L(a,"name")||t(a.species))}</div></div>${duePill(n)}<span class="chev" aria-hidden="true">›</span></button>`).join(""):`<div class="empty">—</div>`}</div>
+<section class="panel">${attnHead()}
+<div class="list">${attnRows()}${care.length?care.map(({a,it,n})=>`<button class="row rowlink" data-open="${esc(a.id)}" data-due="${esc(it.d+"|"+it.what)}" title="${esc(T2("Open","Abrir"))}"><span class="tag ${a.kind==="group"?"group":""}"><span>${esc(a.tag)}</span></span><div class="grow"><b>${esc(L(it,"what"))}</b><div class="t-meta">${esc(L(a,"name")||t(a.species))}</div></div>${duePill(n)}<span class="chev" aria-hidden="true">›</span></button>`).join(""):`<div class="empty">—</div>`}</div>
 <p class="t-meta" style="margin-top:12px">${t("vetNote")}</p>
 </section>
 </div>`;
@@ -833,7 +835,7 @@ ${w?`<div class="inline" style="margin-top:8px"><button class="btn primary sm" d
 ${S.canWrite&&!canWork(a.species)?`<div class="panel lock">🔒 ${T2(`Finish the "${tr(TRAIN[AREA_OF[a.species]].title)}" training before logging entries for this animal.`,`Complete el entrenamiento "${tr(TRAIN[AREA_OF[a.species]].title)}" antes de registrar datos de este animal.`)}</div>`:""}
 ${S.canWrite&&canWork(a.species)?`<div class="panel"><h2>${t("log")}</h2>${logFormHTML(a,null,"lf")}</div>`:""}
 </section>
-<section class="panel timeline"><h2>${t("history")}</h2><div class="list">${(a.events||[]).length?(a.events||[]).slice(0,40).map((e,i)=>`<button class="row rowlink" data-ev="${i}" data-aid="${esc(a.id)}"><span class="when">${esc(e.d)}${e.ts?`<br>${esc(fmtTime(e.ts))}`:""}</span><div class="grow"><span class="pill ${e.type==="health"?"crit":e.type==="treatment"?"warn":"mute"}">${esc(t(e.type))}</span> ${esc(L(e,"note"))}<div class="t-meta">${(e.photoIds&&e.photoIds.length)||e.photoId?`<span class="phcount">${I.camera} ${(e.photoIds||[]).length+(e.photoId?1:0)}</span> `:""}${esc(e.by||"")}${e.instructedBy&&e.instructedBy!=="self"?` · ${T2("by order of","por orden de")} ${esc(instrLabel(e.instructedBy))}`:""}</div></div><span class="chev" aria-hidden="true">›</span></button>`).join(""):`<div class="empty">—</div>`}</div></section>
+<section class="panel timeline"><h2>${t("history")}</h2><div class="list">${(a.events||[]).length?(a.events||[]).slice(0,40).map((e,i)=>`<button class="row rowlink" data-ev="${i}" data-aid="${esc(a.id)}"><span class="when">${esc(e.d)}${e.ts?`<br>${esc(fmtTime(e.ts))}`:""}</span><div class="grow"><span class="pill ${e.type==="health"?"crit":e.type==="treatment"?"warn":"mute"}">${esc(t(e.type))}</span> ${esc(L(e,"note"))}<div class="t-meta">${(e.photoIds&&e.photoIds.length)||e.photoId?`<span class="phcount">${I.camera} ${(e.photoIds||[]).length+(e.photoId?1:0)}</span> `:""}${esc(e.by||"")}${e.instructedBy&&e.instructedBy!=="self"?` · ${T2("by order of","por orden de")} ${esc(instrLabel(e.instructedBy))}`:""}</div></div><span class="chev" aria-hidden="true">›</span></button>`).join(""):(openAttn().length?"":`<div class="empty">—</div>`)}</div></section>
 </div>`;
 }
 function drawSpark(id,pts,unit){
@@ -869,7 +871,7 @@ return topbar(t("dash"), t("farm"), S.canWrite?`${isAdmin()?`<button class="btn 
 ${whosHerePanel()}
 ${pinResetPanel()}${newHiresPanel()}
 <section class="panel"><h2>${t("staffProgress")}</h2><div class="list">${staff.map(({s,n,d})=>`<button class="row rowlink" data-staff="${esc(s.id)}"><span class="avatar">${esc(initials(s.name))}</span><div class="grow"><b>${esc(s.name)}</b> <span class="t-meta">${esc(areaLabel(s))}</span><div class="bar-track" style="margin-top:6px"><div class="bar-fill" style="width:${n?Math.round(d/n*100):0}%"></div></div></div><span class="pill ${n&&d===n?"ok":"mute"}">${d}/${n}</span><span class="chev" aria-hidden="true">›</span></button>`).join("")||`<div class="empty">—</div>`}</div></section>
-<section class="panel"><h2>${t("alerts")}</h2><div class="list">${care.length?care.slice(0,10).map(({a,it,n})=>`<button class="row rowlink" data-open="${esc(a.id)}" data-due="${esc(it.d+"|"+it.what)}" title="${esc(T2("Open","Abrir"))}"><span class="tag ${a.kind==="group"?"group":""}"><span>${esc(a.tag)}</span></span><div class="grow"><b>${esc(L(it,"what"))}</b><div class="t-meta">${esc(L(a,"name")||t(a.species))}</div></div>${duePill(n)}<span class="chev" aria-hidden="true">›</span></button>`).join(""):`<div class="empty">—</div>`}</div></section>
+<section class="panel">${attnHead()}<div class="list">${attnRows()}${care.length?care.slice(0,10).map(({a,it,n})=>`<button class="row rowlink" data-open="${esc(a.id)}" data-due="${esc(it.d+"|"+it.what)}" title="${esc(T2("Open","Abrir"))}"><span class="tag ${a.kind==="group"?"group":""}"><span>${esc(a.tag)}</span></span><div class="grow"><b>${esc(L(it,"what"))}</b><div class="t-meta">${esc(L(a,"name")||t(a.species))}</div></div>${duePill(n)}<span class="chev" aria-hidden="true">›</span></button>`).join(""):(openAttn().length?"":`<div class="empty">—</div>`)}</div></section>
 <section class="panel"><h2>${t("recentHealth")}</h2><div class="list">${health.length?health.slice(0,10).map(({a,e})=>`<div class="row"><span class="when t-meta" style="font-family:var(--f-mono);width:84px">${esc(e.d)}</span><div class="grow"><button class="chip" data-open="${esc(a.id)}">${esc(animalLabel(a))}</button> ${esc(L(e,"note"))}<div class="t-meta">${esc(e.by||"")}</div></div></div>`).join(""):`<div class="empty">—</div>`}</div></section>
 </div>`;
 }
@@ -1453,6 +1455,8 @@ const r=localParse(p,null);
 const hasAnimal=!!r.animal_id && /\b(cow|vaca|calf|ternero|horse|caballo|sheep|oveja|pig|cerdo|sow|cerda|hen|gallina|flock|lote|ram|carnero|\d{2,})\b/.test(low);
 const prio=/\b(urgent|asap|priority|important|now|urgente|prioridad|importante|ya)\b/.test(low)?"high":"normal";
 let date=r.due_date||today(); if(/\btomorrow|mañana\b/.test(low)){ const d=new Date(); d.setDate(d.getDate()+1); date=d.toLocaleDateString("en-CA"); }
+const attnRe=/^(needs attention|attention|flag|note|watch|reminder|keep an eye on|don't forget|requiere atención|requiere atencion|atención|atencion|nota|ojo|vigilar|pendiente|no olvidar)\b[:,\s-]*/i;
+if(attnRe.test(p)||/\b(needs attention|requiere atención|keep an eye on)\b/.test(low)){ let txt=p.replace(/^(needs attention|attention|flag|note|reminder|requiere atenci[oó]n|atenci[oó]n|nota|pendiente)\s*[:\-–]\s*/i,"").trim()||p; txt=txt.charAt(0).toUpperCase()+txt.slice(1); acts.push({type:"attention",text_en:txt,text_es:txt,priority:prio,animal_id:r.animal_id||null}); continue; }
 if(/\bclock (in|me in)\b|marca(r)? (la )?entrada/.test(low) && people.length){ people.forEach(id=>acts.push({type:"clockin",staff_id:id})); continue; }
 if(hasAnimal && !people.length && !all){ if(r.due_date) acts.push({type:"care",animal_id:r.animal_id,date:r.due_date,what_en:r.due_what_en,what_es:r.due_what_es}); else acts.push({type:"log",animal_id:r.animal_id,entry:r.type,note_en:p,note_es:p,weight_lb:r.weight_lb}); continue; }
 const isTask=/\b(task|tarea|assign|asigna|needs? to|has to|must|clean|limpia|fix|arregla|repair|feed|alimenta|check|revisa|move|mueve|bring|trae|pick up|recoge|build|paint|pinta)\b/.test(low);
@@ -1475,6 +1479,7 @@ Reply with only JSON: {"actions":[...]} where each action is one of:
 {"type":"care","animal_id":"...","date":"YYYY-MM-DD","what_en":"...","what_es":"..."}  — schedule future animal care
 {"type":"log","animal_id":"...","entry":"health"|"treatment"|"feed"|"movement"|"breeding"|"obs","note_en":"...","note_es":"...","weight_lb":number|null}
 {"type":"clockin","staff_id":"..."}
+{"type":"attention","text_en":"...","text_es":"...","priority":"high"|"normal","animal_id":"..." or null}  — a note pinned to the administrator's Needs attention list (use when they say "needs attention", "note", "flag", "keep an eye on", "don't forget", or something to watch that isn't a task for one person)
 Write text_en/text_es as clean, direct sentences addressed to the employee. Never invent staff or animals that are not listed; if a name is unclear, use a directive to "all" and say who in the text.`,{modelTier:"default",cache:false});
 }
 let cmdPlan=null;
@@ -1487,13 +1492,14 @@ case "directive": return [I.megaphone,T2("Directive","Directiva"),`${who(a.to)}$
 case "task": return [I.today,T2("Task","Tarea"),`${staffName(a.assignee)} · ${a.date||today()}`,tx(a,"title"),a.priority];
 case "care": return [I.animals,T2("Schedule care","Programar cuidado"),`${an(a.animal_id)} · ${a.date}`,tx(a,"what"),"normal"];
 case "log": return [I.animals,T2("Animal log","Registro de animal"),an(a.animal_id),tx(a,"note"),"normal"];
+case "attention": return ["📌",T2("Needs attention note","Nota de atención"),a.animal_id?an(a.animal_id):T2("Dashboard · Needs attention","Panel · Requiere atención"),tx(a,"text"),a.priority];
 case "clockin": return [I.qr,T2("Clock in","Marcar entrada"),staffName(a.staff_id),T2("Clock in now, entered by administrator","Entrada ahora, registrada por el administrador"),"normal"];
 } return ["","?","",JSON.stringify(a),"normal"];
 }
 function renderCommand(){
 const d=today(); const recent=directives.slice().sort((a,b)=>String(b.ts).localeCompare(String(a.ts))).slice(0,12);
 const recips=x=>x.to==="all"?S.staff.filter(s=>staffStatus(s)==="active"&&s.role!=="admin"):S.staff.filter(s=>(x.to||[]).includes(s.id));
-const ex=[T2("Everyone: no visitors in the coop today.","Todos: hoy no se permiten visitas en el gallinero."),T2("Daniel, fix the north fence before noon. Urgent.","Daniel, arregla la cerca norte antes del mediodía. Urgente."),T2("María and Ana: start with the farrowing pen tomorrow morning.","María y Ana: mañana temprano empiecen por el corral de parto."),T2("Cow 248 needs her vaccination on November 17.","La vaca 248 necesita su vacuna el 17 de noviembre.")];
+const ex=[T2("Everyone: no visitors in the coop today.","Todos: hoy no se permiten visitas en el gallinero."),T2("Daniel, fix the north fence before noon. Urgent.","Daniel, arregla la cerca norte antes del mediodía. Urgente."),T2("María and Ana: start with the farrowing pen tomorrow morning.","María y Ana: mañana temprano empiecen por el corral de parto."),T2("Cow 248 needs her vaccination on November 17.","La vaca 248 necesita su vacuna el 17 de noviembre."),T2("Needs attention: order layer feed before Friday. Urgent.","Requiere atención: pedir alimento de ponedoras antes del viernes. Urgente.")];
 return topbar(T2("Command center","Centro de mando"),T2("Give directives, assign work and update records by voice or text","Dé directivas, asigne trabajo y actualice registros por voz o texto"))+banners()+
 `<div class="grid cols-2" style="align-items:start"><section class="panel cmd">
 <div class="voice"><label class="label" for="cmd-in">${T2("Say or type your instructions","Diga o escriba sus instrucciones")}</label>
@@ -1532,6 +1538,7 @@ await S.db.collection("directives").add({to,text:String(a.text_en||a.text_es||""
 else if(a.type==="task"){ if(!S.staff.some(s=>s.id===a.assignee)) throw 0; await createTask({title:a.title_en||a.title_es,title_es:a.title_es||a.title_en,assignee:a.assignee,date:a.date||today(),priority:a.priority==="high"?"high":"normal",area:T2("Admin directive","Directiva"),area_es:"Directiva",checklist:a.checklist_en||[],checklist_es:a.checklist_es||[]}); }
 else if(a.type==="care"){ const an=S.animals.find(x=>x.id===a.animal_id); if(!an||!a.date) throw 0; await addEvent(an.id,{type:"obs",due:{d:a.date,what:a.what_en||a.what_es||"Follow-up",what_es:a.what_es||a.what_en||"Seguimiento"},meta:{via:"command"}}); }
 else if(a.type==="log"){ const an=S.animals.find(x=>x.id===a.animal_id); if(!an) throw 0; const o={type:a.entry||"obs",note:a.note_en||a.note_es||"",note_es:a.note_es||a.note_en||"",meta:{via:"command"}}; if(a.weight_lb) o.lb=Number(a.weight_lb); await addEvent(an.id,o); }
+else if(a.type==="attention"){ await S.db.collection("attention").add({text:a.text_en||a.text_es||"",text_es:a.text_es||a.text_en||"",priority:a.priority==="high"?"high":"normal",animalId:a.animal_id&&S.animals.some(x=>x.id===a.animal_id)?a.animal_id:"",by:me.name,byId:me.id,ts,date:today(),resolved:false}); }
 else if(a.type==="clockin"){ const st=S.staff.find(s=>s.id===a.staff_id); if(!st) throw 0; await S.db.collection("clock").doc(clockId(st.id,today())).set({staffId:st.id,name:st.name,date:today(),in:ts,out:"",method:"admin",note:T2("Command center","Centro de mando"),enteredBy:me.name,enteredAt:ts,shifts:[]}); }
 n++;
 }catch(e){ console.warn("cmd",a,e); fail++; }
@@ -1539,6 +1546,17 @@ n++;
 cmdPlan=null; render(); const b=document.getElementById("cmd-in"); if(b) b.value="";
 toast(fail?T2(`${n} done, ${fail} couldn't be done`,`${n} hechas, ${fail} no se pudieron`):T2(`${n} sent and saved`,`${n} enviadas y guardadas`));
 }
+// ---------- needs-attention notes (admin pins them from the Command center) ----------
+function openAttn(){ return (S.attention||[]).filter(x=>!x.resolved).sort((a,b)=>(a.priority==="high"?0:1)-(b.priority==="high"?0:1)||String(b.ts).localeCompare(String(a.ts))); }
+function attnRows(){ return openAttn().map(x=>{ const an=x.animalId?S.animals.find(y=>y.id===x.animalId):null;
+return `<div class="row attn ${x.priority==="high"?"high":""}"><span class="tag pin"><span>📌</span></span><div class="grow"><b>${esc(L(x,"text"))}</b>
+<div class="t-meta">${x.priority==="high"?`<span class="pill crit">${T2("Priority","Prioridad")}</span> `:""}${esc(x.by||"")} · ${esc(x.date||"")} ${esc(fmtTime(x.ts))}${an?` · <button class="chip" data-open="${esc(an.id)}">${esc(animalLabel(an))}</button>`:""}</div></div>
+${isAdmin()&&S.canWrite?`<button class="chip" data-attnok="${esc(x.id)}">✓ ${T2("Resolve","Resolver")}</button>`:""}</div>`; }).join(""); }
+function attnHead(){ return `<h2 class="attn-h">${t("alerts")}${isAdmin()&&S.canWrite?`<button class="chip attn-add" data-act="attnNew" title="${esc(T2("Add a needs-attention note","Agregar nota de atención"))}">+ ${T2("Note","Nota")}</button>`:""}</h2>`; }
+async function resolveAttn(id){ const me=meObj(); if(!isAdmin()) return;
+try{ await S.db.collection("attention").doc(id).update({resolved:true,resolvedBy:me?.name||"",resolvedAt:new Date().toISOString()}); toast(T2("Resolved","Resuelto")); }catch(e){ console.warn(e); toast(t("saveErr")); } }
+function attnNew(){ S.view="command"; LS.set("sh.view","command"); render(); window.scrollTo(0,0);
+setTimeout(()=>{ const b=document.getElementById("cmd-in"); if(b){ b.value=T2("Needs attention: ","Requiere atención: "); b.focus(); try{ b.setSelectionRange(b.value.length,b.value.length); }catch{} } },50); }
 async function ackDirective(id){ const me=meObj(); const x=directives.find(d=>d.id===id); if(!x||!me) return;
 try{ await writeDoc("directives",id,()=>S.db.collection("directives").doc(id).update({acks:{[me.id]:{ts:new Date().toISOString(),date:today(),name:me.name}}})); toast(T2("Marked as read","Marcado como leído")); }catch{ toast(t("saveErr")); } }
 
@@ -2131,7 +2149,7 @@ for(const [n,en,es,cen,ces,prio] of list) await createTask({title:en,title_es:es
 
 // ---------- events ----------
 document.addEventListener("click", e=>{
-const el=e.target.closest("[data-codone],[data-coskip],[data-staff],[data-legal],[data-theme-set],[data-ack],[data-cmdex],[data-qrmode],[data-adminclock],[data-ev],[data-duedone],[data-nav],[data-lang],[data-act],[data-login],[data-open],[data-sp],[data-suggest],[data-oblang],[data-invite],[data-mic],[data-fill],[data-vpick],[data-say],[data-sayfill],[data-approve]"); if(!el) return;
+const el=e.target.closest("[data-codone],[data-coskip],[data-staff],[data-legal],[data-theme-set],[data-ack],[data-cmdex],[data-qrmode],[data-adminclock],[data-ev],[data-duedone],[data-nav],[data-lang],[data-act],[data-login],[data-open],[data-sp],[data-suggest],[data-oblang],[data-invite],[data-mic],[data-fill],[data-vpick],[data-say],[data-sayfill],[data-approve],[data-attnok]"); if(!el) return;
 if(el.dataset.act==="closeSheet" && e.target!==el) return;
 if(el.dataset.nav){ S.view=el.dataset.nav; if(S.view!=="animals") S.animalId=null; LS.set("sh.view",S.view); render(); window.scrollTo(0,0); }
 else if(el.dataset.themeSet){ theme=el.dataset.themeSet; LS.set("sh.theme",theme); applyTheme(); render(); }
@@ -2157,6 +2175,7 @@ else if(el.dataset.duedone){ completeDue(el.dataset.duedone,el.dataset.key,el); 
 else if(el.dataset.sp){ S.species=el.dataset.sp; render(); }
 else if(el.dataset.suggest){ ask(t(el.dataset.suggest)); }
 else if(el.dataset.approve){ approveAnimal(el.dataset.approve); }
+else if(el.dataset.attnok){ resolveAttn(el.dataset.attnok); }
 else if(el.dataset.say!=null){ ask(el.dataset.say); }
 else if(el.dataset.sayfill!=null){ const ai=document.getElementById("askIn"); if(ai){ ai.value=el.dataset.sayfill; ai.focus(); const i=ai.value.indexOf("  "); try{ ai.setSelectionRange(i>=0?i+1:ai.value.length,i>=0?i+1:ai.value.length); }catch{} } }
 else switch(el.dataset.act){
@@ -2177,6 +2196,7 @@ case "demoScan": pendingClock="ok"; LS.set("sh.qr",Date.now()); adminMode=false;
 
 case "voice": voiceSheet(); break;
 case "cmdParse": cmdParse(); break;
+case "attnNew": attnNew(); break;
 case "cmdRun": cmdRun(); break;
 case "cmdClear": cmdPlan=null; render(); break;
 case "resetDemo": resetDemo(); break;
@@ -2332,7 +2352,7 @@ db.doc("settings/handbook").onSnapshot(d=>{ handbook=d.exists?d.data():null; ren
 db.collection("directives").onSnapshot(snap=>{ directives=snap.docs.map(d=>Object.assign({id:d.id},d.data())); render(); },err=>console.warn("directives",err));
 bind("animals","animals"); bind("tasks","tasks"); bind("staff","staff",(a,b)=>String(a.name).localeCompare(String(b.name)));
 db.doc("settings/clock").onSnapshot(d=>{ clockCfg=d.exists?d.data():null; if(pendingClock&&pendingClock!=="ok"){ const c=pendingClock; pendingClock=null; setTimeout(()=>processClockCode(c),0); } render(); },err=>console.warn("clock",err));
-bind("sales","sales");
+bind("sales","sales"); bind("attention","attention");
 db.collection("clock").onSnapshot(snap=>{ clockAll=snap.docs.map(d=>Object.assign({id:d.id},d.data())); if(S.view==="records") render(); },err=>console.warn("clockAll",err));
 db.collection("clock").where("date","==",today()).onSnapshot(snap=>{ clocks=snap.docs.map(d=>Object.assign({id:d.id},d.data())); render(); },err=>console.warn("clocks",err));
 window.addEventListener("hashchange",()=>{ if(/^#clockin-/.test(location.hash)) setTimeout(handleClockHash,400); });
