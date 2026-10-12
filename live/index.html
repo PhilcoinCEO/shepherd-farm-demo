@@ -603,7 +603,7 @@ function meSquare(st,cls){ return st&&st.photoId?`<img class="${cls}" src="${blo
 function profileSheet(){ const me=meObj(); if(!me) return; openSheet(`<div class="prof"><label class="prof-photo" title="${T2("Change photo","Cambiar foto")}">${meSquare(me,"sq-big")}<span class="prof-cam">${T2("Change photo","Cambiar foto")}</span><input id="profPhotoIn" type="file" accept="image/*" hidden></label>
 <div class="prof-info"><h2 style="margin:0">${esc(me.name)}</h2><div class="t-meta">${me.role==="admin"?t("admin"):t("employee")}${areaLabel(me)?" · "+esc(areaLabel(me)):""}</div>
 ${clocks.find(c=>c.staffId===me.id)?`<div class="t-meta">${T2("Clocked in at ","Entrada a las ")}${fmtTime(clocks.find(c=>c.staffId===me.id).in)}</div>`:""}
-<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn" data-act="closeSheet">${T2("Close","Cerrar")}</button><button class="btn" data-act="switch">${t("switch")}</button></div></div></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn" data-act="closeSheet">${T2("Close","Cerrar")}</button><button class="btn" data-act="logout" style="border-color:var(--crit);color:var(--crit);font-weight:700">⏻ ${T2("Log out","Cerrar sesión")}</button></div>${meObj()&&meObj().role!=="admin"?`<p class="t-meta" style="margin-top:6px">${T2("Logging out does not clock you out. Use Clock out on the Today screen at the end of your shift.","Cerrar sesión no marca su salida. Use Marcar salida en la pantalla Hoy al final del turno.")}</p>`:""}</div></div>
 ${personalInfoForm(me)}`); setTimeout(()=>{ const f=document.getElementById("piForm"); if(f) f.scrollIntoView({block:"start",behavior:"smooth"}); },80); }
 function personalInfoForm(me){ const lg=me.legal||{}; const ad=lg.address||{}; const v=x=>esc(x||"");
 return `<form class="stack pi" id="piForm" style="margin-top:16px"><h3 class="label" style="margin:0">${T2("Personal information","Información personal")}</h3>
@@ -2408,6 +2408,7 @@ else if(el.dataset.say!=null){ ask(el.dataset.say); }
 else if(el.dataset.sayfill!=null){ const ai=document.getElementById("askIn"); if(ai){ ai.value=el.dataset.sayfill; ai.focus(); const i=ai.value.indexOf("  "); try{ ai.setSelectionRange(i>=0?i+1:ai.value.length,i>=0?i+1:ai.value.length); }catch{} } }
 else switch(el.dataset.act){
 case "switch": endSession(); break;
+case "logout": endSession("Logged out.","Sesión cerrada."); break;
 case "profile": profileSheet(); break;
 case "back": S.animalId=null; render(); break;
 case "assign": assignSheet(); break;
