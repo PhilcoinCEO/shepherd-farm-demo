@@ -952,7 +952,7 @@ return topbar(t("agent"), t("vetNote"), canTalk?`<button class="btn ${S.speak?"v
 ${S.chat.map(m=>m.kind==="receipt"?`<div class="receipt">${esc(m.text)}</div>`:`<div class="msg ${m.role==="user"?"user":"ai"}">${m.img?`<img src="${m.img}" alt="">`:""}${esc(m.text)}</div>${m.chips&&m.chips.length?`<div class="suggest mchips">${m.chips.map(c=>c.nav?`<button class="chip" data-nav="${esc(c.nav)}">${esc(c.label)}</button>`:c.open?`<button class="chip" data-open="${esc(c.open)}">${esc(c.label)}</button>`:c.fill?`<button class="chip" data-sayfill="${esc(c.fill)}">${esc(c.label)}</button>`:`<button class="chip" data-say="${esc(c.say)}">${esc(c.label)}</button>`).join("")}</div>`:""}`).join("")}
 ${S.busy?`<div class="msg ai" id="streaming">${esc(S.streamText||t("thinking"))}</div>`:""}
 </div>
-<div class="composer">${!S.sample?`<div class="t-meta">${DEMO?T2("Demo: Shepherd understands tags, names, weights, egg counts, health notes, treatments, dates, moves and vet tasks. Recognizing animals from photos is in the full version.","Demo: Shepherd entiende números de arete, nombres, pesos, huevos, notas de salud, tratamientos, fechas, movimientos y tareas de veterinario. Reconocer animales por foto es parte de la versión completa."):t("noAgent")}</div>`:""}
+<div class="composer">${!S.sample?`<div class="t-meta">${LIVE?T2("Shepherd AI is in basic mode: it understands tags, names, weights, notes, dates, moves and tasks. Full AI turns on when the administrator connects the AI key.","Shepherd IA está en modo básico: entiende aretes, nombres, pesos, notas, fechas, movimientos y tareas. La IA completa se activa cuando el administrador conecte la clave de IA."):DEMO?T2("Demo: Shepherd understands tags, names, weights, egg counts, health notes, treatments, dates, moves and vet tasks. Recognizing animals from photos is in the full version.","Demo: Shepherd entiende números de arete, nombres, pesos, huevos, notas de salud, tratamientos, fechas, movimientos y tareas de veterinario. Reconocer animales por foto es parte de la versión completa."):t("noAgent")}</div>`:""}
 ${S.chat.length===0&&(S.sample||DEMO||LIVE)?`<div class="suggest">${sugg.map(k=>`<button class="chip" data-suggest="${k}">${esc(t(k))}</button>`).join("")}</div>`:""}
 <div class="attach" id="attach" ${S.photo?"":"hidden"}>${S.photo?`<img src="${S.photo.url}" alt=""><span>${S.photo.video?"🎥 ":""}${esc(S.photo.name||S.photo.file.name)}</span><button class="btn ghost" data-act="clearPhoto">✕</button>`:""}</div>
 <form class="bar" id="askForm">
@@ -1350,7 +1350,36 @@ S.me=null; LS.set("sh.me",null); S.ready=true; render(); await liveRoster(); ret
 let claims={}; try{ claims=(await u.getIdTokenResult(true)).claims; }catch{}
 if(!claims.sid){ await FB.auth.signOut(); return; }
 liveStart(claims); }); }
-function liveStart(c){ liveStop(); S.me=c.sid; S.role=c.role; LS.set("sh.me",S.me); if(!LS.get("sh.since",null)) LS.set("sh.since",new Date().toISOString()); S.ready=true; liveListen(c.role,c.sid); render(); }
+// Shepherd AI in the live app: Claude via the shepherdAI Cloud Function (API key stays on the server).
+async function blobB64(blob){ const b=await shrink(blob,1400); const buf=new Uint8Array(await b.arrayBuffer()); let s=""; for(let i=0;i<buf.length;i+=0x8000) s+=String.fromCharCode.apply(null,buf.subarray(i,i+0x8000)); return {type:"image",source:{type:"base64",media_type:"image/jpeg",data:btoa(s)}}; }
+function aiErr(e){ const m={"resource-exhausted":"rate_limited","failed-precondition":"sampling_disabled","permission-denied":"not_granted","unauthenticated":"not_granted"}; const x=new Error(e&&e.message||"AI error"); x.code=m[e&&e.code]||"unavailable"; x.userMsg=e&&e.message; return x; }
+async function aiCall(payload){ try{ return await callFn("shepherdAI",payload); }catch(e){ throw aiErr(e); } }
+function aiText(content){ return (content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n").trim(); }
+function makeLiveSample(){
+const run=async(turns,opts)=>{ opts=opts||{}; const tools=opts.tools||[];
+const msgs=[]; for(const tn of turns){ const role=tn.role==="assistant"?"assistant":"user"; const txt=String(tn.content||""); if(!msgs.length&&role!=="user") continue;
+const last=msgs[msgs.length-1]; if(last&&last.role===role) last.content[0].text+="\n\n"+txt; else msgs.push({role,content:[{type:"text",text:txt}]}); }
+if(opts.images&&opts.images.length&&msgs.length){ const lu=[...msgs].reverse().find(m=>m.role==="user"); const imgs=[]; for(const f of opts.images){ try{ imgs.push(await blobB64(f)); }catch{} } lu.content=imgs.concat(lu.content); }
+const tdefs=tools.map(t=>({name:t.name,description:t.description,input_schema:t.inputSchema||{type:"object",properties:{}}}));
+let text="";
+for(let step=0;step<8;step++){
+if(opts.signal&&opts.signal.aborted){ const x=new Error("cancelled"); x.code="cancelled"; x.text=text; throw x; }
+const r=await aiCall({messages:msgs,tools:tdefs.length?tdefs:undefined,max_tokens:1500});
+const t1=aiText(r.content); if(t1){ text=(text?text+"\n\n":"")+t1; if(opts.onText) opts.onText({text}); }
+const uses=(r.content||[]).filter(b=>b.type==="tool_use"); if(r.stop_reason!=="tool_use"||!uses.length) return {text};
+msgs.push({role:"assistant",content:r.content});
+const results=[]; for(const u of uses){ const tool=tools.find(t=>t.name===u.name); let out, isErr=false;
+try{ if(!tool) throw new Error("Unknown tool "+u.name); out=await tool.execute(u.input||{}); }catch(e){ out=String(e&&e.message||e); isErr=true; }
+results.push({type:"tool_result",tool_use_id:u.id,content:typeof out==="string"?out:JSON.stringify(out??null),is_error:isErr||undefined}); }
+msgs.push({role:"user",content:results}); }
+return {text,truncated:true}; };
+run.json=async(prompt,opts)=>{ opts=opts||{}; const content=[]; for(const f of (opts.images||[])){ try{ content.push(await blobB64(f)); }catch{} } content.push({type:"text",text:prompt});
+const r=await aiCall({messages:[{role:"user",content}],max_tokens:2000}); const t=aiText(r.content).replace(/^```(?:json)?\s*|\s*```$/g,"");
+try{ return JSON.parse(t); }catch{ const m=t.match(/[\[{][\s\S]*[\]}]/); if(m) return JSON.parse(m[0]); const x=new Error("bad json"); x.code="bad_output"; throw x; } };
+run.limits=async()=>({images:true,tools:true}); return run; }
+let liveAIchecked=false;
+async function liveAICheck(){ if(liveAIchecked) return; liveAIchecked=true; try{ const r=await callFn("shepherdAI",{ping:true}); if(r&&r.ok){ S.sample=makeLiveSample(); imgOK=true; render(); } }catch(e){ console.warn("ai check",e&&e.code); liveAIchecked=false; } }
+function liveStart(c){ liveStop(); S.me=c.sid; S.role=c.role; LS.set("sh.me",S.me); if(!LS.get("sh.since",null)) LS.set("sh.since",new Date().toISOString()); S.ready=true; liveListen(c.role,c.sid); render(); if(c.role==="admin"||c.role==="employee") liveAICheck(); }
 async function liveSignInToken(token){ await FB.auth.signInWithCustomToken(token); const u=FB.auth.currentUser; const c=(await u.getIdTokenResult(true)).claims; if(c.sid&&(c.sid!==S.me||c.role!==S.role)) liveStart(c);
 // wait until my own staff record arrives so the screen knows who I am
 for(let i=0;i<40&&!S.staff.some(x=>x.id===c.sid&&x.role);i++) await new Promise(r=>setTimeout(r,100)); return c; }
