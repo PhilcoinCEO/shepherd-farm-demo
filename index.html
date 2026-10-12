@@ -68,6 +68,7 @@ button{cursor:pointer}
 .avatar{width:26px;height:26px;border-radius:50%;background:var(--hay);color:var(--hay-ink);display:grid;place-items:center;font-weight:700;font-size:12px}
 .demo{background:var(--warn-bg);color:var(--fg);border:1px dashed var(--warn);border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:16px}
 .grid{display:grid;gap:16px}
+.vis-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}.vis-card{border:1px solid var(--line,rgba(0,0,0,.12));border-radius:12px;padding:12px 14px;background:rgba(255,255,255,.35)}.vis-card p{margin:6px 0 4px;white-space:pre-wrap}.row.idea.done b{text-decoration:line-through;opacity:.6}.chip.on{background:var(--pasture);color:var(--pasture-ink);border-color:var(--pasture)}
 .dash-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:start}.dash-col{display:grid;gap:16px;align-content:start;min-width:0}
 @media (max-width:720px){.dash-attn{order:-1}}
 .cols-2{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}
@@ -462,7 +463,7 @@ Female:"Hembra",Male:"Macho","Castrated male":"Macho castrado",Mixed:"Mixto"};
 const V = v => lang==="es" && VOCAB[v] ? VOCAB[v] : (v||"");
 
 // ---------- state ----------
-const S = { sales:[], attention:[], speak: LS.get("sh.speak",false), view: LS.get("sh.view","today"), animals:[], tasks:[], staff:[], me: LS.get("sh.me",null),
+const S = { sales:[], attention:[], vision:[], speak: LS.get("sh.speak",false), view: LS.get("sh.view","today"), animals:[], tasks:[], staff:[], me: LS.get("sh.me",null),
 species:"all", animalId:null, db:null, sample:null, canWrite:true, ready:false, chat:[], busy:false, ctl:null, photo:null };
 const today = () => new Date().toLocaleDateString("en-CA");
 const daysBetween = (a,b) => Math.round((new Date(b+"T12:00")-new Date(a+"T12:00"))/864e5);
@@ -891,7 +892,7 @@ const canTalk="speechSynthesis" in window;
 return topbar(t("agent"), t("vetNote"), canTalk?`<button class="btn ${S.speak?"voicebtn":""}" data-act="toggleSpeak" aria-pressed="${!!S.speak}">${I.speaker} ${S.speak?T2("Voice replies on","Respuestas en voz: sí"):T2("Voice replies off","Respuestas en voz: no")}</button>`:"") +
 `<div class="agent"><div class="msgs" id="msgs" aria-live="polite">
 <div class="msg ai">${esc(t("agentIntro"))}</div>
-${S.chat.map(m=>m.kind==="receipt"?`<div class="receipt">${esc(m.text)}</div>`:`<div class="msg ${m.role==="user"?"user":"ai"}">${m.img?`<img src="${m.img}" alt="">`:""}${esc(m.text)}</div>${m.chips&&m.chips.length?`<div class="suggest mchips">${m.chips.map(c=>c.open?`<button class="chip" data-open="${esc(c.open)}">${esc(c.label)}</button>`:c.fill?`<button class="chip" data-sayfill="${esc(c.fill)}">${esc(c.label)}</button>`:`<button class="chip" data-say="${esc(c.say)}">${esc(c.label)}</button>`).join("")}</div>`:""}`).join("")}
+${S.chat.map(m=>m.kind==="receipt"?`<div class="receipt">${esc(m.text)}</div>`:`<div class="msg ${m.role==="user"?"user":"ai"}">${m.img?`<img src="${m.img}" alt="">`:""}${esc(m.text)}</div>${m.chips&&m.chips.length?`<div class="suggest mchips">${m.chips.map(c=>c.nav?`<button class="chip" data-nav="${esc(c.nav)}">${esc(c.label)}</button>`:c.open?`<button class="chip" data-open="${esc(c.open)}">${esc(c.label)}</button>`:c.fill?`<button class="chip" data-sayfill="${esc(c.fill)}">${esc(c.label)}</button>`:`<button class="chip" data-say="${esc(c.say)}">${esc(c.label)}</button>`).join("")}</div>`:""}`).join("")}
 ${S.busy?`<div class="msg ai" id="streaming">${esc(S.streamText||t("thinking"))}</div>`:""}
 </div>
 <div class="composer">${!S.sample?`<div class="t-meta">${DEMO?T2("Demo: Shepherd understands tags, names, weights, egg counts, health notes, treatments, dates, moves and vet tasks. Recognizing animals from photos is in the full version.","Demo: Shepherd entiende números de arete, nombres, pesos, huevos, notas de salud, tratamientos, fechas, movimientos y tareas de veterinario. Reconocer animales por foto es parte de la versión completa."):t("noAgent")}</div>`:""}
@@ -965,7 +966,7 @@ Rules:
 3. Actions: use the tools to read and write records. After a write, confirm in one line what you saved. Ask a short clarifying question when the person's intent is unclear (for example: log a health note, create a vet task, or both?).
 4. Chickens and pigs are often tracked as flocks or groups; log to the group record.
 5. When someone says an animal needs something on a future date, call schedule_care with that date (next upcoming date if no year). If the tag they said is not on file, say so and list close matches; never create a record for a tag that does not exist.
-6. Staff read records in English and Spanish. Every note and task you save must be written in both languages (the _en and _es fields), whichever language the person used.`;
+6. Staff read records in English and Spanish. Every note and task you save must be written in both languages (the _en and _es fields), whichever language the person used.`+visionContext();
 }
 async function ask(text){
 if(S.busy) return; if(!S.sample){ if(DEMO) return demoAsk(text); return; } text=String(text||"").trim(); const photo=S.photo;
@@ -1026,6 +1027,7 @@ const receipt=txt=>S.chat.push({kind:"receipt",text:"✓ "+txt});
 S.busy=true; render();
 try{
 const low=text.toLowerCase();
+if(isAdmin()&&/\b(my ideas?|vision|mission|visi[oó]n|misi[oó]n|mis ideas|my heart|mi coraz[oó]n|my dream|mi sueño|founder)\b/.test(low)){ const [txt,ch]=demoVisionReply(); say(txt,ch); return; }
 // 1. which animal?
 let a=null; const r0=text?localParse(text,null):null;
 if(r0&&r0.heard_tag){ const scrub=low.replace(/\d+(?:\.\d+)?\s*(lb|lbs|libras|pounds|eggs|huevos|kg|%|days|días|dias)\b/g," ").replace(/\b\d{1,2}\/\d{1,2}\b/g," ").replace(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|ene|abr|ago|dic)[a-z]*\.?\s+\d{1,2}\b/g," ").replace(/\b\d{1,2}\s+de\s+[a-z]+/g," ");
@@ -1523,7 +1525,7 @@ return topbar(T2("Command center","Centro de mando"),T2("Give directives, assign
 return `<div class="row"><div class="grow">${x.priority==="high"?`<span class="pill crit">${T2("Priority","Prioridad")}</span> `:""}<b>${esc(L(x,"text"))}</b>
 <div class="t-meta">${x.to==="all"?T2("Everyone","Todos"):esc(r.map(s=>s.name).join(", "))} · ${esc(x.date||"")} ${esc(fmtTime(x.ts))}</div>
 <div class="chips" style="margin-top:6px">${r.map(s=>{ const a=x.acks&&x.acks[s.id]; return `<span class="pill ${a?"ok":"mute"}">${a?"✓ ":""}${esc(s.name.split(" ")[0])}${a?" "+esc(fmtTime(a.ts)):""}</span>`; }).join("")}</div></div>
-<span class="pill ${ack.length===r.length&&r.length?"ok":"warn"}">${ack.length}/${r.length}</span></div>`; }).join(""):`<div class="empty">${T2("No directives yet.","Sin directivas aún.")}</div>`}</div></section></div>`;
+<span class="pill ${ack.length===r.length&&r.length?"ok":"warn"}">${ack.length}/${r.length}</span></div>`; }).join(""):`<div class="empty">${T2("No directives yet.","Sin directivas aún.")}</div>`}</div></section></div>`+visionPanel();
 }
 function planHTML(){
 if(!cmdPlan.length) return `<div class="demo" style="margin-top:12px">${T2("Couldn't find any actions. Try naming the person or animal.","No se encontraron acciones. Nombre a la persona o al animal.")}</div>`;
@@ -1556,6 +1558,49 @@ n++;
 cmdPlan=null; render(); const b=document.getElementById("cmd-in"); if(b) b.value="";
 toast(fail?T2(`${n} done, ${fail} couldn't be done`,`${n} hechas, ${fail} no se pudieron`):T2(`${n} sent and saved`,`${n} enviadas y guardadas`));
 }
+
+// ---------- founder's Vision · Mission · Ideas (admins only; feeds Shepherd's context) ----------
+let visKind="idea";
+const VKIND={vision:["Vision","Visión","🌄"],mission:["Mission","Misión","🧭"],idea:["Idea","Idea","💡"]};
+function visLatest(k){ return (S.vision||[]).filter(x=>x.kind===k&&!x.archived).sort((a,b)=>String(b.ts).localeCompare(String(a.ts)))[0]||null; }
+function visIdeas(){ return (S.vision||[]).filter(x=>x.kind==="idea"&&!x.archived).sort((a,b)=>(a.status==="done")-(b.status==="done")||String(b.ts).localeCompare(String(a.ts))); }
+function ideaLinks(text){ const low=String(text||"").toLowerCase(); const out=[];
+const SP={cow:/\b(cow|cows|cattle|calf|calves|beef|dairy|milk|vaca|vacas|ganado|ternero|leche)\b/,horse:/\b(horse|horses|riding|caballo|caballos|equin)/,sheep:/\b(sheep|lamb|ewe|wool|oveja|ovejas|cordero)\b/,pig:/\b(pig|pigs|pork|hog|sow|cerdo|cerdos|puerco|lechón)\b/,chicken:/\b(chicken|chickens|hen|hens|egg|eggs|broiler|pollo|pollos|gallina|gallinas|huevo|huevos)\b/};
+for(const [sp,re] of Object.entries(SP)) if(re.test(low)){ const n=S.animals.filter(a=>a.species===sp).reduce((s,a)=>s+(a.kind==="group"?(a.count||0):1),0); out.push(`${n} ${t(sp).toLowerCase()}`); }
+for(const a of S.animals){ const nm=String(a.name||"").toLowerCase(); if((nm&&nm.length>2&&low.includes(nm))||new RegExp("\\b"+String(a.tag).toLowerCase().replace(/[-]/g,"\\-")+"\\b").test(low)) out.push(animalLabel(a)); }
+if(/\b(sell|sale|sales|market|store|grocery|pizzeria|vender|venta|ventas|mercado|tienda)\b/.test(low)&&(S.sales||[]).length) out.push(T2(`${S.sales.length} sales on record`,`${S.sales.length} ventas registradas`));
+if(/\b(staff|team|hire|employee|people|equipo|empleado|personal)\b/.test(low)) out.push(T2(`${S.staff.filter(x=>x.role!=="admin"&&staffStatus(x)==="active").length} active staff`,`${S.staff.filter(x=>x.role!=="admin"&&staffStatus(x)==="active").length} empleados activos`));
+return [...new Set(out)].slice(0,6); }
+function visionPanel(){ if(!isAdmin()) return "";
+const v=visLatest("vision"), m=visLatest("mission"), ideas=visIdeas();
+const card=(k,x)=>`<div class="vis-card"><span class="label">${VKIND[k][2]} ${T2(VKIND[k][0],VKIND[k][1])}</span>${x?`<p>${esc(x.text)}</p><div class="t-meta">${esc(x.by||"")} · ${esc((x.ts||"").slice(0,10))}</div>`:`<p class="t-meta">${k==="vision"?T2("Where is this farm going? What does it look like in 10 years?","¿Hacia dónde va esta finca? ¿Cómo se ve en 10 años?"):T2("Why does this farm exist? Who does it serve?","¿Por qué existe esta finca? ¿A quién sirve?")}</p>`}</div>`;
+return `<section class="panel vis" style="margin-top:16px"><h2>${T2("Vision · Mission · Ideas","Visión · Misión · Ideas")}</h2>
+<p class="t-meta">${T2("Private to administrators. Write or speak what's on your heart for this farm. Shepherd keeps it in mind when you ask for help and connects it to the animals, people and records.","Privado para administradores. Escriba o diga lo que tiene en el corazón para esta finca. Shepherd lo tiene presente cuando usted pide ayuda y lo conecta con los animales, el personal y los registros.")}</p>
+<div class="vis-grid">${card("vision",v)}${card("mission",m)}</div>
+<div class="chips" style="margin:12px 0 8px" role="group">${["idea","vision","mission"].map(k=>`<button class="chip ${visKind===k?"on":""}" data-viskind="${k}" aria-pressed="${visKind===k}">${VKIND[k][2]} ${T2(VKIND[k][0],VKIND[k][1])}</button>`).join("")}</div>
+<div class="voice"><div class="bar"><textarea id="vis-in" class="voicebox" rows="3" placeholder="${esc(visKind==="idea"?T2("e.g. Sell eggs and pork to two local pizzerias by spring.","ej. Vender huevos y cerdo a dos pizzerías locales para la primavera."):visKind==="vision"?T2("e.g. A regenerative family farm that feeds our town and trains young farmers.","ej. Una finca familiar regenerativa que alimenta al pueblo y forma jóvenes agricultores."):T2("e.g. Healthy soil, healthy animals, a better future for our people.","ej. Suelo vivo, animales sanos, un futuro mejor para nuestra gente."))}"></textarea><button type="button" class="iconbtn mic" data-mic="vis-in" title="${T2("Speak","Hablar")}">${I.mic}</button></div></div>
+<div class="inline" style="margin-top:8px"><button class="btn primary" data-act="visSave">${T2("Save","Guardar")} ${T2(VKIND[visKind][0],VKIND[visKind][1]).toLowerCase()}</button><button class="btn" data-act="visAsk">✨ ${T2("Ask Shepherd about my ideas","Preguntar a Shepherd sobre mis ideas")}</button></div>
+<h3 class="label" style="margin:16px 0 8px">💡 ${T2("Ideas","Ideas")} · ${ideas.filter(x=>x.status!=="done").length}</h3>
+<div class="list">${ideas.length?ideas.map(x=>{ const links=ideaLinks(x.text); return `<div class="row idea ${x.status==="done"?"done":""}"><div class="grow"><b>${esc(x.text)}</b>
+<div class="t-meta">${esc((x.ts||"").slice(0,10))} · ${x.status==="done"?"✓ "+T2("Done","Hecha"):x.status==="planned"?T2("In motion","En marcha"):T2("New","Nueva")}${links.length?` · ${T2("Connects to","Se conecta con")}: ${esc(links.join(", "))}`:""}</div>
+<div class="chips" style="margin-top:6px">${x.status!=="done"?`<button class="chip" data-visplan="${esc(x.id)}">${T2("Turn into tasks","Convertir en tareas")}</button><button class="chip" data-visdone="${esc(x.id)}">✓ ${T2("Done","Hecha")}</button>`:""}<button class="chip" data-visarch="${esc(x.id)}">${T2("Archive","Archivar")}</button></div></div></div>`; }).join(""):`<div class="empty">${T2("No ideas yet. Write the first one above.","Sin ideas aún. Escriba la primera arriba.")}</div>`}</div></section>`; }
+async function visSave(){ const box=document.getElementById("vis-in"); const text=(box?.value||"").trim(); if(!text) return; const me=meObj()||{};
+try{ await S.db.collection("vision").add({kind:visKind,text,lang,by:me.name||"",byId:me.id||"",ts:new Date().toISOString(),date:today(),status:visKind==="idea"?"new":"",archived:false});
+if(box) box.value=""; toast(T2("Saved. Shepherd will keep it in mind.","Guardado. Shepherd lo tendrá presente.")); visKind="idea"; render(); const b2=document.getElementById("vis-in"); if(b2) b2.value=""; }catch(e){ console.warn(e); toast(t("saveErr")); } }
+async function visUpdate(id,patch,msg){ try{ await S.db.collection("vision").doc(id).update(patch); if(msg) toast(msg); }catch(e){ console.warn(e); toast(t("saveErr")); } }
+function visPlan(id){ const x=(S.vision||[]).find(y=>y.id===id); if(!x) return; visUpdate(id,{status:"planned"});
+const b=document.getElementById("cmd-in"); if(b){ b.value=T2(`Needs attention: plan the first step for my idea — ${x.text}`,`Requiere atención: planear el primer paso de mi idea — ${x.text}`); b.focus(); window.scrollTo({top:0,behavior:"smooth"}); } }
+function visionContext(){ if(!isAdmin()) return ""; const v=visLatest("vision"), m=visLatest("mission"), ideas=visIdeas().filter(x=>x.status!=="done").slice(0,15);
+if(!v&&!m&&!ideas.length) return "";
+return `\nThe person you are talking with is the farm's founder/administrator. In their own words:
+${v?"VISION: "+v.text+"\n":""}${m?"MISSION: "+m.text+"\n":""}${ideas.length?"IDEAS:\n"+ideas.map(x=>"- ("+x.date+") "+x.text).join("\n")+"\n":""}When they ask about their vision, mission or ideas, answer from these words, connect them to the actual animals, staff, tasks and sales on file, point out what already supports them and what is missing, and propose small concrete next steps they can approve (tasks, directives, care schedules). Speak to their purpose with respect. Never invent beliefs, goals or facts they did not write.`; }
+function demoVisionReply(){ const v=visLatest("vision"), m=visLatest("mission"), ideas=visIdeas().filter(x=>x.status!=="done");
+if(!v&&!m&&!ideas.length) return [T2("You haven't written your vision, mission or ideas yet. Open the Command center and use Vision · Mission · Ideas; then I'll keep them in mind.","Todavía no ha escrito su visión, misión ni ideas. Abra el Centro de mando y use Visión · Misión · Ideas; luego las tendré presentes."),[{label:T2("Open Command center","Abrir Centro de mando"),nav:"command"}]];
+const out=[]; if(v) out.push("🌄 "+T2("Your vision: ","Su visión: ")+v.text); if(m) out.push("🧭 "+T2("Your mission: ","Su misión: ")+m.text);
+if(ideas.length){ out.push("💡 "+T2("Ideas you're carrying:","Ideas que lleva:")); for(const x of ideas.slice(0,6)){ const l=ideaLinks(x.text); out.push(`• ${x.text}${l.length?"\n   "+T2("On the farm today: ","En la finca hoy: ")+l.join(", "):""}`); } }
+out.push(T2("In the full version I'll turn these into a step-by-step plan with you. For now, tap an idea's \"Turn into tasks\" to start it.","En la versión completa convertiré esto en un plan paso a paso con usted. Por ahora, toque \"Convertir en tareas\" en una idea para empezarla."));
+return [out.join("\n"),[{label:T2("Open my ideas","Abrir mis ideas"),nav:"command"}]]; }
+
 // ---------- needs-attention notes (admin pins them from the Command center) ----------
 function openAttn(){ return (S.attention||[]).filter(x=>!x.resolved).sort((a,b)=>(a.priority==="high"?0:1)-(b.priority==="high"?0:1)||String(b.ts).localeCompare(String(a.ts))); }
 function attnRows(){ return openAttn().map(x=>{ const an=x.animalId?S.animals.find(y=>y.id===x.animalId):null;
@@ -2159,7 +2204,7 @@ for(const [n,en,es,cen,ces,prio] of list) await createTask({title:en,title_es:es
 
 // ---------- events ----------
 document.addEventListener("click", e=>{
-const el=e.target.closest("[data-codone],[data-coskip],[data-staff],[data-legal],[data-theme-set],[data-ack],[data-cmdex],[data-qrmode],[data-adminclock],[data-ev],[data-duedone],[data-nav],[data-lang],[data-act],[data-login],[data-open],[data-sp],[data-suggest],[data-oblang],[data-invite],[data-mic],[data-fill],[data-vpick],[data-say],[data-sayfill],[data-approve],[data-attnok]"); if(!el) return;
+const el=e.target.closest("[data-codone],[data-coskip],[data-staff],[data-legal],[data-theme-set],[data-ack],[data-cmdex],[data-qrmode],[data-adminclock],[data-ev],[data-duedone],[data-nav],[data-lang],[data-act],[data-login],[data-open],[data-sp],[data-suggest],[data-oblang],[data-invite],[data-mic],[data-fill],[data-vpick],[data-say],[data-sayfill],[data-approve],[data-attnok],[data-viskind],[data-visplan],[data-visdone],[data-visarch]"); if(!el) return;
 if(el.dataset.act==="closeSheet" && e.target!==el) return;
 if(el.dataset.nav){ S.view=el.dataset.nav; if(S.view!=="animals") S.animalId=null; LS.set("sh.view",S.view); render(); window.scrollTo(0,0); }
 else if(el.dataset.themeSet){ theme=el.dataset.themeSet; LS.set("sh.theme",theme); applyTheme(); render(); }
@@ -2186,6 +2231,10 @@ else if(el.dataset.sp){ S.species=el.dataset.sp; render(); }
 else if(el.dataset.suggest){ ask(t(el.dataset.suggest)); }
 else if(el.dataset.approve){ approveAnimal(el.dataset.approve); }
 else if(el.dataset.attnok){ resolveAttn(el.dataset.attnok); }
+else if(el.dataset.viskind){ const keep=document.getElementById("vis-in")?.value||""; visKind=el.dataset.viskind; render(); const b=document.getElementById("vis-in"); if(b){ b.value=keep; b.focus(); } }
+else if(el.dataset.visplan){ visPlan(el.dataset.visplan); }
+else if(el.dataset.visdone){ visUpdate(el.dataset.visdone,{status:"done",doneAt:new Date().toISOString()},T2("Marked done","Marcada como hecha")); }
+else if(el.dataset.visarch){ visUpdate(el.dataset.visarch,{archived:true},T2("Archived","Archivada")); }
 else if(el.dataset.say!=null){ ask(el.dataset.say); }
 else if(el.dataset.sayfill!=null){ const ai=document.getElementById("askIn"); if(ai){ ai.value=el.dataset.sayfill; ai.focus(); const i=ai.value.indexOf("  "); try{ ai.setSelectionRange(i>=0?i+1:ai.value.length,i>=0?i+1:ai.value.length); }catch{} } }
 else switch(el.dataset.act){
@@ -2207,6 +2256,8 @@ case "demoScan": pendingClock="ok"; LS.set("sh.qr",Date.now()); adminMode=false;
 case "voice": voiceSheet(); break;
 case "cmdParse": cmdParse(); break;
 case "attnNew": attnNew(); break;
+case "visSave": visSave(); break;
+case "visAsk": S.view="agent"; LS.set("sh.view","agent"); render(); setTimeout(()=>ask(T2("Help me with my vision and ideas for the farm.","Ayúdeme con mi visión e ideas para la finca.")),50); break;
 case "cmdRun": cmdRun(); break;
 case "cmdClear": cmdPlan=null; render(); break;
 case "resetDemo": resetDemo(); break;
@@ -2362,7 +2413,7 @@ db.doc("settings/handbook").onSnapshot(d=>{ handbook=d.exists?d.data():null; ren
 db.collection("directives").onSnapshot(snap=>{ directives=snap.docs.map(d=>Object.assign({id:d.id},d.data())); render(); },err=>console.warn("directives",err));
 bind("animals","animals"); bind("tasks","tasks"); bind("staff","staff",(a,b)=>String(a.name).localeCompare(String(b.name)));
 db.doc("settings/clock").onSnapshot(d=>{ clockCfg=d.exists?d.data():null; if(pendingClock&&pendingClock!=="ok"){ const c=pendingClock; pendingClock=null; setTimeout(()=>processClockCode(c),0); } render(); },err=>console.warn("clock",err));
-bind("sales","sales"); bind("attention","attention");
+bind("sales","sales"); bind("attention","attention"); bind("vision","vision");
 db.collection("clock").onSnapshot(snap=>{ clockAll=snap.docs.map(d=>Object.assign({id:d.id},d.data())); if(S.view==="records") render(); },err=>console.warn("clockAll",err));
 db.collection("clock").where("date","==",today()).onSnapshot(snap=>{ clocks=snap.docs.map(d=>Object.assign({id:d.id},d.data())); render(); },err=>console.warn("clocks",err));
 window.addEventListener("hashchange",()=>{ if(/^#clockin-/.test(location.hash)) setTimeout(handleClockHash,400); });
