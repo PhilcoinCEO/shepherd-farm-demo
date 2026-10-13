@@ -217,6 +217,21 @@ body.signed-out .main{padding-bottom:0}
 .bar-fill{height:100%;background:var(--pasture)}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:600;font-size:14px;z-index:20}
 .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:grid;place-items:center;padding:16px;z-index:10}
+.st-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.st-card{background:var(--card-row,var(--surface));border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;justify-content:space-between}
+.st-name{background:none;border:0;padding:0;text-align:left;color:inherit;display:flex;flex-direction:column;gap:2px;font:inherit;cursor:pointer}
+.st-name:disabled{cursor:default;opacity:1}
+.st-foot{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.st-foot .btn{min-width:44px;font-size:20px;line-height:1}
+.st-total{display:flex;justify-content:space-between;align-items:baseline;border-top:2px solid var(--line);margin:10px 0;padding-top:10px;font-size:18px}
+.st-total b{font-size:26px;color:var(--pasture)}
+.lbl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:10px}
+.lbl{border:1px dashed var(--line);border-radius:8px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;background:#fff;color:#000;break-inside:avoid}
+.lbl code{font-size:11px}
+@media print{ body.printing-labels .app, body.printing-labels .rail, body.printing-labels .no-print{display:none!important}
+body.printing-labels .sheet-bg{position:static!important;background:none!important;padding:0!important}
+body.printing-labels .sheet{max-height:none!important;overflow:visible!important;box-shadow:none!important;width:100%!important}
+body.printing-labels .lbl{border:1px solid #999} }
 .sheet{background:var(--surface);border-radius:12px;padding:18px;width:min(560px,100%);max-height:90vh;overflow-y:auto}
 .photo-drop{display:flex;flex-direction:column;align-items:center;gap:6px;padding:28px 16px;border:2px dashed var(--pasture);border-radius:12px;background:var(--bg);cursor:pointer;text-align:center;margin:12px 0}
 .photo-drop svg{width:40px;height:40px;color:var(--pasture)}
@@ -288,7 +303,7 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 .app>.main{order:1;flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;padding-bottom:24px}
 .brand,.rail-foot{display:none}
 .nav{flex-direction:row;width:100%;justify-content:space-around}
-.nav button{flex-direction:column;gap:2px;font-size:11px;padding:6px 4px}
+.nav button{flex-direction:column;gap:2px;font-size:10px;padding:6px 0;flex:1 1 0;min-width:0;align-items:center;text-align:center;line-height:1.1;letter-spacing:-.2px}
 .topbar h1{font-size:28px}
 .agent{height:calc(100vh - 210px)}
 }
@@ -478,7 +493,7 @@ Female:"Hembra",Male:"Macho","Castrated male":"Macho castrado",Mixed:"Mixto"};
 const V = v => lang==="es" && VOCAB[v] ? VOCAB[v] : (v||"");
 
 // ---------- state ----------
-const S = { sales:[], attention:[], vision:[], speak: LS.get("sh.speak",false), view: LS.get("sh.view","today"), animals:[], tasks:[], staff:[], me: LS.get("sh.me",null),
+const S = { sales:[], products:[], attention:[], vision:[], speak: LS.get("sh.speak",false), view: LS.get("sh.view","today"), animals:[], tasks:[], staff:[], me: LS.get("sh.me",null),
 species:"all", animalId:null, db:null, sample:null, canWrite:true, ready:false, chat:[], busy:false, ctl:null, photo:null };
 const today = () => new Date().toLocaleDateString("en-CA");
 const daysBetween = (a,b) => Math.round((new Date(b+"T12:00")-new Date(a+"T12:00"))/864e5);
@@ -497,6 +512,7 @@ camera:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width=
 mic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
 speaker:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>',
 qr:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>',
+store:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l2-5h14l2 5"/><path d="M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z"/><path d="M5 13v7h14v-7M10 20v-4h4v4"/></svg>',
 megaphone:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10v4h4l7 5V5L7 10z"/><path d="M17 9a4 4 0 0 1 0 6M7 14l1.5 6h3L10 15"/></svg>',
 send:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12 20 4l-6 16-3-7z"/></svg>'
 };
@@ -593,8 +609,8 @@ else await writeDoc("tasks",tk.id,()=>S.db.collection("tasks").doc(tk.id).update
 // ---------- render ----------
 function renderNav(){
 if(meObj() && staffStatus(meObj())!=="active"){ document.getElementById("nav").innerHTML=""; document.getElementById("railNote").textContent=meObj().name; return; }
-const items=[["today",I.today],["animals",I.animals],["agent",I.agent]]; if(isAdmin()){ items.unshift(["command",I.megaphone]); items.push(["dash",I.dash]); items.push(["records",I.sheet]); }
-document.getElementById("nav").innerHTML = items.map(([k,ic])=>`<button data-nav="${k}" ${S.view===k?'aria-current="page"':""}>${ic}<span>${k==="records"?T2("Records","Registros"):t(k)}</span></button>`).join("");
+const items=[["today",I.today],["animals",I.animals],["store",I.store],["agent",I.agent]]; if(isAdmin()){ items.unshift(["command",I.megaphone]); items.push(["dash",I.dash]); items.push(["records",I.sheet]); }
+document.getElementById("nav").innerHTML = items.map(([k,ic])=>`<button data-nav="${k}" ${S.view===k?'aria-current="page"':""}>${ic}<span>${k==="records"?T2("Records","Registros"):k==="store"?T2("Store","Tienda"):t(k)}</span></button>`).join("");
 document.getElementById("railNote").textContent = meObj() ? `${meObj().name} · ${meObj().role==="admin"?t("admin"):t("employee")}` : "";
 }
 const FLAG_US='<svg viewBox="0 0 38 20" width="30" height="16" aria-hidden="true"><rect width="38" height="20" fill="#B22234"/><g fill="#fff"><rect y="1.54" width="38" height="1.54"/><rect y="4.62" width="38" height="1.54"/><rect y="7.69" width="38" height="1.54"/><rect y="10.77" width="38" height="1.54"/><rect y="13.85" width="38" height="1.54"/><rect y="16.92" width="38" height="1.54"/></g><rect width="15.2" height="10.77" fill="#3C3B6E"/><g fill="#fff">'+[...Array(20)].map((_,i)=>`<circle cx="${1.5+(i%5)*3.05+(Math.floor(i/5)%2)*1.5}" cy="${1.4+Math.floor(i/5)*2.6}" r=".55"/>`).join("")+'</g></svg>';
@@ -678,7 +694,7 @@ document.body.classList.toggle("signed-out",!me);
 if(!me) html=renderLogin();
 else if(staffStatus(me)!=="active") html=renderOnboarding(me);
 else if(S.lessonK&&TRAIN[S.lessonK]) html=renderLesson(me,S.lessonK);
-else { if(S.view==="dash" && !isAdmin()) S.view="today"; if((S.view==="kiosk"||S.view==="command"||S.view==="records")&&!isAdmin()) S.view="today"; html=({today:renderToday,animals:renderAnimals,agent:renderAgent,dash:renderDash,kiosk:renderKiosk,command:renderCommand,records:renderRecords}[S.view]||renderToday)(); }
+else { if(S.view==="dash" && !isAdmin()) S.view="today"; if((S.view==="kiosk"||S.view==="command"||S.view==="records")&&!isAdmin()) S.view="today"; html=({today:renderToday,animals:renderAnimals,agent:renderAgent,dash:renderDash,kiosk:renderKiosk,command:renderCommand,records:renderRecords,store:renderStore}[S.view]||renderToday)(); }
 main.innerHTML = html;
 if(!me || staffStatus(me)!=="active"){ for(const [id,val] of Object.entries(keep)){ const x=document.getElementById(id); if(x&&val) x.value=val; } if(focusId) document.getElementById(focusId)?.focus(); return; }
 for(const [id,val] of Object.entries(keep)){ const x=document.getElementById(id); if(x&&val) x.value=val; }
@@ -728,7 +744,8 @@ function signIn(st){ const wasQr=qrOK();
 S.me=st.id; LS.set("sh.me",S.me); LS.set("sh.since",new Date().toISOString()); adminMode=false;
 if(st.role!=="admin"){ LS.set("sh.device",st.id); pendingClock=null; LS.set("sh.qr",0); }
 S.view=st.role==="admin"?"dash":"today"; closeSheet(); render(); window.scrollTo(0,0);
-if(st.role!=="admin"&&wasQr) doClockIn("qr").catch(()=>toast(t("saveErr"))); }
+if(st.role!=="admin"&&wasQr) doClockIn("qr").catch(()=>toast(t("saveErr")));
+if(st.role==="admin") logAdminLogin(st); }
 async function checkPin(st,pin,errEl,form){
 if(!/^\d{4}$/.test(pin)){ errEl.textContent=T2("PIN is 4 digits.","El PIN tiene 4 dígitos."); return false; }
 if(LIVE){ errEl.textContent=T2("Checking…","Verificando…");
@@ -930,6 +947,7 @@ return topbar(t("dash"), t("farm"), S.canWrite?`${isAdmin()?`<button class="btn 
 <div class="dash-cols">
 <div class="dash-col">
 ${whosHerePanel()}
+${adminLoginsPanel()}
 ${pinResetPanel()}${newHiresPanel()}
 </div>
 <div class="dash-col">
@@ -1338,7 +1356,10 @@ on(db.collection("animals"),s=>{ S.animals=docs(s); render(); },"animals");
 on(db.collection("staff"),s=>{ liveStaffDocs=docs(s); liveMergeStaff(); },"staff");
 on(db.doc("settings/handbook"),d=>{ handbook=d.exists?d.data():null; render(); },"handbook");
 on(db.collection("attention"),s=>{ S.attention=docs(s); render(); },"attention");
+on(db.collection("products"),s=>{ S.products=docs(s).sort((a,b)=>String(a.name).localeCompare(String(b.name))); render(); },"products");
 if(role==="admin"){
+on(db.doc("private/site"),d=>{ siteCfg=d.exists?d.data():null; render(); },"site");
+on(db.collection("logins"),s=>{ logins=docs(s); if(S.view==="dash") render(); },"logins");
 on(db.collection("tasks"),s=>{ S.tasks=docs(s); render(); },"tasks");
 on(db.collection("staffPrivate"),s=>{ livePriv={}; s.docs.forEach(d=>livePriv[d.id]=d.data()); liveMergeStaff(); },"priv");
 on(db.collection("directives"),s=>{ directives=docs(s); render(); },"directives");
@@ -1348,6 +1369,7 @@ on(db.collection("vision"),s=>{ S.vision=docs(s); render(); },"vision");
 on(db.collection("clock"),s=>{ clockAll=docs(s); clocks=clockAll.filter(c=>c.date===today()); render(); },"clock");
 } else {
 on(db.collection("tasks").where("assignee","==",sid),s=>{ S.tasks=docs(s); render(); },"tasks");
+on(db.collection("sales").where("byId","==",sid),s=>{ S.sales=docs(s); render(); },"mysales");
 on(db.collection("staffPrivate").doc(sid),d=>{ livePriv[sid]=d.exists?d.data():{}; liveMergeStaff(); },"mePriv");
 let a=[],b=[]; const mergeD=()=>{ const m={}; [...a,...b].forEach(x=>m[x.id]=x); directives=Object.values(m); render(); };
 on(db.collection("directives").where("to","==","all"),s=>{ a=docs(s); mergeD(); },"dirAll");
@@ -1404,6 +1426,10 @@ const KEY="sh.demo.db"; let st=null;
 try{ st=JSON.parse(localStorage.getItem(KEY)||"null"); }catch{}
 if(!st){ st=JSON.parse(JSON.stringify(DEMO_SEED).split("__TODAY__").join(today())); }
 if(!st._em){ const E={admin:"admin@fincapastoreo.example",ana:"ana@fincapastoreo.example",daniel:"daniel@fincapastoreo.example",maria:"maria@fincapastoreo.example"}; for(const [k,v] of Object.entries(E)) if(st.staff&&st.staff[k]&&!st.staff[k].email) st.staff[k].email=v; st._em=1; }
+if(!st._prod){ const now=new Date().toISOString(); const P=(id,name,name_es,price,unit,stock,lowAt,sku,category)=>[id,{name,name_es,price,unit,stock,lowAt,sku,category,track:true,active:true,createdAt:now,updatedAt:now,sample:true}];
+st.products=Object.assign(Object.fromEntries([P("p_eggs","Pasture eggs (dozen)","Huevos de pastoreo (docena)",7,"doz",24,6,"EGG12","Eggs"),P("p_eggs6","Pasture eggs (half dozen)","Huevos de pastoreo (media docena)",4,"ea",10,4,"EGG6","Eggs"),
+P("p_pork","Pork chops","Chuletas de cerdo",9.5,"lb",18,5,"PORKCH","Meat"),P("p_bacon","Bacon","Tocineta",11,"lb",4,5,"BACON","Meat"),P("p_beef","Ground beef","Carne molida",8,"lb",30,8,"BEEFGR","Meat"),
+P("p_lamb","Lamb shoulder","Paleta de cordero",13,"lb",6,3,"LAMBSH","Meat"),P("p_honey","Raw honey","Miel cruda",12,"jar",0,3,"HONEY","Pantry")]),st.products||{}); st._prod=1; }
 if(!st._rec){ st.sales=Object.assign(demoSales(),st.sales||{}); st.clock=Object.assign(demoClocks(),st.clock||{}); st._rec=1; }
 const subs=new Set(); const save=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){ console.warn("demo save",e); toast("Storage full on this device. Use Reset demo."); } };
 const fire=()=>setTimeout(()=>subs.forEach(f=>{ try{f();}catch(e){console.warn(e);} }),0);
@@ -1811,7 +1837,7 @@ try{ await writeDoc("directives",id,()=>S.db.collection("directives").doc(id).up
 // ---------- farm records (admin spreadsheet) ----------
 let clockAll=[];
 const REC={tab:LS.get("sh.rec.tab","activity"),range:LS.get("sh.rec.range","30"),q:"",who:"all",sort:{}};
-const SALE_CH=[["grocery","Grocery store","Supermercado"],["pizzeria","Pizzeria","Pizzería"],["stand","Farm stand","Puesto de la finca"],["wholesale","Wholesale","Al por mayor"],["other","Other","Otro"]];
+const SALE_CH=[["grocery","Grocery store","Supermercado"],["pizzeria","Pizzeria","Pizzería"],["stand","Farm stand","Puesto de la finca"],["wholesale","Wholesale","Al por mayor"],["other","Other","Otro"],["store","Farm store","Tienda de la finca"]];
 function chLabel(k){ const c=SALE_CH.find(x=>x[0]===k)||SALE_CH[4]; return T2(c[1],c[2]); }
 function demoSales(){ const out={}; const items=[["Eggs (dozen)","Huevos (docena)","doz",6,"grocery"],["Eggs (dozen)","Huevos (docena)","doz",6,"stand"],["Farm pizza","Pizza de la finca","ea",18,"pizzeria"],["Pork sausage","Salchicha de cerdo","lb",9,"grocery"],["Whole chicken","Pollo entero","ea",22,"stand"],["Ground beef","Carne molida","lb",8.5,"grocery"]];
 const who=[["maria","María Rivera"],["ana","Ana Colón"],["admin","Farm Administrator"]]; let seed=7; const rnd=()=>{ seed=(seed*9301+49297)%233280; return seed/233280; };
@@ -2459,6 +2485,7 @@ case "skipPhoto": animalSheet("form"); break;
 case "closeSheet": closeSheet(); break;
 case "stop": S.ctl?.abort(); break;
 case "join": codeSheet(); break;
+case "setFarmLoc": if(siteCfg&&siteCfg.lat!=null&&!confirm(T2("Move the farm location to where you are now? Every sign-in will be measured from here.","¿Mover la ubicación de la finca a donde está ahora? Todas las entradas se medirán desde aquí."))) break; setFarmLocation().catch(()=>toast(t("saveErr"))); break;
 case "notme": LS.set("sh.device",null); render(); break;
 case "adminMode": adminMode=true; render(); window.scrollTo(0,0); break;
 case "gateBack": adminMode=false; render(); break;
@@ -2641,6 +2668,184 @@ await S.db.collection("animals").add(doc); closeSheet(); toast(t("saved")); }
 document.addEventListener("keydown", e=>{ if(e.target.id==="askIn" && e.key==="Enter" && !e.shiftKey){ e.preventDefault(); ask(e.target.value); } if(e.key==="Escape") closeSheet(); });
 let rz; window.addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{ if(S.view==="animals"&&S.animalId) drawCharts(); },150);});
 
+// ---------- store front: inventory, scanning, point of sale -> sales records ----------
+const STORE={cart:LS.get("sh.cart",[])||[],q:"",pay:LS.get("sh.pay","cash")||"cash",cust:""};
+const ST_UNITS=["ea","doz","lb","case","bag","jar","bottle"];
+const PAY=[["cash","Cash","Efectivo"],["card","Card","Tarjeta"],["ath","ATH Móvil","ATH Móvil"],["other","Other","Otro"]];
+const money=n=>"$"+(Math.round((Number(n)||0)*100)/100).toFixed(2);
+const prodName=p=>p?(lang==="es"&&p.name_es?p.name_es:p.name):"";
+const prodBySku=code=>S.products.find(p=>p.active!==false&&String(p.sku||"").toLowerCase()===String(code||"").toLowerCase());
+const lowStock=p=>p.track!==false&&(Number(p.stock)||0)<=(Number(p.lowAt)||0);
+function saveCart(){ LS.set("sh.cart",STORE.cart); }
+function cartLines(){ return STORE.cart.map(l=>({l,p:S.products.find(p=>p.id===l.id)})).filter(x=>x.p); }
+function cartTotal(){ return cartLines().reduce((s,{l,p})=>s+l.qty*(Number(p.price)||0),0); }
+function addToCart(id,n=1){ const p=S.products.find(x=>x.id===id); if(!p) return false; const l=STORE.cart.find(x=>x.id===id); const want=(l?l.qty:0)+n;
+if(p.track!==false&&want>(Number(p.stock)||0)){ toast(T2(`Only ${Number(p.stock)||0} ${prodName(p)} in stock.`,`Solo hay ${Number(p.stock)||0} de ${prodName(p)}.`)); return false; }
+if(l) l.qty=want; else STORE.cart.push({id,qty:n}); saveCart(); return true; }
+function storeGridHTML(){ const q=STORE.q.trim().toLowerCase(); const adm=isAdmin()&&S.canWrite;
+const list=S.products.filter(p=>p.active!==false&&(!q||[p.name,p.name_es,p.sku,p.category].some(v=>String(v||"").toLowerCase().includes(q))));
+if(!S.products.length) return `<div class="empty">${adm?T2("No products yet. Tap “+ Product” or scan an item to add it.","Todavía no hay productos. Toque “+ Producto” o escanee un artículo para añadirlo."):T2("The store is empty. An administrator adds products.","La tienda está vacía. Un administrador añade los productos.")}</div>`;
+if(!list.length) return `<div class="empty">—</div>`;
+return `<div class="st-grid">${list.map(p=>{ const s=Number(p.stock)||0; const tr=p.track!==false;
+return `<div class="st-card"><button class="st-name" ${adm?`data-st="edit" data-id="${esc(p.id)}"`:"disabled"}><b>${esc(prodName(p))}</b><span class="t-meta">${money(p.price)} / ${esc(p.unit||"ea")}</span></button>
+<div class="st-foot">${tr?`<span class="pill ${s<=0?"crit":lowStock(p)?"warn":"ok"}">${s<=0?T2("Sold out","Agotado"):s+" "+T2("left","quedan")}</span>`:`<span class="pill mute">${T2("Not tracked","Sin control")}</span>`}
+<button class="btn primary sm" data-st="add" data-id="${esc(p.id)}" ${tr&&s<=0?"disabled":""} aria-label="${esc(T2("Add to sale","Añadir a la venta"))}">+</button></div></div>`; }).join("")}</div>`; }
+function cartHTML(){ const lines=cartLines();
+return `<section class="panel st-cart"><h2 style="margin:0 0 8px">${T2("Current sale","Venta actual")}</h2>
+${lines.length?`<div class="list">${lines.map(({l,p})=>`<div class="row"><div class="grow"><b>${esc(prodName(p))}</b><div class="t-meta">${money(p.price)} × ${l.qty} = ${money(l.qty*p.price)}</div></div>
+<button class="chip" data-st="dec" data-id="${esc(p.id)}" aria-label="−">−</button><b style="min-width:22px;text-align:center">${l.qty}</b><button class="chip" data-st="inc" data-id="${esc(p.id)}" aria-label="+">+</button></div>`).join("")}</div>
+<div class="st-total"><span>${T2("Total","Total")}</span><b>${money(cartTotal())}</b></div>
+<div class="seg" style="flex-wrap:wrap">${PAY.map(([k,en,es])=>`<button data-stpay="${k}" aria-pressed="${STORE.pay===k}">${T2(en,es)}</button>`).join("")}</div>
+<div class="field" style="margin-top:8px"><label class="label" for="stCust">${T2("Customer (optional)","Cliente (opcional)")}</label><input id="stCust" value="${esc(STORE.cust)}"></div>
+<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px"><button class="btn" data-st="clear">${T2("Clear","Borrar")}</button>${S.canWrite?`<button class="btn primary" data-st="checkout">✓ ${T2("Complete sale","Completar venta")}</button>`:""}</div>`
+:`<div class="empty">${T2("Scan an item or tap + to start a sale.","Escanee un artículo o toque + para empezar una venta.")}</div>`}</section>`; }
+function renderStore(){ const adm=isAdmin()&&S.canWrite;
+const td=(S.sales||[]).filter(x=>x.d===today()&&x.channel==="store"); const low=S.products.filter(p=>p.active!==false&&lowStock(p));
+return topbar(T2("Store","Tienda"),T2("Scan, sell and track inventory","Escanee, venda y controle inventario"),
+`<button class="btn primary" data-st="scan">📷 ${T2("Scan to sell","Escanear para vender")}</button>${adm?`<button class="btn" data-st="new">+ ${T2("Product","Producto")}</button><button class="btn" data-st="scanRecv">${T2("Receive stock","Recibir inventario")}</button><button class="btn" data-st="labels">${T2("Print labels","Imprimir etiquetas")}</button>`:""}`)+banners()+
+`<div class="kpis"><div class="kpi"><span class="label">${T2("Store sales today","Ventas de hoy")}</span><b>${money(td.reduce((s,x)=>s+(Number(x.total)||0),0))}</b></div>
+<div class="kpi"><span class="label">${T2("Items sold today","Artículos hoy")}</span><b>${td.reduce((s,x)=>s+(Number(x.qty)||0),0)}</b></div>
+<div class="kpi ${low.length?"crit":""}"><span class="label">${T2("Low or sold out","Poco o agotado")}</span><b>${low.length}</b>${low.length?`<span class="t-meta">${low.slice(0,3).map(p=>esc(prodName(p))).join(", ")}</span>`:""}</div></div>
+<div class="grid cols-2" style="align-items:start">${cartHTML()}
+<section class="panel"><div class="field" style="margin:0 0 10px"><input id="stQ" type="search" placeholder="${esc(T2("Search products","Buscar productos"))}" value="${esc(STORE.q)}"></div><div id="stGrid">${storeGridHTML()}</div></section></div>`; }
+function productSheet(p,sku){ p=p||{}; const v=k=>esc(p[k]!=null?p[k]:"");
+openSheet(`<h2>${p.id?T2("Edit product","Editar producto"):T2("New product","Nuevo producto")}</h2><form class="stack" id="prodForm" data-id="${esc(p.id||"")}">
+<div class="field"><label class="label" for="pf-n">${T2("Name","Nombre")}</label><input id="pf-n" name="name" required value="${v("name")}" placeholder="${esc(T2("Eggs (dozen)","Huevos (docena)"))}"></div>
+<div class="field"><label class="label" for="pf-ne">${T2("Name in Spanish (optional)","Nombre en español (opcional)")}</label><input id="pf-ne" name="name_es" value="${v("name_es")}"></div>
+<div class="inline"><div class="field"><label class="label" for="pf-p">${T2("Price ($)","Precio ($)")}</label><input id="pf-p" name="price" type="number" step="0.01" min="0" required value="${v("price")}"></div>
+<div class="field"><label class="label" for="pf-u">${T2("Unit","Unidad")}</label><select id="pf-u" name="unit">${ST_UNITS.map(u=>`<option ${p.unit===u?"selected":""}>${u}</option>`).join("")}</select></div></div>
+<div class="inline"><div class="field"><label class="label" for="pf-s">${p.id?T2("In stock (correct a count)","En inventario (corregir)"):T2("Starting stock","Inventario inicial")}</label><input id="pf-s" name="stock" type="number" step="1" min="0" value="${p.stock!=null?esc(p.stock):0}"></div>
+<div class="field"><label class="label" for="pf-l">${T2("Warn when at or below","Avisar al llegar a")}</label><input id="pf-l" name="lowAt" type="number" step="1" min="0" value="${p.lowAt!=null?esc(p.lowAt):3}"></div></div>
+<div class="inline"><div class="field"><label class="label" for="pf-k">${T2("Code / barcode","Código / barras")}</label><input id="pf-k" name="sku" value="${esc(p.sku||sku||"")}" placeholder="${esc(T2("Blank = make one","Vacío = crear uno"))}"></div>
+<div class="field"><label class="label" for="pf-c">${T2("Category (optional)","Categoría (opcional)")}</label><input id="pf-c" name="category" value="${v("category")}"></div></div>
+<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" name="track" ${p.track===false?"":"checked"}> ${T2("Track stock for this product","Controlar inventario de este producto")}</label>
+<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">${p.id?`<button type="button" class="btn" data-st="archive" data-id="${esc(p.id)}">${T2("Remove from store","Quitar de la tienda")}</button>`:"<span></span>"}
+<span style="display:flex;gap:8px"><button type="button" class="btn" data-act="closeSheet">${T2("Cancel","Cancelar")}</button><button class="btn primary">${T2("Save","Guardar")}</button></span></div></form>`); }
+function receiveSheet(p){ openSheet(`<h2>${T2("Receive stock","Recibir inventario")}</h2><form class="stack" id="recvForm">
+<div class="field"><label class="label" for="rv-p">${T2("Product","Producto")}</label><select id="rv-p" name="id">${S.products.filter(x=>x.active!==false).map(x=>`<option value="${esc(x.id)}" ${p&&p.id===x.id?"selected":""}>${esc(prodName(x))} (${Number(x.stock)||0})</option>`).join("")}</select></div>
+<div class="inline"><div class="field"><label class="label" for="rv-q">${T2("How many came in","Cuántos entraron")}</label><input id="rv-q" name="qty" type="number" step="1" min="1" required autofocus></div>
+<div class="field"><label class="label" for="rv-n">${T2("Note (optional)","Nota (opcional)")}</label><input id="rv-n" name="note" placeholder="${esc(T2("Morning egg collection","Recogida de huevos"))}"></div></div>
+<div style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="btn" data-act="closeSheet">${T2("Cancel","Cancelar")}</button><button class="btn primary">${T2("Add to stock","Sumar al inventario")}</button></div></form>`); }
+function labelsSheet(){ const list=S.products.filter(p=>p.active!==false);
+openSheet(`<div class="no-print" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2 style="margin:0">${T2("Product labels","Etiquetas")}</h2><span style="display:flex;gap:8px"><button class="btn" data-act="closeSheet">${T2("Close","Cerrar")}</button><button class="btn primary" data-st="print">${T2("Print","Imprimir")}</button></span></div>
+<p class="t-meta no-print">${T2("Stick these on shelves or packages. Scanning a label adds that product to the sale.","Péguelas en estantes o paquetes. Al escanear una etiqueta se añade el producto a la venta.")}</p>
+<div class="lbl-grid">${list.map(p=>`<div class="lbl"><div class="lbl-qr" data-qr="${esc("SHP:"+p.sku)}"></div><b>${esc(prodName(p))}</b><span>${money(p.price)} / ${esc(p.unit||"ea")}</span><code>${esc(p.sku)}</code></div>`).join("")||`<div class="empty">—</div>`}</div>`);
+setTimeout(()=>document.querySelectorAll("[data-qr]").forEach(el=>{ if(window.QRCode) new QRCode(el,{text:el.dataset.qr,width:110,height:110,colorDark:"#000",colorLight:"#fff",correctLevel:QRCode.CorrectLevel.M}); else el.textContent=el.dataset.qr; }),30); }
+// product scanner: QR labels everywhere, retail barcodes where the phone supports them, typed code always
+let pScan={stream:null,loop:null,mode:"sell",last:"",lastT:0};
+function pScanClose(){ if(pScan.loop) clearInterval(pScan.loop); pScan.loop=null; if(pScan.stream) pScan.stream.getTracks().forEach(t=>t.stop()); pScan.stream=null; document.getElementById("pScanOv")?.remove(); if(S.view==="store") render(); }
+function pScanMsg(h,k){ const el=document.getElementById("pScMsg"); if(el){ el.className="sc-msg"+(k?" "+k:""); el.innerHTML=h; } }
+function skuFrom(txt){ txt=String(txt||"").trim(); return /^SHP:/i.test(txt)?txt.slice(4):txt; }
+function onProductCode(raw){ const sku=skuFrom(raw); if(!sku) return; const now=Date.now(); if(sku===pScan.last&&now-pScan.lastT<1800) return; pScan.last=sku; pScan.lastT=now;
+const p=prodBySku(sku); try{ navigator.vibrate&&navigator.vibrate(80); }catch{}
+if(!p){ if(isAdmin()&&S.canWrite){ pScanClose(); productSheet(null,sku); toast(T2("New code. Add the product.","Código nuevo. Añada el producto.")); }
+else pScanMsg(T2(`Code ${esc(sku)} isn't in the store. Ask an administrator to add it.`,`El código ${esc(sku)} no está en la tienda. Pida a un administrador que lo añada.`),"bad"); return; }
+if(pScan.mode==="recv"){ pScanClose(); receiveSheet(p); return; }
+if(addToCart(p.id)){ pScanMsg(`<span class="sc-big">✓</span> ${esc(prodName(p))} · ${money(p.price)} <span class="t-meta">(${T2("in sale","en venta")}: ${STORE.cart.find(x=>x.id===p.id).qty})</span>`,"ok"); const c=document.getElementById("pScCount"); if(c) c.textContent=money(cartTotal()); } }
+async function openProductScanner(mode){ pScanClose(); pScan.mode=mode; pScan.last="";
+const ov=document.createElement("div"); ov.id="pScanOv"; ov.className="scan-ov"; ov.setAttribute("role","dialog");
+ov.innerHTML=`<div class="sc-top"><b>${mode==="recv"?T2("Scan the product you received","Escanee el producto recibido"):T2("Scan items to sell","Escanee para vender")}</b><button class="sc-x" data-pscan="close" aria-label="${T2("Close","Cerrar")}">✕</button></div>
+<div class="sc-vid"><video id="pScVid" playsinline muted autoplay></video><div class="sc-frame"></div></div>
+<div id="pScMsg" class="sc-msg">${T2("Starting camera…","Abriendo cámara…")}</div>
+${mode==="sell"?`<div class="sc-msg">${T2("Sale total","Total")}: <b id="pScCount">${money(cartTotal())}</b></div><button class="btn primary big" data-pscan="close">${T2("Done scanning","Terminé")}</button>`:""}
+<div class="sc-type"><div class="sc-typerow"><input id="pScCode" autocomplete="off" placeholder="${esc(T2("Type a code","Escriba un código"))}"><button class="btn primary" data-pscan="go">OK</button></div></div>`;
+document.body.appendChild(ov);
+const md=navigator.mediaDevices; if(!md||!md.getUserMedia){ pScanMsg(T2("Camera not available. Type the code below.","Cámara no disponible. Escriba el código abajo.")); return; }
+try{ pScan.stream=await md.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720}},audio:false});
+if(!document.getElementById("pScanOv")){ pScanClose(); return; }
+const vid=document.getElementById("pScVid"); vid.srcObject=pScan.stream; await vid.play().catch(()=>{});
+let det=null; if("BarcodeDetector" in window){ try{ const sup=await BarcodeDetector.getSupportedFormats(); const f=["qr_code","ean_13","ean_8","upc_a","upc_e","code_128","code_39"].filter(x=>sup.includes(x)); if(f.length) det=new BarcodeDetector({formats:f}); }catch{} }
+pScanMsg(det&&det.formats!==undefined||det?T2("Point at a label or barcode.","Apunte a una etiqueta o código de barras."):T2("Point at a Shepherd label QR code.","Apunte a la etiqueta QR de Shepherd."));
+const cv=document.createElement("canvas"); const cx=cv.getContext("2d",{willReadFrequently:true});
+pScan.loop=setInterval(async()=>{ if(!vid.videoWidth) return; let txt=null;
+if(det){ try{ const r=await det.detect(vid); if(r&&r[0]) txt=r[0].rawValue; }catch{} }
+if(!txt){ const k=Math.min(1,720/Math.max(vid.videoWidth,vid.videoHeight)); const w=Math.round(vid.videoWidth*k),h=Math.round(vid.videoHeight*k); cv.width=w; cv.height=h; cx.drawImage(vid,0,0,w,h); txt=decodeImageData(cx,w,h); }
+if(txt) onProductCode(txt); },300);
+}catch(e){ pScanMsg(T2("Couldn't open the camera. Type the code below.","No se pudo abrir la cámara. Escriba el código abajo."),"bad"); } }
+async function checkout(){ const lines=cartLines(); if(!lines.length) return; const me=meObj()||{};
+for(const {l,p} of lines) if(p.track!==false&&l.qty>(Number(p.stock)||0)){ toast(T2(`Not enough ${prodName(p)} in stock.`,`No hay suficiente ${prodName(p)}.`)); return; }
+const ts=new Date().toISOString(), order="O"+Date.now().toString(36).toUpperCase(); const pay=PAY.find(x=>x[0]===STORE.pay)||PAY[0];
+const cust=String(document.getElementById("stCust")?.value||"").trim(); const note=[T2(pay[1],pay[2]),cust].filter(Boolean).join(" · ");
+if(LIVE){ try{ const r=await callFn("storeCheckout",{lines:lines.map(({l,p})=>({id:p.id,qty:l.qty})),payment:pay[0],customer:cust});
+STORE.cart=[]; STORE.cust=""; saveCart(); render(); toast(T2(`Sale complete: ${money(r.total)}`,`Venta completada: ${money(r.total)}`)); }
+catch(err){ toast(liveErr(err)); } return; }
+try{ for(const {l,p} of lines){ const price=Number(p.price)||0;
+await S.db.collection("sales").add({d:today(),ts,channel:"store",item:p.name,item_es:p.name_es||p.name,qty:l.qty,unit:p.unit||"ea",price,total:Math.round(l.qty*price*100)/100,note,payment:pay[0],customer:cust,order,productId:p.id,sku:p.sku||"",by:me.name||"",byId:me.id||""});
+if(p.track!==false){ await S.db.collection("products").doc(p.id).update({stock:(Number(p.stock)||0)-l.qty,updatedAt:ts}); p.stock=(Number(p.stock)||0)-l.qty; } }
+const tot=cartTotal(); STORE.cart=[]; STORE.cust=""; saveCart(); render(); toast(T2(`Sale complete: ${money(tot)}`,`Venta completada: ${money(tot)}`));
+}catch(err){ console.warn(err); toast(t("saveErr")); } }
+document.addEventListener("click",e=>{
+const ps=e.target.closest&&e.target.closest("[data-pscan]"); if(ps){ const k=ps.dataset.pscan; if(k==="close") pScanClose(); else if(k==="go"){ const i=document.getElementById("pScCode"); if(i&&i.value.trim()){ pScan.last=""; onProductCode(i.value); i.value=""; } } return; }
+const py=e.target.closest&&e.target.closest("[data-stpay]"); if(py){ STORE.pay=py.dataset.stpay; LS.set("sh.pay",STORE.pay); const c=document.getElementById("stCust"); if(c) STORE.cust=c.value; render(); return; }
+const b=e.target.closest&&e.target.closest("[data-st]"); if(!b) return; const k=b.dataset.st, id=b.dataset.id, p=id&&S.products.find(x=>x.id===id);
+const keepCust=()=>{ const c=document.getElementById("stCust"); if(c) STORE.cust=c.value; };
+if(k==="add"||k==="inc"){ keepCust(); if(addToCart(id)) render(); }
+else if(k==="dec"){ keepCust(); const l=STORE.cart.find(x=>x.id===id); if(l){ l.qty--; if(l.qty<=0) STORE.cart=STORE.cart.filter(x=>x!==l); saveCart(); render(); } }
+else if(k==="clear"){ STORE.cart=[]; STORE.cust=""; saveCart(); render(); }
+else if(k==="checkout") checkout();
+else if(k==="scan") openProductScanner("sell");
+else if(k==="scanRecv"){ if(S.products.length) openProductScanner("recv"); else productSheet(); }
+else if(k==="new") productSheet();
+else if(k==="edit"&&p) productSheet(p);
+else if(k==="labels") labelsSheet();
+else if(k==="print"){ document.body.classList.add("printing-labels"); setTimeout(()=>{ window.print(); setTimeout(()=>document.body.classList.remove("printing-labels"),500); },50); }
+else if(k==="archive"&&p){ if(!confirm(T2("Remove this product from the store? Past sales stay in Records.","¿Quitar este producto de la tienda? Las ventas pasadas quedan en Registros."))) return;
+S.db.collection("products").doc(p.id).update({active:false,updatedAt:new Date().toISOString()}).then(()=>{ closeSheet(); toast(T2("Removed","Quitado")); }).catch(()=>toast(t("saveErr"))); }
+});
+document.addEventListener("keydown",e=>{ if(e.key==="Enter"&&e.target&&e.target.id==="pScCode"){ e.preventDefault(); document.querySelector('[data-pscan="go"]')?.click(); } if(e.key==="Escape"&&document.getElementById("pScanOv")) pScanClose(); });
+document.addEventListener("input",e=>{ if(e.target.id==="stQ"){ STORE.q=e.target.value; const g=document.getElementById("stGrid"); if(g) g.innerHTML=storeGridHTML(); } else if(e.target.id==="stCust") STORE.cust=e.target.value; });
+document.addEventListener("submit",async e=>{
+if(e.target.id==="prodForm"){ e.preventDefault(); const fd=new FormData(e.target); const id=e.target.dataset.id; const ts=new Date().toISOString(); const me=meObj()||{};
+let sku=String(fd.get("sku")||"").trim(); if(!sku) sku="P"+Math.random().toString(36).slice(2,8).toUpperCase();
+const dup=S.products.find(x=>x.active!==false&&x.id!==id&&String(x.sku).toLowerCase()===sku.toLowerCase()); if(dup){ toast(T2(`Code ${sku} is already used by ${prodName(dup)}.`,`El código ${sku} ya lo usa ${prodName(dup)}.`)); return; }
+const d={name:String(fd.get("name")).trim(),name_es:String(fd.get("name_es")||"").trim(),price:Number(fd.get("price"))||0,unit:String(fd.get("unit")),stock:Math.max(0,Math.round(Number(fd.get("stock"))||0)),lowAt:Math.max(0,Math.round(Number(fd.get("lowAt"))||0)),sku,category:String(fd.get("category")||"").trim(),track:!!fd.get("track"),active:true,updatedAt:ts,updatedBy:me.name||""};
+try{ if(id){ const old=S.products.find(x=>x.id===id); await S.db.collection("products").doc(id).update(d);
+if(old&&(Number(old.stock)||0)!==d.stock) await S.db.collection("stockmoves").add({productId:id,name:d.name,delta:d.stock-(Number(old.stock)||0),reason:"count",ts,by:me.name||""}); }
+else { const r=S.db.collection("products").doc(); await r.set(Object.assign(d,{createdAt:ts,createdBy:me.name||""})); if(d.stock) await S.db.collection("stockmoves").add({productId:r.id,name:d.name,delta:d.stock,reason:"start",ts,by:me.name||""}); }
+closeSheet(); toast(T2("Product saved","Producto guardado")); }catch(err){ console.warn(err); toast(t("saveErr")); } }
+else if(e.target.id==="recvForm"){ e.preventDefault(); const fd=new FormData(e.target); const p=S.products.find(x=>x.id===fd.get("id")); const n=Math.round(Number(fd.get("qty"))||0); if(!p||n<=0) return; const ts=new Date().toISOString(); const me=meObj()||{};
+try{ await S.db.collection("products").doc(p.id).update({stock:(Number(p.stock)||0)+n,updatedAt:ts}); await S.db.collection("stockmoves").add({productId:p.id,name:p.name,delta:n,reason:"receive",note:String(fd.get("note")||"").trim(),ts,by:me.name||""});
+closeSheet(); toast(T2(`+${n} ${prodName(p)}`,`+${n} ${prodName(p)}`)); }catch(err){ console.warn(err); toast(t("saveErr")); } }
+});
+
+// ---------- admin sign-in location ----------
+let siteCfg=null, logins=[];
+function distM(a,b,c,d){ const R=6371000,r=x=>x*Math.PI/180; const h=Math.sin(r(c-a)/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(r(d-b)/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
+function getPos(){ return new Promise(res=>{ if(!navigator.geolocation) return res({err:"unavailable"});
+navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude,lng:p.coords.longitude,acc:Math.round(p.coords.accuracy)}),e=>res({err:e&&e.code===1?"denied":"unavailable"}),{enableHighAccuracy:true,timeout:15000,maximumAge:60000}); }); }
+function deviceLabel(){ const u=navigator.userAgent||""; const os=/iPhone/.test(u)?"iPhone":/iPad/.test(u)?"iPad":/Android/.test(u)?"Android":/Mac/.test(u)?"Mac":/Windows/.test(u)?"Windows":"Device";
+const br=/CriOS|Chrome/.test(u)&&!/Edg/.test(u)?"Chrome":/Edg/.test(u)?"Edge":/Firefox|FxiOS/.test(u)?"Firefox":/Safari/.test(u)?"Safari":""; return br?os+" · "+br:os; }
+async function logAdminLogin(st){ try{ const ts=new Date().toISOString(); const p=await getPos(); let status=p.err||"nofarm", dist=null;
+if(!p.err&&siteCfg&&siteCfg.lat!=null){ dist=Math.round(distM(p.lat,p.lng,siteCfg.lat,siteCfg.lng)); const rad=siteCfg.radius||400;
+status=(p.acc||0)>1500?"uncertain":dist<=rad+Math.min(p.acc||0,300)?"onsite":"offsite"; }
+await S.db.collection("logins").doc(st.id+"_"+Date.now()).set({staffId:st.id,name:st.name,role:st.role,ts,date:today(),status,dist,acc:p.acc||null,lat:p.lat!=null?p.lat:null,lng:p.lng!=null?p.lng:null,device:deviceLabel()});
+}catch(e){ console.warn("login log",e); } }
+async function setFarmLocation(){ toast(T2("Getting your location…","Obteniendo su ubicación…")); const p=await getPos();
+if(p.err){ toast(p.err==="denied"?T2("Location is blocked. Allow location for this site and try again.","La ubicación está bloqueada. Permítala para este sitio e intente de nuevo."):T2("Couldn't get a location. Try outdoors.","No se pudo obtener la ubicación. Intente afuera.")); return; }
+const me=meObj(); const hist=((siteCfg&&siteCfg.history)||[]).concat(siteCfg&&siteCfg.lat!=null?[{lat:siteCfg.lat,lng:siteCfg.lng,setBy:siteCfg.setBy,setAt:siteCfg.setAt}]:[]).slice(-10);
+await S.db.doc(LIVE?"private/site":"settings/site").set({lat:p.lat,lng:p.lng,acc:p.acc,radius:400,setBy:me?.name||"",setAt:new Date().toISOString(),history:hist});
+toast(T2("Farm location saved.","Ubicación de la finca guardada.")); }
+function fmtDist(m){ return m>=1000?(m/1000).toFixed(m>=10000?0:1)+" km":m+" m"; }
+function adminLoginsPanel(){
+const wk=new Date(Date.now()-7*864e5).toLocaleDateString("en-CA");
+const list=logins.filter(x=>x.date>=wk).sort((a,b)=>String(b.ts).localeCompare(String(a.ts))).slice(0,12);
+const pill=x=>({onsite:`<span class="pill ok">${T2("On site","En la finca")}</span>`,
+offsite:`<span class="pill crit">${T2("Off site","Fuera de la finca")} · ${fmtDist(x.dist)}</span>`,
+denied:`<span class="pill warn">${T2("Location blocked","Ubicación bloqueada")}</span>`,
+uncertain:`<span class="pill warn">${T2("Location too rough","Ubicación imprecisa")}</span>`,
+nofarm:`<span class="pill mute">${T2("Farm location not set","Finca sin ubicación")}</span>`}[x.status]||`<span class="pill mute">${T2("Location unavailable","Ubicación no disponible")}</span>`);
+const rows=list.map(x=>`<div class="row"><span class="avatar">${esc(initials(x.name||"?"))}</span><div class="grow"><b>${esc(x.name||"")}</b><div class="t-meta">${x.date===today()?T2("Today","Hoy"):esc(x.date)} ${esc(fmtTime(x.ts))} · ${esc(x.device||"")}${x.lat!=null?` · <a href="https://www.google.com/maps?q=${x.lat},${x.lng}" target="_blank" rel="noopener">${T2("Map","Mapa")}</a>`:""}</div></div>${pill(x)}</div>`).join("");
+const set=siteCfg&&siteCfg.lat!=null;
+const admins=S.staff.filter(x=>x.role==="admin"&&staffStatus(x)==="active");
+const roster=admins.map(a=>{ const last=logins.filter(x=>x.staffId===a.id).sort((x,y)=>String(y.ts).localeCompare(String(x.ts)))[0];
+return `<button class="row rowlink" data-staff="${esc(a.id)}">${meSquare(a,"sq")}<div class="grow"><b>${esc(a.name)}</b><div class="t-meta">${T2("Administrator","Administrador")}${last?` · ${T2("last sign-in","última entrada")} ${last.date===today()?T2("today","hoy"):esc(last.date)} ${esc(fmtTime(last.ts))}`:""}</div></div>${last?pill(last):""}</button>`; }).join("");
+return `<section class="panel"><h2 style="margin:0">${T2("Administrators","Administradores")} · ${admins.length}</h2>
+<div class="list" style="margin:8px 0 6px">${roster||`<div class="empty">—</div>`}</div>
+<h3 class="label" style="margin:10px 0 0">${T2("Sign-ins, last 7 days","Entradas, últimos 7 días")}</h3>
+<div class="t-meta" style="margin-top:4px">${set?T2(`Farm location set by ${esc(siteCfg.setBy||"—")} on ${esc(String(siteCfg.setAt||"").slice(0,10))}`,`Ubicación fijada por ${esc(siteCfg.setBy||"—")} el ${esc(String(siteCfg.setAt||"").slice(0,10))}`):T2("Set the farm location once, while standing at the farm, so sign-ins can be marked on site or off site.","Fije la ubicación una vez, estando en la finca, para marcar entradas en la finca o fuera.")}</div>
+${S.canWrite?`<button class="chip" data-act="setFarmLoc" style="margin-top:8px">📍 ${set?T2("Reset farm location to here","Fijar la finca aquí de nuevo"):T2("Set farm location (I'm at the farm)","Fijar ubicación (estoy en la finca)")}</button>`:""}
+<div class="list" style="margin-top:8px">${rows||`<div class="empty">${T2("No admin sign-ins in the last 7 days.","Sin entradas de administradores en 7 días.")}</div>`}</div></section>`;
+}
 // ---------- boot ----------
 document.documentElement.lang=lang;
 render();
@@ -2666,6 +2871,9 @@ db.collection("directives").onSnapshot(snap=>{ directives=snap.docs.map(d=>Objec
 bind("animals","animals"); bind("tasks","tasks"); bind("staff","staff",(a,b)=>String(a.name).localeCompare(String(b.name)));
 db.doc("settings/clock").onSnapshot(d=>{ clockCfg=d.exists?d.data():null; if(pendingClock&&pendingClock!=="ok"){ const c=pendingClock; pendingClock=null; setTimeout(()=>processClockCode(c),0); } render(); },err=>console.warn("clock",err));
 bind("sales","sales"); bind("attention","attention"); bind("vision","vision");
+bind("products","products",(a,b)=>String(a.name).localeCompare(String(b.name)));
+db.doc("settings/site").onSnapshot(d=>{ siteCfg=d.exists?d.data():null; render(); },err=>console.warn("site",err));
+db.collection("logins").onSnapshot(snap=>{ logins=snap.docs.map(d=>Object.assign({id:d.id},d.data())); if(S.view==="dash") render(); },err=>console.warn("logins",err));
 db.collection("clock").onSnapshot(snap=>{ clockAll=snap.docs.map(d=>Object.assign({id:d.id},d.data())); if(S.view==="records") render(); },err=>console.warn("clockAll",err));
 db.collection("clock").where("date","==",today()).onSnapshot(snap=>{ clocks=snap.docs.map(d=>Object.assign({id:d.id},d.data())); render(); },err=>console.warn("clocks",err));
 window.addEventListener("hashchange",()=>{ if(/^#clockin-/.test(location.hash)) setTimeout(handleClockHash,400);
