@@ -247,7 +247,7 @@ body.printing-labels .lbl{border:1px solid #999} }
 .map-bar.draw b{flex:1 1 220px}
 .map-search{display:flex;gap:6px;flex:1 1 260px;min-width:0}.map-search input{flex:1;min-width:0}
 .map-slot{position:relative;isolation:isolate;height:62vh;min-height:320px;border-radius:12px;overflow:hidden;background:#1d2a1a}
-.map-host{position:absolute;inset:0}
+.map-host{position:absolute;inset:0}.map-host.drawing{cursor:crosshair;touch-action:none}.map-host.drawing .leaflet-container,.map-host.drawing.leaflet-container{cursor:crosshair}
 .map-attr{margin-top:6px;font-size:11px}
 .map-steps{margin:0;padding-left:20px;line-height:1.6}
 .zdot{display:inline-block;width:12px;height:12px;border-radius:3px;flex:none;vertical-align:middle;border:1px solid rgba(0,0,0,.25)}
@@ -2921,8 +2921,8 @@ function renderMap(){ const adm=isAdmin()&&S.canWrite!==false; const farmSet=sit
 const days=MAP.period; const list=zones.map(z=>({z,s:zoneStats(z,days)})).sort((a,b)=>b.s.score-a.s.score||String(a.z.name).localeCompare(String(b.z.name)));
 const unmapped=[...new Set(S.animals.filter(a=>a.pen&&a.status!=="sold"&&a.status!=="dead"&&!zoneOf(a.pen,a.pen_es)).map(a=>L(a,"pen")))].sort();
 let tools="";
-if(MAP.mode==="draw") tools=`<div class="map-bar draw"><b>✏️ ${T2(`Tap each corner of the area · ${MAP.pts.length} point${MAP.pts.length===1?"":"s"}`,`Toque cada esquina del área · ${MAP.pts.length} punto${MAP.pts.length===1?"":"s"}`)}</b>
-<button class="btn" data-act="mapUndo" ${MAP.pts.length?"":"disabled"}>↶ ${T2("Undo","Deshacer")}</button><button class="btn primary" data-act="mapFinish" ${MAP.pts.length>=3?"":"disabled"}>✓ ${T2("Finish","Terminar")}</button><button class="btn" data-act="mapCancel">${T2("Cancel","Cancelar")}</button></div>`;
+if(MAP.mode==="draw") tools=`<div class="map-bar draw"><b>✏️ ${MAP.panMode?T2("Move the map, then tap ✏️ Draw to keep drawing.","Mueva el mapa y toque ✏️ Dibujar para seguir."):T2(`Draw around the area with your finger or mouse, or tap each corner · ${MAP.pts.length} point${MAP.pts.length===1?"":"s"}`,`Dibuje alrededor del área con el dedo o el ratón, o toque cada esquina · ${MAP.pts.length} punto${MAP.pts.length===1?"":"s"}`)}</b>
+<button class="btn" data-act="mapPanToggle">${MAP.panMode?"✏️ "+T2("Draw","Dibujar"):"✋ "+T2("Move map","Mover mapa")}</button><button class="btn" data-act="mapUndo" ${MAP.pts.length?"":"disabled"}>↶ ${T2("Undo","Deshacer")}</button><button class="btn primary" data-act="mapFinish" ${MAP.pts.length>=3?"":"disabled"}>✓ ${T2("Finish","Terminar")}</button><button class="btn" data-act="mapCancel">${T2("Cancel","Cancelar")}</button></div>`;
 else if(MAP.mode==="pin") tools=`<div class="map-bar draw"><b>📍 ${T2("Tap the map where the farm entrance or main barn is.","Toque el mapa donde está la entrada o el establo principal.")}</b><button class="btn" data-act="mapCancel">${T2("Cancel","Cancelar")}</button></div>`;
 else tools=`<div class="map-bar"><form id="mapSearch" class="map-search"><input id="mapQ" placeholder="${T2("Search a place, address or paste GPS (18.2, -66.5)","Busque un lugar, dirección o pegue GPS (18.2, -66.5)")}" autocomplete="off"><button class="btn" type="submit">${T2("Go","Ir")}</button></form>
 ${adm?`<button class="btn primary" data-act="mapDraw">＋ ${T2("Trace an area","Trazar un área")}</button><button class="btn" data-act="mapPin">📍 ${farmSet?T2("Move farm pin","Mover pin de la finca"):T2("Place farm pin","Poner pin de la finca")}</button>`:""}
@@ -2966,7 +2966,9 @@ MAP.map=Lf.map(MAP.host,{zoomControl:true,attributionControl:true,maxZoom:21,key
 Lf.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxNativeZoom:19,maxZoom:21,attribution:"Esri, Maxar, Earthstar Geographics"}).addTo(MAP.map);
 Lf.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",{maxNativeZoom:19,maxZoom:21,opacity:.85}).addTo(MAP.map);
 MAP.zl=Lf.layerGroup().addTo(MAP.map);
-MAP.map.on("click",onMapClick); }
+MAP.map.on("click",onMapClick); initFreehand(); }
+const drawing=MAP.mode==="draw"&&!MAP.panMode; MAP.host.classList.toggle("drawing",drawing);
+if(drawing){ MAP.map.dragging.disable(); MAP.map.doubleClickZoom.disable(); } else { MAP.map.dragging.enable(); MAP.map.doubleClickZoom.enable(); }
 setTimeout(()=>MAP.map&&MAP.map.invalidateSize(),0);
 drawZones();
 if(!MAP.fitted){ fitMap(); } }
@@ -2988,8 +2990,24 @@ if(MAP.me) Lf.circleMarker(MAP.me,{radius:8,color:"#fff",weight:3,fillColor:"#1e
 function selectZone(id){ MAP.sel=MAP.sel===id?null:id; render(); const z=zones.find(x=>x.id===MAP.sel);
 if(z&&MAP.map&&z.pts&&z.pts.length) MAP.map.fitBounds(LF().latLngBounds(z.pts.map(p=>[p.lat,p.lng])).pad(.3),{maxZoom:19});
 if(z) setTimeout(()=>document.querySelector(".zdetail")?.scrollIntoView({block:"nearest",behavior:"smooth"}),120); }
-async function onMapClick(e){ const p={lat:+e.latlng.lat.toFixed(7),lng:+e.latlng.lng.toFixed(7)};
-if(MAP.mode==="draw"){ MAP.pts.push(p); render(); return; }
+
+// Freehand tracing: in draw mode, press and drag to outline an area (taps still add single corners).
+function initFreehand(){ const host=MAP.host, Lf=LF(); let st=null;
+const pt=e=>MAP.map.mouseEventToContainerPoint(e);
+host.addEventListener("pointerdown",e=>{ if(MAP.mode!=="draw"||MAP.panMode||e.button>0) return; if(e.target.closest(".leaflet-control")) return;
+st={id:e.pointerId,p0:pt(e),last:pt(e),pts:[MAP.map.mouseEventToLatLng(e)],free:false}; });
+host.addEventListener("pointermove",e=>{ if(!st||e.pointerId!==st.id) return; const p=pt(e);
+if(!st.free){ if(p.distanceTo(st.p0)<7) return; st.free=true; try{ host.setPointerCapture(e.pointerId); }catch{}
+MAP.live=Lf.polyline([],{color:"#fff",weight:3,dashArray:"4 4",interactive:false}).addTo(MAP.map); }
+e.preventDefault(); if(p.distanceTo(st.last)<8) return; st.last=p; st.pts.push(MAP.map.mouseEventToLatLng(e)); MAP.live.setLatLngs(MAP.pts.map(q=>[q.lat,q.lng]).concat(st.pts)); });
+const end=e=>{ if(!st||e.pointerId!==st.id) return; const s0=st; st=null; if(!s0.free) return;
+MAP.justDrew=Date.now(); if(MAP.live){ MAP.map.removeLayer(MAP.live); MAP.live=null; }
+let pts=MAP.pts.concat(s0.pts.map(q=>({lat:+q.lat.toFixed(7),lng:+q.lng.toFixed(7)})));
+if(pts.length>280){ const k=Math.ceil(pts.length/280); pts=pts.filter((_,i)=>i%k===0); }
+(MAP.undo=MAP.undo||[]).push(MAP.pts.length); MAP.pts=pts; render(); if(pts.length>=3) toast(T2("Outline drawn. Tap ✓ Finish to name it, or ↶ Undo.","Contorno dibujado. Toque ✓ Terminar para nombrarlo, o ↶ Deshacer.")); };
+host.addEventListener("pointerup",end); host.addEventListener("pointercancel",end); }
+async function onMapClick(e){ if(MAP.justDrew&&Date.now()-MAP.justDrew<400) return; if(MAP.mode==="draw"&&MAP.panMode) return; const p={lat:+e.latlng.lat.toFixed(7),lng:+e.latlng.lng.toFixed(7)};
+if(MAP.mode==="draw"){ (MAP.undo=MAP.undo||[]).push(MAP.pts.length); MAP.pts.push(p); render(); return; }
 if(MAP.mode==="pin"){ MAP.mode=null; await saveFarmPos(Object.assign({acc:null,via:"map"},p)); MAP.fitted=true; render(); } }
 async function saveFarmPos(p){ const me=meObj(); const hist=((siteCfg&&siteCfg.history)||[]).concat(siteCfg&&siteCfg.lat!=null?[{lat:siteCfg.lat,lng:siteCfg.lng,setBy:siteCfg.setBy,setAt:siteCfg.setAt}]:[]).slice(-10);
 try{ await S.db.doc(LIVE?"private/site":"settings/site").set({lat:p.lat,lng:p.lng,acc:p.acc==null?null:p.acc,via:p.via||"gps",radius:(siteCfg&&siteCfg.radius)||400,setBy:me?.name||"",setAt:new Date().toISOString(),history:hist});
@@ -3014,7 +3032,7 @@ if(zones.some(z=>z.id!==id&&znorm(z.name)===znorm(data.name))){ toast(T2("Anothe
 if(MAP.pending){ data.pts=MAP.pending; data.m2=Math.round(polyArea(MAP.pending)); }
 try{ if(id) await S.db.collection("zones").doc(id).update(data);
 else{ const nid="z_"+Date.now().toString(36); await S.db.collection("zones").doc(nid).set(Object.assign({createdAt:now,createdBy:me?.name||""},data)); MAP.sel=nid; }
-MAP.pending=null; MAP.mode=null; MAP.pts=[]; MAP.redraw=null; closeSheet(); toast(T2("Area saved.","Área guardada.")); render(); }
+MAP.pending=null; MAP.mode=null; MAP.pts=[]; MAP.redraw=null; MAP.panMode=false; closeSheet(); toast(T2("Area saved.","Área guardada.")); render(); }
 catch(err){ console.warn(err); toast(liveErr?liveErr(err):t("saveErr")); } },true);
 async function mapSearch(q){ q=String(q||"").trim(); if(!q||!MAP.map) return;
 const m=q.match(/(-?\d{1,2}\.\d+)\s*[, ]\s*(-?\d{1,3}\.\d+)/)||q.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
@@ -3025,9 +3043,10 @@ MAP.map.setView([c.location.y,c.location.x],c.score>90&&/Address|Point/.test(c.a
 catch{ toast(T2("Search needs signal.","La búsqueda necesita señal.")); } }
 document.addEventListener("click",async e=>{ const zr=e.target.closest("[data-zone]"); if(zr){ selectZone(zr.dataset.zone); return; }
 const b=e.target.closest('[data-act^="map"]'); if(!b) return; const a=b.dataset.act; const z=MAP.sel&&zones.find(x=>x.id===MAP.sel);
-if(a==="mapDraw"||a==="mapDrawNamed"){ MAP.mode="draw"; MAP.pts=[]; MAP.redraw=null; MAP.preset=b.dataset.name||null; MAP.sel=null; render(); toast(T2("Zoom in, then tap each corner.","Acerque el mapa y toque cada esquina.")); }
-else if(a==="mapUndo"){ MAP.pts.pop(); render(); }
-else if(a==="mapCancel"){ MAP.mode=null; MAP.pts=[]; MAP.redraw=null; render(); }
+if(a==="mapDraw"||a==="mapDrawNamed"){ MAP.mode="draw"; MAP.undo=[]; MAP.panMode=false; MAP.pts=[]; MAP.redraw=null; MAP.preset=b.dataset.name||null; MAP.sel=null; render(); toast(T2("Zoom in, then tap each corner.","Acerque el mapa y toque cada esquina.")); }
+else if(a==="mapUndo"){ const n=(MAP.undo||[]).pop(); MAP.pts=MAP.pts.slice(0,n!=null?n:Math.max(0,MAP.pts.length-1)); render(); }
+else if(a==="mapCancel"){ MAP.mode=null; MAP.pts=[]; MAP.redraw=null; MAP.panMode=false; render(); }
+else if(a==="mapPanToggle"){ MAP.panMode=!MAP.panMode; render(); }
 else if(a==="mapFinish"){ if(MAP.pts.length<3) return; const pts=MAP.pts.slice();
 if(MAP.redraw){ const id=MAP.redraw; try{ await S.db.collection("zones").doc(id).update({pts,m2:Math.round(polyArea(pts)),updatedAt:new Date().toISOString(),updatedBy:meObj()?.name||""}); toast(T2("Shape updated.","Forma actualizada.")); }catch(err){ toast(t("saveErr")); }
 MAP.mode=null; MAP.pts=[]; MAP.redraw=null; MAP.sel=id; render(); }
@@ -3038,7 +3057,7 @@ MAP.me=[p.lat,p.lng]; if(MAP.map) MAP.map.setView(MAP.me,Math.max(MAP.map.getZoo
 else if(a==="mapPeriod"){ MAP.period=+b.dataset.days||30; render(); }
 else if(a==="mapClose"){ MAP.sel=null; render(); }
 else if(a==="mapEdit"&&z){ zoneSheet(z,null); }
-else if(a==="mapRedraw"&&z){ MAP.mode="draw"; MAP.pts=[]; MAP.redraw=z.id; render(); toast(T2("Tap the new corners.","Toque las esquinas nuevas.")); }
+else if(a==="mapRedraw"&&z){ MAP.mode="draw"; MAP.undo=[]; MAP.panMode=false; MAP.pts=[]; MAP.redraw=z.id; render(); toast(T2("Tap the new corners.","Toque las esquinas nuevas.")); }
 else if(a==="mapDelete"&&z){ if(!confirm(T2(`Remove “${z.name}” from the map? Animals and notes are not deleted.`,`¿Quitar “${z.name}” del mapa? Los animales y notas no se borran.`))) return;
 try{ await S.db.collection("zones").doc(z.id).delete(); MAP.sel=null; render(); }catch(err){ toast(t("saveErr")); } } });
 
