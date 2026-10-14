@@ -235,12 +235,17 @@ body.printing-labels .sheet{max-height:none!important;overflow:visible!important
 body.printing-labels .lbl{border:1px solid #999} }
 .pq{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:10px 0}.pq-lbl{width:220px}.pq-side{flex:1 1 220px;display:flex;flex-direction:column;gap:10px}
 .st-qr{font:700 11px/1 ui-monospace,monospace;padding:6px 8px}
+.adm-map-wrap{position:relative;margin-top:10px;isolation:isolate}.adm-map-slot{position:relative;height:220px;border-radius:12px;overflow:hidden;background:#1d2a1a}
+.adm-map-open{position:absolute;right:8px;bottom:8px;z-index:500;border:0;border-radius:999px;padding:6px 12px;font-weight:700;background:rgba(20,30,18,.85);color:#fff;cursor:pointer}
+.linkbtn{background:none;border:0;padding:0;color:var(--pasture);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
+.loc-map{position:relative;isolation:isolate;height:56vh;min-height:300px;border-radius:12px;overflow:hidden;background:#1d2a1a;margin:10px 0}
+.lpin{background:none;border:0}.lpin span{display:block;width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.6)}
 .map-panel{padding:12px}
 .map-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
 .map-bar.draw{background:var(--bg);border:2px solid var(--pasture);border-radius:10px;padding:8px 10px}
 .map-bar.draw b{flex:1 1 220px}
 .map-search{display:flex;gap:6px;flex:1 1 260px;min-width:0}.map-search input{flex:1;min-width:0}
-.map-slot{position:relative;height:62vh;min-height:320px;border-radius:12px;overflow:hidden;background:#1d2a1a}
+.map-slot{position:relative;isolation:isolate;height:62vh;min-height:320px;border-radius:12px;overflow:hidden;background:#1d2a1a}
 .map-host{position:absolute;inset:0}
 .map-attr{margin-top:6px;font-size:11px}
 .map-steps{margin:0;padding-left:20px;line-height:1.6}
@@ -726,6 +731,7 @@ if(S.view==="agent") afterAgentRender();
 if(S.view==="kiosk"){ drawQR(); if(!kioskTimer) kioskTimer=setInterval(drawQR,5000); } else if(kioskTimer){ clearInterval(kioskTimer); kioskTimer=null; }
 if(S.view==="animals" && S.animalId) drawCharts();
 if(S.view==="map") afterMapRender();
+if(S.view==="dash") afterAdminMap();
 }
 
 // ---------- sign-in: QR (on-site proof) + PIN (identity) ----------
@@ -2861,7 +2867,7 @@ offsite:`<span class="pill crit">${T2("Off site","Fuera de la finca")} · ${fmtD
 denied:`<span class="pill warn">${T2("Location blocked","Ubicación bloqueada")}</span>`,
 uncertain:`<span class="pill warn">${T2("Location too rough","Ubicación imprecisa")}</span>`,
 nofarm:`<span class="pill mute">${T2("Farm location not set","Finca sin ubicación")}</span>`}[x.status]||`<span class="pill mute">${T2("Location unavailable","Ubicación no disponible")}</span>`);
-const rows=list.map(x=>`<div class="row"><span class="avatar">${esc(initials(x.name||"?"))}</span><div class="grow"><b>${esc(x.name||"")}</b><div class="t-meta">${x.date===today()?T2("Today","Hoy"):esc(x.date)} ${esc(fmtTime(x.ts))} · ${esc(x.device||"")}${x.lat!=null?` · <a href="https://www.google.com/maps?q=${x.lat},${x.lng}" target="_blank" rel="noopener">${T2("Map","Mapa")}</a>`:""}</div></div>${pill(x)}</div>`).join("");
+const rows=list.map(x=>`<div class="row"><span class="avatar">${esc(initials(x.name||"?"))}</span><div class="grow"><b>${esc(x.name||"")}</b><div class="t-meta">${x.date===today()?T2("Today","Hoy"):esc(x.date)} ${esc(fmtTime(x.ts))} · ${esc(x.device||"")}${x.lat!=null?` · <button class="linkbtn" data-loginmap="${esc(x.id)}">📍 ${T2("See on map","Ver en el mapa")}</button>`:""}</div></div>${pill(x)}</div>`).join("");
 const set=siteCfg&&siteCfg.lat!=null;
 const admins=S.staff.filter(x=>x.role==="admin"&&staffStatus(x)==="active");
 const roster=admins.map(a=>{ const last=logins.filter(x=>x.staffId===a.id).sort((x,y)=>String(y.ts).localeCompare(String(x.ts)))[0];
@@ -2871,6 +2877,8 @@ return `<section class="panel"><h2 style="margin:0">${T2("Administrators","Admin
 <h3 class="label" style="margin:10px 0 0">${T2("Sign-ins, last 7 days","Entradas, últimos 7 días")}</h3>
 <div class="t-meta" style="margin-top:4px">${set?T2(`Farm location set by ${esc(siteCfg.setBy||"—")} on ${esc(String(siteCfg.setAt||"").slice(0,10))}`,`Ubicación fijada por ${esc(siteCfg.setBy||"—")} el ${esc(String(siteCfg.setAt||"").slice(0,10))}`):T2("Set the farm location once, while standing at the farm, so sign-ins can be marked on site or off site.","Fije la ubicación una vez, estando en la finca, para marcar entradas en la finca o fuera.")}</div>
 ${S.canWrite?`<button class="chip" data-act="setFarmLoc" style="margin-top:8px">📍 ${set?T2("Reset farm location to here","Fijar la finca aquí de nuevo"):T2("Set farm location (I'm at the farm)","Fijar ubicación (estoy en la finca)")}</button>`:""}
+${S.canWrite?`<button class="chip" data-act="goPinMap" style="margin:8px 0 0 6px">🗺️ ${T2("Place pin on the map","Poner pin en el mapa")}</button>`:""}
+${set||list.some(x=>x.lat!=null)?`<div class="adm-map-wrap"><div id="admMapSlot" class="adm-map-slot"></div><button class="adm-map-open" data-loginmap="__all" aria-label="${T2("Open full map","Abrir mapa completo")}">⤢ ${T2("Full map","Mapa completo")}</button></div>`:""}
 <div class="list" style="margin-top:8px">${rows||`<div class="empty">${T2("No admin sign-ins in the last 7 days.","Sin entradas de administradores en 7 días.")}</div>`}</div></section>`;
 }
 // ---------- farm map (satellite + traced areas) ----------
@@ -3113,6 +3121,52 @@ toast(T2("Excel workbook downloaded.","Libro de Excel descargado."));
 finally{ REC.range=saveRange; } }
 document.addEventListener("click",e=>{ const b=e.target.closest&&e.target.closest('[data-act="farmXlsx"]'); if(!b) return; e.stopPropagation(); farmWorkbook(); },true);
 
+
+// ---------- admin sign-in map (dashboard mini map + full location sheet) ----------
+const ADM={host:null,map:null,lay:null,fitKey:""}; let LOCM=null;
+const LCOL={onsite:"#2e9d4f",offsite:"#d64545",uncertain:"#e0a020",denied:"#e0a020",nofarm:"#8a8a8a"};
+function esriLayers(m){ const Lf=LF(); Lf.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxNativeZoom:19,maxZoom:21,attribution:"Esri, Maxar, Earthstar Geographics"}).addTo(m);
+Lf.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",{maxNativeZoom:19,maxZoom:21,opacity:.85}).addTo(m); }
+function recentLogins(){ const wk=new Date(Date.now()-7*864e5).toLocaleDateString("en-CA"); return logins.filter(x=>x.date>=wk&&x.lat!=null).sort((a,b)=>String(b.ts).localeCompare(String(a.ts))).slice(0,12); }
+function drawLocLayer(m,lay,list,focus){ const Lf=LF(); lay.clearLayers(); const pts=[];
+if(siteCfg&&siteCfg.lat!=null){ Lf.circle([siteCfg.lat,siteCfg.lng],{radius:siteCfg.radius||400,color:"#fff",weight:2,dashArray:"6 4",fillColor:"#8bc34a",fillOpacity:.12,interactive:false}).addTo(lay);
+Lf.marker([siteCfg.lat,siteCfg.lng],{interactive:false,icon:Lf.divIcon({className:"farmpin",html:"<span>🏡</span>",iconSize:[30,30],iconAnchor:[15,28]})}).addTo(lay); pts.push([siteCfg.lat,siteCfg.lng]); }
+zones.forEach(z=>{ if(z.pts&&z.pts.length>2){ Lf.polygon(z.pts.map(p=>[p.lat,p.lng]),{color:zk(z.kind)[3],weight:1,fillOpacity:.15,interactive:false}).addTo(lay); } });
+list.forEach(x=>{ const ll=[x.lat,x.lng]; pts.push(ll); const on=focus&&focus.id===x.id;
+if(on&&x.acc) Lf.circle(ll,{radius:x.acc,color:"#4fa3e0",weight:1,fillOpacity:.12,interactive:false}).addTo(lay);
+const mk=Lf.marker(ll,{icon:Lf.divIcon({className:"lpin",html:`<span style="background:${LCOL[x.status]||"#4fa3e0"};${on?"width:22px;height:22px":""}"></span>`,iconSize:on?[28,28]:[22,22],iconAnchor:on?[14,14]:[11,11]})}).addTo(lay);
+mk.bindTooltip(`${esc(x.name||"")} · ${x.date===today()?T2("today","hoy"):esc(x.date)} ${esc(fmtTime(x.ts))}`);
+mk.on("click",()=>loginMapSheet(x.id)); });
+return pts; }
+async function afterAdminMap(){ const slot=document.getElementById("admMapSlot"); if(!slot) return;
+if(!ADM.host){ ADM.host=document.createElement("div"); ADM.host.className="map-host"; }
+if(ADM.host.parentNode!==slot) slot.appendChild(ADM.host);
+try{ await loadLeaflet(); }catch{ return; } const Lf=LF();
+if(!ADM.map){ ADM.map=Lf.map(ADM.host,{keyboard:false,zoomControl:true,attributionControl:false,scrollWheelZoom:false,maxZoom:21}).setView([18.22,-66.45],9); esriLayers(ADM.map); ADM.lay=Lf.layerGroup().addTo(ADM.map); }
+setTimeout(()=>ADM.map&&ADM.map.invalidateSize(),0);
+const list=recentLogins(); const pts=drawLocLayer(ADM.map,ADM.lay,list,null);
+const key=JSON.stringify(pts); if(key!==ADM.fitKey){ ADM.fitKey=key; if(pts.length>1) ADM.map.fitBounds(Lf.latLngBounds(pts).pad(.25),{maxZoom:17}); else if(pts.length) ADM.map.setView(pts[0],17); } }
+async function loginMapSheet(id){ const all=recentLogins(); const x=id==="__all"?null:(logins.find(l=>l.id===id)||null); const set=siteCfg&&siteCfg.lat!=null;
+const pillTxt=s=>({onsite:T2("On site","En la finca"),offsite:T2("Off site","Fuera de la finca"),uncertain:T2("Location too rough","Ubicación imprecisa"),denied:T2("Location blocked","Ubicación bloqueada"),nofarm:T2("Farm location not set","Finca sin ubicación")})[s]||"";
+const info=x?`<div class="loc-info"><b>${esc(x.name||"")}</b> · ${x.date===today()?T2("Today","Hoy"):esc(x.date)} ${esc(fmtTime(x.ts))} · ${esc(x.device||"")}
+<div><span class="pill ${x.status==="onsite"?"ok":x.status==="offsite"?"crit":"warn"}">${esc(pillTxt(x.status))}</span>${x.dist!=null?` ${T2(`${fmtDist(x.dist)} from the farm pin`,`a ${fmtDist(x.dist)} del pin de la finca`)}`:""}</div>
+<div class="t-meta" id="locAddr">${T2("Looking up the address…","Buscando la dirección…")}</div>
+<div class="t-meta">GPS: <code>${(+x.lat).toFixed(6)}, ${(+x.lng).toFixed(6)}</code>${x.acc?` · ${T2("accuracy","precisión")} ±${fmtDist(x.acc)}`:""}</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><a class="btn" href="https://www.google.com/maps?q=${x.lat},${x.lng}" target="_blank" rel="noopener">${T2("Open in Google Maps","Abrir en Google Maps")}</a>${set?`<a class="btn" href="https://www.google.com/maps/dir/?api=1&origin=${x.lat},${x.lng}&destination=${siteCfg.lat},${siteCfg.lng}" target="_blank" rel="noopener">${T2("Route to the farm","Ruta a la finca")}</a>`:""}</div></div>`
+:`<p class="t-meta">${T2("Admin sign-ins from the last 7 days. Green = on the farm, red = away. Tap a dot for details.","Entradas de administradores de los últimos 7 días. Verde = en la finca, rojo = fuera. Toque un punto para ver detalles.")}</p>`;
+openSheet(`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2 style="margin:0">${x?T2("Sign-in location","Ubicación de la entrada"):T2("Admin sign-ins map","Mapa de entradas de administradores")}</h2><button class="btn" data-act="closeSheet">✕</button></div>
+${info}<div id="locMap" class="loc-map"></div>
+${set?`<p class="t-meta">🏡 ${T2(`Farm pin (dashed circle = ${siteCfg.radius||400} m “on site” zone)`,`Pin de la finca (círculo = zona “en la finca” de ${siteCfg.radius||400} m)`)}</p>`:`<p class="t-meta">${T2("The farm pin isn't set yet, so distances can't be measured.","El pin de la finca no está puesto, así que no se pueden medir distancias.")}</p>`}`);
+try{ await loadLeaflet(); }catch{ return; } const el=document.getElementById("locMap"); if(!el) return; const Lf=LF();
+if(LOCM){ try{ LOCM.remove(); }catch{} LOCM=null; }
+LOCM=Lf.map(el,{keyboard:false,maxZoom:21}).setView([18.22,-66.45],9); esriLayers(LOCM); const lay=Lf.layerGroup().addTo(LOCM);
+const list=x&&!all.some(l=>l.id===x.id)?all.concat([x]):all; const pts=drawLocLayer(LOCM,lay,list,x);
+setTimeout(()=>{ LOCM.invalidateSize(); if(x){ const b=[[x.lat,x.lng]]; if(set) b.push([siteCfg.lat,siteCfg.lng]); b.length>1?LOCM.fitBounds(Lf.latLngBounds(b).pad(.3),{maxZoom:18}):LOCM.setView(b[0],18); } else if(pts.length>1) LOCM.fitBounds(Lf.latLngBounds(pts).pad(.25),{maxZoom:18}); else if(pts.length) LOCM.setView(pts[0],17); },60);
+if(x){ try{ const r=await fetch(`https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=json&location=${x.lng},${x.lat}`).then(r=>r.json()); const a=document.getElementById("locAddr");
+if(a) a.textContent=(r&&r.address&&(r.address.LongLabel||r.address.Match_addr))||T2("No street address for this spot.","No hay dirección para este punto."); }
+catch{ const a=document.getElementById("locAddr"); if(a) a.textContent=T2("Address lookup needs signal.","La dirección necesita señal."); } } }
+document.addEventListener("click",e=>{ const b=e.target.closest&&e.target.closest("[data-loginmap]"); if(b){ e.preventDefault(); loginMapSheet(b.dataset.loginmap); return; }
+const g=e.target.closest&&e.target.closest('[data-act="goPinMap"]'); if(g){ e.stopPropagation(); S.view="map"; LS.set("sh.view","map"); MAP.mode="pin"; render(); setTimeout(()=>document.getElementById("mapSlot")?.scrollIntoView({block:"start"}),300); } },true);
 // ---------- boot ----------
 document.documentElement.lang=lang;
 render();
