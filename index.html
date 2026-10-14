@@ -141,6 +141,7 @@ form.stack{display:flex;flex-direction:column;gap:10px}
 .msg.user{align-self:flex-end;background:var(--pasture);color:var(--pasture-ink);border-bottom-right-radius:4px}
 .msg.ai{align-self:flex-start;background:var(--sunk);border-bottom-left-radius:4px}
 .msg img{display:block;max-width:220px;border-radius:8px;margin-bottom:6px}
+.msg img.ai-photo{margin:8px 0 0;max-width:min(260px,100%)}
 .receipt{align-self:flex-start;font-size:13px;display:flex;gap:6px;align-items:center;color:var(--ok);font-weight:600}
 .receipt::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok)}
 .composer{border-top:1px solid var(--line);padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
@@ -521,6 +522,10 @@ species:"all", animalId:null, db:null, sample:null, canWrite:true, ready:false, 
 const today = () => new Date().toLocaleDateString("en-CA");
 const daysBetween = (a,b) => Math.round((new Date(b+"T12:00")-new Date(a+"T12:00"))/864e5);
 const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+// AI replies: show farm photo links (Firebase Storage) as pictures instead of long URLs.
+function aiRich(text){ const imgs=[]; const re=/!?\[([^\]]*)\]\((https:\/\/firebasestorage\.googleapis\.com\/[^)\s]+)\)|(https:\/\/firebasestorage\.googleapis\.com\/[^\s)\]]+)/g;
+const txt=String(text||"").replace(re,(m,l,u1,u2)=>{ const u=u1||u2; if(!imgs.includes(u)) imgs.push(u); return ""; }).replace(/[ \t]+\n/g,"\n").replace(/\n{3,}/g,"\n\n").trim();
+return esc(txt)+imgs.map(u=>`<img class="ai-photo" src="${esc(u)}" alt="" loading="lazy">`).join(""); }
 const initials = n => String(n||"?").split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
 const SPECIES = ["cow","horse","sheep","pig","chicken"];
 
@@ -993,7 +998,7 @@ const canTalk="speechSynthesis" in window;
 return topbar(t("agent"), t("vetNote"), canTalk?`<button class="btn ${S.speak?"voicebtn":""}" data-act="toggleSpeak" aria-pressed="${!!S.speak}">${I.speaker} ${S.speak?T2("Voice replies on","Respuestas en voz: sí"):T2("Voice replies off","Respuestas en voz: no")}</button>`:"") +
 `<div class="agent"><div class="msgs" id="msgs" aria-live="polite">
 <div class="msg ai">${esc(t("agentIntro"))}</div>
-${S.chat.map(m=>m.kind==="receipt"?`<div class="receipt">${esc(m.text)}</div>`:`<div class="msg ${m.role==="user"?"user":"ai"}">${m.img?`<img src="${m.img}" alt="">`:""}${esc(m.text)}</div>${m.chips&&m.chips.length?`<div class="suggest mchips">${m.chips.map(c=>c.nav?`<button class="chip" data-nav="${esc(c.nav)}">${esc(c.label)}</button>`:c.open?`<button class="chip" data-open="${esc(c.open)}">${esc(c.label)}</button>`:c.fill?`<button class="chip" data-sayfill="${esc(c.fill)}">${esc(c.label)}</button>`:`<button class="chip" data-say="${esc(c.say)}">${esc(c.label)}</button>`).join("")}</div>`:""}`).join("")}
+${S.chat.map(m=>m.kind==="receipt"?`<div class="receipt">${esc(m.text)}</div>`:`<div class="msg ${m.role==="user"?"user":"ai"}">${m.img?`<img src="${m.img}" alt="">`:""}${m.role==="user"?esc(m.text):aiRich(m.text)}</div>${m.chips&&m.chips.length?`<div class="suggest mchips">${m.chips.map(c=>c.nav?`<button class="chip" data-nav="${esc(c.nav)}">${esc(c.label)}</button>`:c.open?`<button class="chip" data-open="${esc(c.open)}">${esc(c.label)}</button>`:c.fill?`<button class="chip" data-sayfill="${esc(c.fill)}">${esc(c.label)}</button>`:`<button class="chip" data-say="${esc(c.say)}">${esc(c.label)}</button>`).join("")}</div>`:""}`).join("")}
 ${S.busy?`<div class="msg ai" id="streaming">${esc(S.streamText||t("thinking"))}</div>`:""}
 </div>
 <div class="composer">${!S.sample?`<div class="t-meta">${LIVE?T2("Shepherd AI is in basic mode: it understands tags, names, weights, notes, dates, moves and tasks. Full AI turns on when the administrator connects the AI key.","Shepherd IA está en modo básico: entiende aretes, nombres, pesos, notas, fechas, movimientos y tareas. La IA completa se activa cuando el administrador conecte la clave de IA."):DEMO?T2("Demo: Shepherd understands tags, names, weights, egg counts, health notes, treatments, dates, moves and vet tasks. Recognizing animals from photos is in the full version.","Demo: Shepherd entiende números de arete, nombres, pesos, huevos, notas de salud, tratamientos, fechas, movimientos y tareas de veterinario. Reconocer animales por foto es parte de la versión completa."):t("noAgent")}</div>`:""}
