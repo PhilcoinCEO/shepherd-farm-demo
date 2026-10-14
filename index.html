@@ -44,6 +44,7 @@ button{cursor:pointer}
 .nav{display:flex;flex-direction:column;gap:4px}
 .nav button{background:none;border:0;text-align:left;padding:10px 12px;border-radius:8px;color:inherit;font-weight:600;display:flex;align-items:center;gap:10px;opacity:.85}
 .nav button svg{width:18px;height:18px;flex:none}
+.nav .ns{display:none}
 .nav button[aria-current="page"]{background:rgba(255,255,255,.16);opacity:1}
 :root[data-theme="dark"] .nav button[aria-current="page"]{background:rgba(0,0,0,.18)}
 .rail-foot{margin-top:auto;display:flex;flex-direction:column;gap:10px;font-size:13px}
@@ -222,6 +223,26 @@ body.signed-out .main{padding-bottom:0}
 body.printing-labels .sheet-bg{position:static!important;background:none!important;padding:0!important}
 body.printing-labels .sheet{max-height:none!important;overflow:visible!important;box-shadow:none!important;width:100%!important}
 body.printing-labels .lbl{border:1px solid #999} }
+.pq{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:10px 0}.pq-lbl{width:220px}.pq-side{flex:1 1 220px;display:flex;flex-direction:column;gap:10px}
+.st-qr{font:700 11px/1 ui-monospace,monospace;padding:6px 8px}
+.map-panel{padding:12px}
+.map-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.map-bar.draw{background:var(--bg);border:2px solid var(--pasture);border-radius:10px;padding:8px 10px}
+.map-bar.draw b{flex:1 1 220px}
+.map-search{display:flex;gap:6px;flex:1 1 260px;min-width:0}.map-search input{flex:1;min-width:0}
+.map-slot{position:relative;height:62vh;min-height:320px;border-radius:12px;overflow:hidden;background:#1d2a1a}
+.map-host{position:absolute;inset:0}
+.map-attr{margin-top:6px;font-size:11px}
+.map-steps{margin:0;padding-left:20px;line-height:1.6}
+.zdot{display:inline-block;width:12px;height:12px;border-radius:3px;flex:none;vertical-align:middle;border:1px solid rgba(0,0,0,.25)}
+.zrow{width:100%;background:none;border:0;border-bottom:1px solid var(--line);color:inherit;font:inherit;cursor:pointer;gap:10px}
+.zrow.on{background:var(--bg)}
+.zstat{font-size:13px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.zk{margin:12px 0}
+.zlabel{background:none;border:0}
+.zlabel span{display:inline-block;transform:translate(-50%,-50%);white-space:nowrap;background:rgba(20,30,18,.72);color:#fff;font:600 12px/1.2 system-ui,sans-serif;padding:3px 7px;border-radius:999px;pointer-events:none}
+.farmpin{background:none;border:0;font-size:24px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+.leaflet-container{font:inherit}
 .sheet{background:var(--surface);border-radius:12px;padding:18px;width:min(560px,100%);max-height:90vh;overflow-y:auto}
 .photo-drop{display:flex;flex-direction:column;align-items:center;gap:6px;padding:28px 16px;border:2px dashed var(--pasture);border-radius:12px;background:var(--bg);cursor:pointer;text-align:center;margin:12px 0}
 .photo-drop svg{width:40px;height:40px;color:var(--pasture)}
@@ -293,6 +314,7 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 .app>.main{order:1;flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;padding-bottom:24px}
 .brand,.rail-foot{display:none}
 .nav{flex-direction:row;width:100%;justify-content:space-around}
+.nav .nl{display:none}.nav .ns{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .nav button{flex-direction:column;gap:2px;font-size:10px;padding:6px 0;flex:1 1 0;min-width:0;align-items:center;text-align:center;line-height:1.1;letter-spacing:-.2px}
 .topbar h1{font-size:28px}
 .agent{height:calc(100vh - 210px)}
@@ -502,6 +524,7 @@ camera:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width=
 mic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
 speaker:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>',
 qr:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>',
+map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>',
 store:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l2-5h14l2 5"/><path d="M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z"/><path d="M5 13v7h14v-7M10 20v-4h4v4"/></svg>',
 megaphone:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10v4h4l7 5V5L7 10z"/><path d="M17 9a4 4 0 0 1 0 6M7 14l1.5 6h3L10 15"/></svg>',
 send:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12 20 4l-6 16-3-7z"/></svg>'
@@ -599,8 +622,8 @@ else await writeDoc("tasks",tk.id,()=>S.db.collection("tasks").doc(tk.id).update
 // ---------- render ----------
 function renderNav(){
 if(meObj() && staffStatus(meObj())!=="active"){ document.getElementById("nav").innerHTML=""; document.getElementById("railNote").textContent=meObj().name; return; }
-const items=[["today",I.today],["animals",I.animals],["store",I.store],["agent",I.agent]]; if(isAdmin()){ items.unshift(["command",I.megaphone]); items.push(["dash",I.dash]); items.push(["records",I.sheet]); }
-document.getElementById("nav").innerHTML = items.map(([k,ic])=>`<button data-nav="${k}" ${S.view===k?'aria-current="page"':""}>${ic}<span>${k==="records"?T2("Records","Registros"):k==="store"?T2("Store","Tienda"):t(k)}</span></button>`).join("");
+const items=[["today",I.today],["animals",I.animals],["map",I.map],["store",I.store],["agent",I.agent]]; if(isAdmin()){ items.unshift(["command",I.megaphone]); items.push(["dash",I.dash]); items.push(["records",I.sheet]); }
+document.getElementById("nav").innerHTML = items.map(([k,ic])=>`<button data-nav="${k}" ${S.view===k?'aria-current="page"':""}>${ic}<span class="nl">${k==="records"?T2("Records","Registros"):k==="store"?T2("Store","Tienda"):k==="map"?T2("Map","Mapa"):t(k)}</span><span class="ns">${({agent:T2("AI","IA"),dash:T2("Board","Panel"),command:T2("Orders","Mando")})[k]||(k==="records"?T2("Records","Registros"):k==="store"?T2("Store","Tienda"):k==="map"?T2("Map","Mapa"):t(k))}</span></button>`).join("");
 document.getElementById("railNote").textContent = meObj() ? `${meObj().name} · ${meObj().role==="admin"?t("admin"):t("employee")}` : "";
 }
 const FLAG_US='<svg viewBox="0 0 38 20" width="30" height="16" aria-hidden="true"><rect width="38" height="20" fill="#B22234"/><g fill="#fff"><rect y="1.54" width="38" height="1.54"/><rect y="4.62" width="38" height="1.54"/><rect y="7.69" width="38" height="1.54"/><rect y="10.77" width="38" height="1.54"/><rect y="13.85" width="38" height="1.54"/><rect y="16.92" width="38" height="1.54"/></g><rect width="15.2" height="10.77" fill="#3C3B6E"/><g fill="#fff">'+[...Array(20)].map((_,i)=>`<circle cx="${1.5+(i%5)*3.05+(Math.floor(i/5)%2)*1.5}" cy="${1.4+Math.floor(i/5)*2.6}" r=".55"/>`).join("")+'</g></svg>';
@@ -684,7 +707,7 @@ document.body.classList.toggle("signed-out",!me);
 if(!me) html=renderLogin();
 else if(staffStatus(me)!=="active") html=renderOnboarding(me);
 else if(S.lessonK&&TRAIN[S.lessonK]) html=renderLesson(me,S.lessonK);
-else { if(S.view==="dash" && !isAdmin()) S.view="today"; if((S.view==="kiosk"||S.view==="command"||S.view==="records")&&!isAdmin()) S.view="today"; html=({today:renderToday,animals:renderAnimals,agent:renderAgent,dash:renderDash,kiosk:renderKiosk,command:renderCommand,records:renderRecords,store:renderStore}[S.view]||renderToday)(); }
+else { if(S.view==="dash" && !isAdmin()) S.view="today"; if((S.view==="kiosk"||S.view==="command"||S.view==="records")&&!isAdmin()) S.view="today"; html=({today:renderToday,animals:renderAnimals,agent:renderAgent,dash:renderDash,kiosk:renderKiosk,command:renderCommand,records:renderRecords,store:renderStore,map:renderMap}[S.view]||renderToday)(); }
 main.innerHTML = html;
 if(!me || staffStatus(me)!=="active"){ for(const [id,val] of Object.entries(keep)){ const x=document.getElementById(id); if(x&&val) x.value=val; } if(focusId) document.getElementById(focusId)?.focus(); return; }
 for(const [id,val] of Object.entries(keep)){ const x=document.getElementById(id); if(x&&val) x.value=val; }
@@ -692,6 +715,7 @@ if(focusId){ const x=document.getElementById(focusId); if(x&&x.focus) x.focus();
 if(S.view==="agent") afterAgentRender();
 if(S.view==="kiosk"){ drawQR(); if(!kioskTimer) kioskTimer=setInterval(drawQR,5000); } else if(kioskTimer){ clearInterval(kioskTimer); kioskTimer=null; }
 if(S.view==="animals" && S.animalId) drawCharts();
+if(S.view==="map") afterMapRender();
 }
 
 // ---------- sign-in: QR (on-site proof) + PIN (identity) ----------
@@ -878,7 +902,7 @@ openSheet(`<h2>✏️ ${T2("Edit","Editar")} · ${esc(animalLabel(a))}</h2>
 <div class="inline"><div class="field"><label class="label" for="ea-sex">${t("sex")}</label><select id="ea-sex" name="sex"><option value=""></option>${["Female","Male","Castrated male","Mixed"].map(x=>`<option value="${x}" ${sel(x,a.sex)}>${esc(V(x))}</option>`).join("")}</select></div>
 <div class="field"><label class="label" for="ea-born">${t("born")}</label><input id="ea-born" name="born" type="date" value="${esc(a.born||"")}"></div>
 ${isGroup?`<div class="field"><label class="label" for="ea-count">${t("count")}</label><input id="ea-count" name="count" type="number" min="0" value="${esc(a.count||0)}"></div>`:""}</div>
-<div class="inline"><div class="field"><label class="label" for="ea-pen">${t("pen")}</label><input id="ea-pen" name="pen" value="${esc(L(a,"pen")||"")}"></div>
+<div class="inline"><div class="field"><label class="label" for="ea-pen">${t("pen")}</label><input id="ea-pen" name="pen" list="zoneNames" value="${esc(L(a,"pen")||"")}">${zones.length?`<datalist id="zoneNames">${zones.map(z=>`<option value="${esc(z.name)}">`).join("")}</datalist>`:""}</div>
 <div class="field"><label class="label" for="ea-color">${t("color")}</label><input id="ea-color" name="color" value="${esc(L(a,"color")||"")}"></div></div>
 <div class="inline"><div class="field"><label class="label" for="ea-status">${t("status")}</label><select id="ea-status" name="status">${[...new Set(["Active","Bred","Pregnant","Open","Nursing","Laying","Growing","Riding","Working","Pre-breeding","Breeding sire","Quarantine","Sold","Deceased"].concat(a.status?[a.status]:[]))].map(x=>`<option value="${x}" ${sel(x,a.status||"Active")}>${esc(V(x))}</option>`).join("")}</select></div>
 <div class="field"><label class="label" for="ea-dam">${t("dam")}</label><input id="ea-dam" name="dam" value="${esc(a.dam||"")}"></div></div>
@@ -1203,7 +1227,7 @@ ${dup?`<div class="demo" style="margin:12px 0 0">${t("dupTag")} <b>${esc(animalL
 <div class="inline"><div class="field"><label class="label" for="nf-sp">${t("species")}</label><select id="nf-sp" name="species">${SPECIES.filter(x=>isAdmin()||canWork(x)).map(x=>`<option value="${x}" ${sel(x,v.species)}>${t(x)}</option>`).join("")}</select></div>
 <div class="field"><label class="label" for="nf-kind">${t("kind")}</label><select id="nf-kind" name="kind"><option value="individual">${t("individual")}</option><option value="group" ${sel("group",v.kind)}>${t("group")}</option></select></div></div>
 <div class="inline"><div class="field"><label class="label" for="nf-tag">${t("tagNo")}</label><input id="nf-tag" name="tag" required value="${esc(v.tag||"")}"></div><div class="field"><label class="label" for="nf-name">${t("name")}</label><input id="nf-name" name="name"></div></div>
-<div class="inline"><div class="field"><label class="label" for="nf-breed">${t("breed")}</label><input id="nf-breed" name="breed" value="${esc(v.breed||"")}"></div><div class="field"><label class="label" for="nf-pen">${t("pen")}</label><input id="nf-pen" name="pen"></div></div>
+<div class="inline"><div class="field"><label class="label" for="nf-breed">${t("breed")}</label><input id="nf-breed" name="breed" value="${esc(v.breed||"")}"></div><div class="field"><label class="label" for="nf-pen">${t("pen")}</label><input id="nf-pen" name="pen" list="zoneNames">${zones.length?`<datalist id="zoneNames">${zones.map(z=>`<option value="${esc(z.name)}">`).join("")}</datalist>`:""}</div></div>
 <div class="field"><label class="label" for="nf-color">${t("color")}</label><input id="nf-color" name="color" value="${esc((lang==="es"?(v.color_es||v.color):(v.color||v.color_es))||"")}"></div>
 <div class="inline"><div class="field"><label class="label" for="nf-sex">${t("sex")}</label><select id="nf-sex" name="sex"><option value=""></option>${["Female","Male","Castrated male","Mixed"].map(x=>`<option value="${x}" ${sel(x,v.sex)}>${esc(V(x))}</option>`).join("")}</select></div>
 <div class="field"><label class="label" for="nf-born">${t("born")}</label><input id="nf-born" name="born" type="date"></div><div class="field"><label class="label" for="nf-count">${t("count")}</label><input id="nf-count" name="count" type="number" min="1" value="${esc(v.count&&v.kind==="group"?v.count:"")}"></div></div>
@@ -1347,6 +1371,7 @@ on(db.collection("staff"),s=>{ liveStaffDocs=docs(s); liveMergeStaff(); },"staff
 on(db.doc("settings/handbook"),d=>{ handbook=d.exists?d.data():null; render(); },"handbook");
 on(db.collection("attention"),s=>{ S.attention=docs(s); render(); },"attention");
 on(db.collection("products"),s=>{ S.products=docs(s).sort((a,b)=>String(a.name).localeCompare(String(b.name))); render(); },"products");
+on(db.collection("zones"),s=>{ zones=docs(s); render(); },"zones");
 if(role==="admin"){
 on(db.doc("private/site"),d=>{ siteCfg=d.exists?d.data():null; render(); },"site");
 on(db.collection("logins"),s=>{ logins=docs(s); if(S.view==="dash") render(); },"logins");
@@ -1913,7 +1938,7 @@ ${hasTot&&rows.length?`<tfoot><tr><td class="rn">Σ</td>${cols.map((c,i)=>`<td c
 function renderRecords(){ const tabs=[["activity",T2("Activity log","Bitácora")],["animals",T2("Animals","Animales")],["production",T2("Production","Producción")],["sales",T2("Sales","Ventas")],["labor",T2("Labor","Personal")]];
 const ranges=[["7",T2("7 days","7 días")],["30",T2("30 days","30 días")],["90",T2("90 days","90 días")],["all",T2("All","Todo")]];
 return topbar(T2("Farm records","Registros de la finca"),T2("Every animal, sale, harvest and shift. Who, what, when.","Cada animal, venta, cosecha y turno. Quién, qué, cuándo."),
-`${REC.tab==="sales"&&S.canWrite?`<button class="btn primary" data-act="addSale">+ ${T2("Log sale","Anotar venta")}</button>`:""}<button class="btn" data-act="recCsv">${T2("Export to Excel (CSV)","Exportar a Excel (CSV)")}</button>`)+banners()+recSummary()+
+`${REC.tab==="sales"&&S.canWrite?`<button class="btn primary" data-act="addSale">+ ${T2("Log sale","Anotar venta")}</button>`:""}<button class="btn primary" data-act="farmXlsx">⬇︎ ${T2("Full farm workbook (Excel)","Libro completo de la finca (Excel)")}</button><button class="btn" data-act="recCsv">${T2("This table (CSV)","Esta tabla (CSV)")}</button>`)+banners()+recSummary()+
 `<section class="panel"><div class="rec-bar"><div class="chips">${tabs.map(([k,l])=>`<button class="chip" data-rectab="${k}" aria-pressed="${REC.tab===k}">${l}</button>`).join("")}</div>
 <div class="rec-filters">${REC.tab!=="animals"?`<div class="seg">${ranges.map(([k,l])=>`<button data-recrange="${k}" aria-pressed="${REC.range===k}">${l}</button>`).join("")}</div>`:""}
 ${["activity","sales","labor"].includes(REC.tab)?`<select id="recWho" aria-label="${T2("Person","Persona")}"><option value="all">${T2("Everyone","Todos")}</option>${S.staff.map(s=>`<option value="${esc(s.id)}" ${REC.who===s.id?"selected":""}>${esc(s.name)}</option>`).join("")}</select>`:""}
@@ -2679,7 +2704,7 @@ if(!list.length) return `<div class="empty">—</div>`;
 return `<div class="st-grid">${list.map(p=>{ const s=Number(p.stock)||0; const tr=p.track!==false;
 return `<div class="st-card"><button class="st-name" ${adm?`data-st="edit" data-id="${esc(p.id)}"`:"disabled"}><b>${esc(prodName(p))}</b><span class="t-meta">${money(p.price)} / ${esc(p.unit||"ea")}</span></button>
 <div class="st-foot">${tr?`<span class="pill ${s<=0?"crit":lowStock(p)?"warn":"ok"}">${s<=0?T2("Sold out","Agotado"):s+" "+T2("left","quedan")}</span>`:`<span class="pill mute">${T2("Not tracked","Sin control")}</span>`}
-<button class="btn primary sm" data-st="add" data-id="${esc(p.id)}" ${tr&&s<=0?"disabled":""} aria-label="${esc(T2("Add to sale","Añadir a la venta"))}">+</button></div></div>`; }).join("")}</div>`; }
+<button class="chip st-qr" data-st="qr" data-id="${esc(p.id)}" title="${esc(T2("QR code and sales","Código QR y ventas"))}">QR</button><button class="btn primary sm" data-st="add" data-id="${esc(p.id)}" ${tr&&s<=0?"disabled":""} aria-label="${esc(T2("Add to sale","Añadir a la venta"))}">+</button></div></div>`; }).join("")}</div>`; }
 function cartHTML(){ const lines=cartLines();
 return `<section class="panel st-cart"><h2 style="margin:0 0 8px">${T2("Current sale","Venta actual")}</h2>
 ${lines.length?`<div class="list">${lines.map(({l,p})=>`<div class="row"><div class="grow"><b>${esc(prodName(p))}</b><div class="t-meta">${money(p.price)} × ${l.qty} = ${money(l.qty*p.price)}</div></div>
@@ -2692,7 +2717,7 @@ ${lines.length?`<div class="list">${lines.map(({l,p})=>`<div class="row"><div cl
 function renderStore(){ const adm=isAdmin()&&S.canWrite;
 const td=(S.sales||[]).filter(x=>x.d===today()&&x.channel==="store"); const low=S.products.filter(p=>p.active!==false&&lowStock(p));
 return topbar(T2("Store","Tienda"),T2("Scan, sell and track inventory","Escanee, venda y controle inventario"),
-`<button class="btn primary" data-st="scan">📷 ${T2("Scan to sell","Escanear para vender")}</button>${adm?`<button class="btn" data-st="new">+ ${T2("Product","Producto")}</button><button class="btn" data-st="scanRecv">${T2("Receive stock","Recibir inventario")}</button><button class="btn" data-st="labels">${T2("Print labels","Imprimir etiquetas")}</button>`:""}`)+banners()+
+`<button class="btn primary" data-st="scan">📷 ${T2("Scan to sell","Escanear para vender")}</button>${adm?`<button class="btn" data-st="new">+ ${T2("Product","Producto")}</button><button class="btn" data-st="scanRecv">${T2("Receive stock","Recibir inventario")}</button><button class="btn" data-st="labels">${T2("Print labels","Imprimir etiquetas")}</button><button class="btn" data-act="farmXlsx">⬇︎ Excel</button>`:""}`)+banners()+
 `<div class="kpis"><div class="kpi"><span class="label">${T2("Store sales today","Ventas de hoy")}</span><b>${money(td.reduce((s,x)=>s+(Number(x.total)||0),0))}</b></div>
 <div class="kpi"><span class="label">${T2("Items sold today","Artículos hoy")}</span><b>${td.reduce((s,x)=>s+(Number(x.qty)||0),0)}</b></div>
 <div class="kpi ${low.length?"crit":""}"><span class="label">${T2("Low or sold out","Poco o agotado")}</span><b>${low.length}</b>${low.length?`<span class="t-meta">${low.slice(0,3).map(p=>esc(prodName(p))).join(", ")}</span>`:""}</div></div>
@@ -2778,6 +2803,8 @@ else if(k==="scanRecv"){ if(S.products.length) openProductScanner("recv"); else 
 else if(k==="new") productSheet();
 else if(k==="edit"&&p) productSheet(p);
 else if(k==="labels") labelsSheet();
+else if(k==="qr"&&p) productQRSheet(p);
+else if(k==="qrpng"&&p) saveQRPng(p);
 else if(k==="print"){ document.body.classList.add("printing-labels"); setTimeout(()=>{ window.print(); setTimeout(()=>document.body.classList.remove("printing-labels"),500); },50); }
 else if(k==="archive"&&p){ if(!confirm(T2("Remove this product from the store? Past sales stay in Records.","¿Quitar este producto de la tienda? Las ventas pasadas quedan en Registros."))) return;
 S.db.collection("products").doc(p.id).update({active:false,updatedAt:new Date().toISOString()}).then(()=>{ closeSheet(); toast(T2("Removed","Quitado")); }).catch(()=>toast(t("saveErr"))); }
@@ -2836,6 +2863,246 @@ return `<section class="panel"><h2 style="margin:0">${T2("Administrators","Admin
 ${S.canWrite?`<button class="chip" data-act="setFarmLoc" style="margin-top:8px">📍 ${set?T2("Reset farm location to here","Fijar la finca aquí de nuevo"):T2("Set farm location (I'm at the farm)","Fijar ubicación (estoy en la finca)")}</button>`:""}
 <div class="list" style="margin-top:8px">${rows||`<div class="empty">${T2("No admin sign-ins in the last 7 days.","Sin entradas de administradores en 7 días.")}</div>`}</div></section>`;
 }
+// ---------- farm map (satellite + traced areas) ----------
+// keyboard:false matters: Leaflet calls window.scrollTo on focus, which the phone app-shell shim maps to #main and jumps to the top.
+// Areas are traced once on the satellite photo. Animals, tasks and notes already carry a pen/area name,
+// so each traced area gathers its own history: that history is what the agents will learn from later.
+let zones=[];
+const MAP={map:null,host:null,zl:null,farm:null,mode:null,pts:[],tmp:null,sel:null,loading:null,fitted:false,err:false,period:30};
+const ZKIND=[["pasture","Pasture","Pasto","#8bc34a"],["pen","Pen / corral","Corral","#f2b134"],["coop","Coop","Gallinero","#ff8a3d"],["barn","Barn / building","Establo / edificio","#e2725b"],["water","Water","Agua","#4fa3e0"],["crop","Garden / crops","Huerto / cultivo","#5fd38d"],["other","Other","Otro","#c9bfa8"]];
+const zk=k=>ZKIND.find(x=>x[0]===k)||ZKIND[ZKIND.length-1];
+const LF=()=>window.L;
+function loadLeaflet(){ if(LF()&&LF().map) return Promise.resolve(); if(MAP.loading) return MAP.loading;
+MAP.loading=new Promise((res,rej)=>{ const l=document.createElement("link"); l.rel="stylesheet"; l.href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"; document.head.appendChild(l);
+const s=document.createElement("script"); s.src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"; s.onload=()=>res(); s.onerror=()=>{ MAP.loading=null; rej(new Error("leaflet")); }; document.head.appendChild(s); });
+return MAP.loading; }
+const znorm=s=>String(s||"").trim().toLowerCase();
+function zoneMatch(z,...names){ const a=znorm(z.name), b=znorm(z.name_es); return names.some(n=>{ n=znorm(n); return n&&(n===a||(b&&n===b)); }); }
+function zoneOf(name,name_es){ return zones.find(z=>zoneMatch(z,name,name_es))||null; }
+function zoneStats(z,days){ const since=new Date(Date.now()-(days||30)*864e5).toISOString();
+const animals=S.animals.filter(a=>a.status!=="sold"&&a.status!=="dead"&&zoneMatch(z,a.pen,a.pen_es));
+const tasks=S.tasks.filter(t=>!t.done&&zoneMatch(z,t.area,t.area_es));
+const ev=[]; S.animals.forEach(a=>(a.events||[]).forEach(e=>{ if(String(e.ts||e.d||"")>=since&&zoneMatch(z,e.pen,e.pen_es)) ev.push(Object.assign({animal:a},e)); }));
+ev.sort((x,y)=>String(y.ts||y.d).localeCompare(String(x.ts||x.d)));
+const health=ev.filter(e=>e.type==="health"||e.type==="treatment"||e.type==="vet").length;
+const head=animals.reduce((n,a)=>n+(a.kind==="group"?(+a.count||+a.head||1):1),0);
+return {animals,tasks,ev,health,head,score:ev.length+health*2+tasks.length}; }
+function polyArea(pts){ if(!pts||pts.length<3) return 0; const R=6371000,r=x=>x*Math.PI/180; const lat0=r(pts.reduce((s,p)=>s+p.lat,0)/pts.length);
+const xy=pts.map(p=>[R*r(p.lng)*Math.cos(lat0),R*r(p.lat)]); let a=0; for(let i=0;i<xy.length;i++){ const [x1,y1]=xy[i],[x2,y2]=xy[(i+1)%xy.length]; a+=x1*y2-x2*y1; } return Math.abs(a)/2; }
+function fmtArea(m2){ if(!m2) return ""; const ac=m2/4046.86, cu=m2/3930.4; return lang==="es"?`${cu<10?cu.toFixed(1):Math.round(cu)} cuerdas`:`${ac<10?ac.toFixed(1):Math.round(ac)} acres · ${cu<10?cu.toFixed(1):Math.round(cu)} cuerdas`; }
+function zoneName(z){ return lang==="es"&&z.name_es?z.name_es:z.name; }
+
+function renderMap(){ const adm=isAdmin()&&S.canWrite!==false; const farmSet=siteCfg&&siteCfg.lat!=null;
+const days=MAP.period; const list=zones.map(z=>({z,s:zoneStats(z,days)})).sort((a,b)=>b.s.score-a.s.score||String(a.z.name).localeCompare(String(b.z.name)));
+const unmapped=[...new Set(S.animals.filter(a=>a.pen&&a.status!=="sold"&&a.status!=="dead"&&!zoneOf(a.pen,a.pen_es)).map(a=>L(a,"pen")))].sort();
+let tools="";
+if(MAP.mode==="draw") tools=`<div class="map-bar draw"><b>✏️ ${T2(`Tap each corner of the area · ${MAP.pts.length} point${MAP.pts.length===1?"":"s"}`,`Toque cada esquina del área · ${MAP.pts.length} punto${MAP.pts.length===1?"":"s"}`)}</b>
+<button class="btn" data-act="mapUndo" ${MAP.pts.length?"":"disabled"}>↶ ${T2("Undo","Deshacer")}</button><button class="btn primary" data-act="mapFinish" ${MAP.pts.length>=3?"":"disabled"}>✓ ${T2("Finish","Terminar")}</button><button class="btn" data-act="mapCancel">${T2("Cancel","Cancelar")}</button></div>`;
+else if(MAP.mode==="pin") tools=`<div class="map-bar draw"><b>📍 ${T2("Tap the map where the farm entrance or main barn is.","Toque el mapa donde está la entrada o el establo principal.")}</b><button class="btn" data-act="mapCancel">${T2("Cancel","Cancelar")}</button></div>`;
+else tools=`<div class="map-bar"><form id="mapSearch" class="map-search"><input id="mapQ" placeholder="${T2("Search a place, address or paste GPS (18.2, -66.5)","Busque un lugar, dirección o pegue GPS (18.2, -66.5)")}" autocomplete="off"><button class="btn" type="submit">${T2("Go","Ir")}</button></form>
+${adm?`<button class="btn primary" data-act="mapDraw">＋ ${T2("Trace an area","Trazar un área")}</button><button class="btn" data-act="mapPin">📍 ${farmSet?T2("Move farm pin","Mover pin de la finca"):T2("Place farm pin","Poner pin de la finca")}</button>`:""}
+<button class="btn" data-act="mapMe">◎ ${T2("Where am I","Dónde estoy")}</button></div>`;
+const sel=MAP.sel&&zones.find(z=>z.id===MAP.sel);
+const detail=sel?zoneDetail(sel,adm):"";
+const rows=list.map(({z,s})=>`<button class="row zrow ${MAP.sel===z.id?"on":""}" data-zone="${esc(z.id)}"><span class="zdot" style="background:${zk(z.kind)[3]}"></span><div class="grow" style="text-align:left"><b>${esc(zoneName(z))}</b><div class="t-meta">${esc(T2(zk(z.kind)[1],zk(z.kind)[2]))}${z.m2?" · "+fmtArea(z.m2):""}</div></div>
+<span class="zstat" title="${T2("Animals","Animales")}">🐾 ${s.head}</span><span class="zstat" title="${T2("Notes","Notas")}">📝 ${s.ev.length}</span>${s.health?`<span class="pill warn">${s.health} ${T2("health","salud")}</span>`:""}${s.tasks.length?`<span class="pill mute">${s.tasks.length} ${T2("tasks","tareas")}</span>`:""}</button>`).join("");
+const intro=!zones.length?`<div class="panel"><h2>${T2("Start here","Empiece aquí")}</h2><ol class="map-steps">
+<li>${farmSet?T2("Farm pin is set. Check it sits on the farm.","El pin de la finca está puesto. Verifique que esté sobre la finca."):T2("Find the farm: search the address or paste its GPS, then tap “Place farm pin”.","Encuentre la finca: busque la dirección o pegue su GPS y toque “Poner pin de la finca”.")}</li>
+<li>${T2("Tap “Trace an area” and tap the corners of a pasture, pen or coop on the photo.","Toque “Trazar un área” y toque las esquinas de un pasto, corral o gallinero en la foto.")}</li>
+<li>${T2("Use the same name animals already use (for example “North pasture”) so their history lands on the map.","Use el mismo nombre que ya usan los animales (por ejemplo “Pasto norte”) para que su historial aparezca en el mapa.")}</li></ol>${adm?"":`<p class="t-meta">${T2("Only an administrator can trace areas.","Solo un administrador puede trazar áreas.")}</p>`}</div>`:"";
+return topbar(T2("Farm map","Mapa de la finca"),T2("Satellite view · every area keeps its own history","Vista satelital · cada área guarda su propio historial"))+banners()+
+`<div class="panel map-panel">${tools}<div id="mapSlot" class="map-slot">${MAP.err?`<div class="empty">${T2("The map couldn't load. Check the signal and open this tab again.","El mapa no pudo cargar. Verifique la señal y abra esta pestaña otra vez.")}</div>`:""}</div>
+<div class="t-meta map-attr">${T2("Imagery","Imágenes")}: Esri, Maxar, Earthstar Geographics · ${T2("Photo date varies by location","La fecha de la foto varía según el lugar")}</div></div>
+${detail}${intro}
+${zones.length?`<div class="panel"><div class="ph"><h2>${T2(`Areas · ${zones.length}`,`Áreas · ${zones.length}`)}</h2><div class="seg">${[7,30,90].map(d=>`<button data-act="mapPeriod" data-days="${d}" aria-pressed="${days===d}">${d}${T2(" days"," días")}</button>`).join("")}</div></div>
+<p class="t-meta">${T2("Busiest first. Color strength on the map = activity in the period.","Las más activas primero. La intensidad del color en el mapa = actividad en el período.")}</p><div class="list">${rows}</div></div>`:""}
+${unmapped.length?`<div class="panel"><h2>${T2("Not on the map yet","Todavía no están en el mapa")}</h2><p class="t-meta">${T2("Animals are recorded in these places, but no area with that name has been traced.","Hay animales registrados en estos lugares, pero no se ha trazado un área con ese nombre.")}</p>
+<div class="chips">${unmapped.map(n=>adm?`<button class="chip" data-act="mapDrawNamed" data-name="${esc(n)}">＋ ${esc(n)}</button>`:`<span class="chip">${esc(n)}</span>`).join("")}</div></div>`:""}`; }
+
+function zoneDetail(z,adm){ const s=zoneStats(z,MAP.period);
+const an=s.animals.slice(0,40).map(a=>`<button class="chip" data-open="${esc(a.id)}">${esc(a.tag?a.tag+" · ":"")}${esc(a.name||"")}</button>`).join("");
+const ev=s.ev.slice(0,8).map(e=>`<div class="row"><div class="grow"><b>${esc(e.animal.name||e.animal.tag||"")}</b> · ${esc(L(e,"note")||e.type||"")}<div class="t-meta">${esc(String(e.ts||e.d).slice(0,10))} · ${esc(e.by||"")}</div></div>${e.type==="health"?`<span class="pill warn">${T2("health","salud")}</span>`:""}</div>`).join("");
+const tk=s.tasks.slice(0,8).map(t=>`<div class="row"><div class="grow"><b>${esc(L(t,"title"))}</b><div class="t-meta">${esc(t.date||"")}</div></div></div>`).join("");
+return `<div class="panel zdetail"><div class="ph"><h2><span class="zdot" style="background:${zk(z.kind)[3]}"></span> ${esc(zoneName(z))}</h2><button class="btn" data-act="mapClose">✕</button></div>
+<div class="t-meta">${esc(T2(zk(z.kind)[1],zk(z.kind)[2]))}${z.m2?" · "+fmtArea(z.m2):""}${z.note?" · "+esc(z.note):""}</div>
+<div class="kpis zk"><div class="kpi"><b>${s.head}</b><span>${T2("animals now","animales ahora")}</span></div><div class="kpi"><b>${s.ev.length}</b><span>${T2(`notes, ${MAP.period} days`,`notas, ${MAP.period} días`)}</span></div><div class="kpi"><b>${s.health}</b><span>${T2("health notes","notas de salud")}</span></div><div class="kpi"><b>${s.tasks.length}</b><span>${T2("open tasks","tareas abiertas")}</span></div></div>
+${an?`<h3 class="label">${T2("Animals here","Animales aquí")}</h3><div class="chips">${an}</div>`:`<p class="t-meta">${T2(`No animals list “${z.name}” as their pen.`,`Ningún animal tiene “${z.name}” como su corral.`)}</p>`}
+${ev?`<h3 class="label">${T2("Recent notes","Notas recientes")}</h3><div class="list">${ev}</div>`:""}
+${tk?`<h3 class="label">${T2("Open tasks","Tareas abiertas")}</h3><div class="list">${tk}</div>`:""}
+${adm?`<div class="inline" style="margin-top:12px"><button class="btn" data-act="mapEdit">✏️ ${T2("Rename / type","Nombre / tipo")}</button><button class="btn" data-act="mapRedraw">✏️ ${T2("Redraw shape","Redibujar forma")}</button><button class="btn" data-act="mapDelete" style="border-color:var(--crit);color:var(--crit)">${T2("Remove area","Quitar área")}</button></div>`:""}</div>`; }
+
+async function afterMapRender(){ const slot=document.getElementById("mapSlot"); if(!slot||MAP.err) return;
+if(!MAP.host){ MAP.host=document.createElement("div"); MAP.host.className="map-host"; }
+if(MAP.host.parentNode!==slot) slot.appendChild(MAP.host);
+try{ await loadLeaflet(); }catch{ MAP.err=true; render(); return; }
+const Lf=LF();
+if(!MAP.map){
+MAP.map=Lf.map(MAP.host,{zoomControl:true,attributionControl:true,maxZoom:21,keyboard:false}).setView([18.22,-66.45],9);
+Lf.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxNativeZoom:19,maxZoom:21,attribution:"Esri, Maxar, Earthstar Geographics"}).addTo(MAP.map);
+Lf.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",{maxNativeZoom:19,maxZoom:21,opacity:.85}).addTo(MAP.map);
+MAP.zl=Lf.layerGroup().addTo(MAP.map);
+MAP.map.on("click",onMapClick); }
+setTimeout(()=>MAP.map&&MAP.map.invalidateSize(),0);
+drawZones();
+if(!MAP.fitted){ fitMap(); } }
+function fitMap(){ const Lf=LF(); if(!MAP.map) return; const all=[]; zones.forEach(z=>(z.pts||[]).forEach(p=>all.push([p.lat,p.lng])));
+if(all.length){ MAP.map.fitBounds(Lf.latLngBounds(all).pad(.15),{maxZoom:19}); MAP.fitted=true; }
+else if(siteCfg&&siteCfg.lat!=null){ MAP.map.setView([siteCfg.lat,siteCfg.lng],17); MAP.fitted=true; } }
+function drawZones(){ const Lf=LF(); if(!MAP.map) return; MAP.zl.clearLayers();
+const stats=zones.map(z=>zoneStats(z,MAP.period)); const max=Math.max(1,...stats.map(s=>s.score));
+zones.forEach((z,i)=>{ if(!z.pts||z.pts.length<3) return; const s=stats[i], col=zk(z.kind)[3], on=MAP.sel===z.id;
+const pg=Lf.polygon(z.pts.map(p=>[p.lat,p.lng]),{color:on?"#fff":col,weight:on?4:2,fillColor:col,fillOpacity:.12+.5*(s.score/max),dashArray:on?null:"6 4"}).addTo(MAP.zl);
+pg.on("click",ev=>{ if(MAP.mode) return; Lf.DomEvent.stopPropagation(ev); selectZone(z.id); });
+const c=pg.getBounds().getCenter();
+Lf.marker(c,{interactive:false,icon:Lf.divIcon({className:"zlabel",html:`<span>${esc(zoneName(z))}${s.head?` · ${s.head}🐾`:""}${s.health?` · ⚠︎${s.health}`:""}</span>`,iconSize:null})}).addTo(MAP.zl); });
+if(siteCfg&&siteCfg.lat!=null) Lf.marker([siteCfg.lat,siteCfg.lng],{interactive:false,icon:Lf.divIcon({className:"farmpin",html:"<span>🏡</span>",iconSize:[30,30],iconAnchor:[15,28]})}).addTo(MAP.zl);
+if(MAP.mode==="draw"&&MAP.pts.length){ const ll=MAP.pts.map(p=>[p.lat,p.lng]);
+(MAP.pts.length>=3?Lf.polygon(ll,{color:"#fff",weight:3,fillColor:"#fff",fillOpacity:.2}):Lf.polyline(ll,{color:"#fff",weight:3})).addTo(MAP.zl);
+ll.forEach(p=>Lf.circleMarker(p,{radius:6,color:"#fff",weight:2,fillColor:"#2e7d32",fillOpacity:1,interactive:false}).addTo(MAP.zl)); }
+if(MAP.me) Lf.circleMarker(MAP.me,{radius:8,color:"#fff",weight:3,fillColor:"#1e88e5",fillOpacity:1,interactive:false}).addTo(MAP.zl); }
+function selectZone(id){ MAP.sel=MAP.sel===id?null:id; render(); const z=zones.find(x=>x.id===MAP.sel);
+if(z&&MAP.map&&z.pts&&z.pts.length) MAP.map.fitBounds(LF().latLngBounds(z.pts.map(p=>[p.lat,p.lng])).pad(.3),{maxZoom:19});
+if(z) setTimeout(()=>document.querySelector(".zdetail")?.scrollIntoView({block:"nearest",behavior:"smooth"}),120); }
+async function onMapClick(e){ const p={lat:+e.latlng.lat.toFixed(7),lng:+e.latlng.lng.toFixed(7)};
+if(MAP.mode==="draw"){ MAP.pts.push(p); render(); return; }
+if(MAP.mode==="pin"){ MAP.mode=null; await saveFarmPos(Object.assign({acc:null,via:"map"},p)); MAP.fitted=true; render(); } }
+async function saveFarmPos(p){ const me=meObj(); const hist=((siteCfg&&siteCfg.history)||[]).concat(siteCfg&&siteCfg.lat!=null?[{lat:siteCfg.lat,lng:siteCfg.lng,setBy:siteCfg.setBy,setAt:siteCfg.setAt}]:[]).slice(-10);
+try{ await S.db.doc(LIVE?"private/site":"settings/site").set({lat:p.lat,lng:p.lng,acc:p.acc==null?null:p.acc,via:p.via||"gps",radius:(siteCfg&&siteCfg.radius)||400,setBy:me?.name||"",setAt:new Date().toISOString(),history:hist});
+toast(T2("Farm location saved.","Ubicación de la finca guardada.")); }catch(err){ console.warn(err); toast(t("saveErr")); } }
+function guessKind(n){ n=znorm(n); return /coop|gallin|hen|chick|broiler|brooder|ave/.test(n)?"coop":/barn|establo|shed|house|casa|office|oficina|almac/.test(n)?"barn":/pen|corral|stall|pig|cerdo|calf|terner/.test(n)?"pen":/pond|lago|charca|water|agua|tank|tanque|river|rio|río/.test(n)?"water":/garden|huerto|crop|cultivo|orchard|vegg/.test(n)?"crop":"pasture"; }
+function zoneSheet(z,pts,presetName){ const k=z?z.kind:guessKind(presetName); const nm=z?z.name:(presetName||""); const used=[...new Set(S.animals.map(a=>a.pen).filter(Boolean))].sort();
+openSheet(`<form id="zoneForm" class="stack" data-id="${z?esc(z.id):""}"><h2 style="margin:0">${z?T2("Edit area","Editar área"):T2("Name this area","Nombre del área")}</h2>
+${pts?`<p class="t-meta">${fmtArea(polyArea(pts))}</p>`:""}
+<div class="field"><label class="label" for="zf-name">${T2("Name (English)","Nombre (inglés)")}</label><input id="zf-name" name="name" list="zf-used" required value="${esc(nm)}" placeholder="${T2("North pasture","North pasture")}"><datalist id="zf-used">${used.map(u=>`<option value="${esc(u)}">`).join("")}</datalist></div>
+<div class="field"><label class="label" for="zf-es">${T2("Name (Spanish, optional)","Nombre (español, opcional)")}</label><input id="zf-es" name="name_es" value="${esc(z?z.name_es||"":"")}" placeholder="Pasto norte"></div>
+<div class="field"><label class="label">${T2("Type","Tipo")}</label><div class="chips">${ZKIND.map(x=>`<label class="chip"><input type="radio" name="kind" value="${x[0]}" ${x[0]===k?"checked":""}> <span class="zdot" style="background:${x[3]}"></span> ${esc(T2(x[1],x[2]))}</label>`).join("")}</div></div>
+<div class="field"><label class="label" for="zf-note">${T2("Note (water, gate, shade…)","Nota (agua, portón, sombra…)")}</label><input id="zf-note" name="note" value="${esc(z?z.note||"":"")}"></div>
+<p class="t-meta">${T2("Tip: use the exact pen name animals already have, so their history shows up here.","Consejo: use el nombre exacto del corral que ya tienen los animales para que su historial aparezca aquí.")}</p>
+<div class="inline"><button class="btn primary" type="submit">${T2("Save area","Guardar área")}</button><button class="btn" type="button" data-act="closeSheet">${T2("Cancel","Cancelar")}</button></div></form>`);
+MAP.pending=pts||null; }
+document.addEventListener("submit",async e=>{ if(e.target.id==="mapSearch"){ e.preventDefault(); e.stopImmediatePropagation(); mapSearch(document.getElementById("mapQ").value); return; }
+if(e.target.id!=="zoneForm") return; e.preventDefault(); e.stopImmediatePropagation();
+const fd=new FormData(e.target); const g=k=>String(fd.get(k)||"").trim(); const id=e.target.dataset.id; const me=meObj(); const now=new Date().toISOString();
+const data={name:g("name"),name_es:g("name_es"),kind:g("kind")||"other",note:g("note"),updatedAt:now,updatedBy:me?.name||""};
+if(!data.name){ toast(T2("Give the area a name.","Póngale nombre al área.")); return; }
+if(zones.some(z=>z.id!==id&&znorm(z.name)===znorm(data.name))){ toast(T2("Another area already has that name.","Otra área ya tiene ese nombre.")); return; }
+if(MAP.pending){ data.pts=MAP.pending; data.m2=Math.round(polyArea(MAP.pending)); }
+try{ if(id) await S.db.collection("zones").doc(id).update(data);
+else{ const nid="z_"+Date.now().toString(36); await S.db.collection("zones").doc(nid).set(Object.assign({createdAt:now,createdBy:me?.name||""},data)); MAP.sel=nid; }
+MAP.pending=null; MAP.mode=null; MAP.pts=[]; MAP.redraw=null; closeSheet(); toast(T2("Area saved.","Área guardada.")); render(); }
+catch(err){ console.warn(err); toast(liveErr?liveErr(err):t("saveErr")); } },true);
+async function mapSearch(q){ q=String(q||"").trim(); if(!q||!MAP.map) return;
+const m=q.match(/(-?\d{1,2}\.\d+)\s*[, ]\s*(-?\d{1,3}\.\d+)/)||q.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+if(m){ MAP.map.setView([+m[1],+m[2]],18); return; }
+try{ const r=await fetch("https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&maxLocations=1&countryCode=PRI,USA&SingleLine="+encodeURIComponent(q)).then(r=>r.json());
+const c=r&&r.candidates&&r.candidates[0]; if(!c){ toast(T2("Place not found. Try the town name or paste GPS.","No se encontró. Pruebe el pueblo o pegue el GPS.")); return; }
+MAP.map.setView([c.location.y,c.location.x],c.score>90&&/Address|Point/.test(c.attributes?.Addr_type||"")?18:15); }
+catch{ toast(T2("Search needs signal.","La búsqueda necesita señal.")); } }
+document.addEventListener("click",async e=>{ const zr=e.target.closest("[data-zone]"); if(zr){ selectZone(zr.dataset.zone); return; }
+const b=e.target.closest('[data-act^="map"]'); if(!b) return; const a=b.dataset.act; const z=MAP.sel&&zones.find(x=>x.id===MAP.sel);
+if(a==="mapDraw"||a==="mapDrawNamed"){ MAP.mode="draw"; MAP.pts=[]; MAP.redraw=null; MAP.preset=b.dataset.name||null; MAP.sel=null; render(); toast(T2("Zoom in, then tap each corner.","Acerque el mapa y toque cada esquina.")); }
+else if(a==="mapUndo"){ MAP.pts.pop(); render(); }
+else if(a==="mapCancel"){ MAP.mode=null; MAP.pts=[]; MAP.redraw=null; render(); }
+else if(a==="mapFinish"){ if(MAP.pts.length<3) return; const pts=MAP.pts.slice();
+if(MAP.redraw){ const id=MAP.redraw; try{ await S.db.collection("zones").doc(id).update({pts,m2:Math.round(polyArea(pts)),updatedAt:new Date().toISOString(),updatedBy:meObj()?.name||""}); toast(T2("Shape updated.","Forma actualizada.")); }catch(err){ toast(t("saveErr")); }
+MAP.mode=null; MAP.pts=[]; MAP.redraw=null; MAP.sel=id; render(); }
+else zoneSheet(null,pts,MAP.preset); }
+else if(a==="mapPin"){ MAP.mode="pin"; render(); }
+else if(a==="mapMe"){ const p=await getPos(); if(p.err){ toast(p.err==="denied"?T2("Location is blocked for this site.","La ubicación está bloqueada para este sitio."):T2("Couldn't get a location.","No se pudo obtener la ubicación.")); return; }
+MAP.me=[p.lat,p.lng]; if(MAP.map) MAP.map.setView(MAP.me,Math.max(MAP.map.getZoom(),17)); drawZones(); }
+else if(a==="mapPeriod"){ MAP.period=+b.dataset.days||30; render(); }
+else if(a==="mapClose"){ MAP.sel=null; render(); }
+else if(a==="mapEdit"&&z){ zoneSheet(z,null); }
+else if(a==="mapRedraw"&&z){ MAP.mode="draw"; MAP.pts=[]; MAP.redraw=z.id; render(); toast(T2("Tap the new corners.","Toque las esquinas nuevas.")); }
+else if(a==="mapDelete"&&z){ if(!confirm(T2(`Remove “${z.name}” from the map? Animals and notes are not deleted.`,`¿Quitar “${z.name}” del mapa? Los animales y notas no se borran.`))) return;
+try{ await S.db.collection("zones").doc(z.id).delete(); MAP.sel=null; render(); }catch(err){ toast(t("saveErr")); } } });
+
+// ---------- product QR + product sales history ----------
+function prodSales(p){ return (S.sales||[]).filter(s=>s.productId===p.id||(p.sku&&s.sku===p.sku)); }
+function salesSum(list,days){ const from=days?new Date(Date.now()-(days-1)*864e5).toLocaleDateString("en-CA"):"0000"; const l=list.filter(s=>String(s.d||"")>=from);
+return {qty:l.reduce((n,s)=>n+(Number(s.qty)||0),0),rev:l.reduce((n,s)=>n+(Number(s.total)||0),0),n:l.length}; }
+function productQRSheet(p){ const all=prodSales(p).slice().sort((a,b)=>String(b.ts||b.d).localeCompare(String(a.ts||a.d)));
+const d7=salesSum(all,7), d30=salesSum(all,30), tot=salesSum(all,0); const last=all[0];
+const perDay=d30.qty/30; const left=p.track!==false&&perDay>0?Math.floor((Number(p.stock)||0)/perDay):null;
+const k=(lab,val,sub)=>`<div class="kpi"><span class="t-meta">${lab}</span><b>${val}</b>${sub?`<span class="t-meta">${sub}</span>`:""}</div>`;
+openSheet(`<div class="no-print" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2 style="margin:0">${esc(prodName(p))}</h2><button class="btn" data-act="closeSheet">✕</button></div>
+<div class="pq"><div class="lbl pq-lbl"><div class="lbl-qr" id="pqBox" data-qr="${esc("SHP:"+p.sku)}"></div><b>${esc(prodName(p))}</b><span>${money(p.price)} / ${esc(p.unit||"ea")}</span><code>${esc(p.sku)}</code></div>
+<div class="no-print pq-side"><p class="t-meta" style="margin:0">${T2("This QR belongs to this product only. Scan it with “Scan to sell” to add it to a sale, or with “Receive stock” to add inventory.","Este QR pertenece solo a este producto. Escanéelo con “Escanear para vender” para añadirlo a una venta, o con “Recibir inventario” para sumar inventario.")}</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" data-st="add" data-id="${esc(p.id)}">+ ${T2("Add to sale","Añadir a la venta")}</button><button class="btn" data-st="print">${T2("Print label","Imprimir etiqueta")}</button><button class="btn" data-st="qrpng" data-id="${esc(p.id)}">${T2("Save QR image","Guardar imagen QR")}</button>${isAdmin()&&S.canWrite?`<button class="btn" data-st="edit" data-id="${esc(p.id)}">✏️ ${T2("Edit","Editar")}</button>`:""}</div></div></div>
+<div class="no-print"><div class="kpis">${k(T2("Sold, 7 days","Vendido, 7 días"),d7.qty,money(d7.rev))}${k(T2("Sold, 30 days","Vendido, 30 días"),d30.qty,money(d30.rev))}${k(T2("Sold, all time","Vendido, total"),tot.qty,money(tot.rev))}
+${k(T2("In stock","En inventario"),p.track===false?"—":(Number(p.stock)||0),left!=null?T2(`≈ ${left} days at this pace`,`≈ ${left} días a este ritmo`):T2("No recent sales","Sin ventas recientes"))}</div>
+<h3 class="label">${T2("Recent sales","Ventas recientes")}</h3>${all.length?`<div class="list">${all.slice(0,10).map(s=>`<div class="row"><div class="grow"><b>${esc(String(s.qty))} × ${money(s.price)}</b> = ${money(s.total)}<div class="t-meta">${esc(fmtWhen(s.ts,s.d))} · ${esc(s.by||"")}${s.payment?" · "+esc(s.payment):""}${s.customer?" · "+esc(s.customer):""}</div></div></div>`).join("")}</div>`:`<p class="t-meta">${T2("No sales yet.","Sin ventas todavía.")}</p>`}
+${last?`<p class="t-meta">${T2("Last sold","Última venta")}: ${esc(fmtWhen(last.ts,last.d))}</p>`:""}</div>`);
+setTimeout(()=>{ const el=document.getElementById("pqBox"); if(!el) return; if(window.QRCode) new QRCode(el,{text:el.dataset.qr,width:180,height:180,colorDark:"#000",colorLight:"#fff",correctLevel:QRCode.CorrectLevel.M}); else el.textContent=el.dataset.qr; },30); }
+function saveQRPng(p){ const box=document.getElementById("pqBox"); const cv=box&&box.querySelector("canvas"); if(!cv){ toast(T2("QR not ready yet.","El QR aún no está listo.")); return; }
+const W=360,H=460,c=document.createElement("canvas"); c.width=W; c.height=H; const g=c.getContext("2d"); g.fillStyle="#fff"; g.fillRect(0,0,W,H);
+g.drawImage(cv,40,30,280,280); g.fillStyle="#000"; g.textAlign="center"; g.font="bold 22px system-ui,sans-serif"; g.fillText(prodName(p).slice(0,28),W/2,350);
+g.font="18px system-ui,sans-serif"; g.fillText(`${money(p.price)} / ${p.unit||"ea"}`,W/2,382); g.font="16px ui-monospace,monospace"; g.fillText(p.sku||"",W/2,412);
+const a=document.createElement("a"); a.href=c.toDataURL("image/png"); a.download=`qr-${String(p.sku||p.id).replace(/[^\w-]+/g,"_")}.png`; document.body.appendChild(a); a.click(); a.remove(); }
+
+// ---------- full farm workbook (Excel .xlsx) ----------
+let xlsxLoading=null;
+function loadXLSX(){ if(window.XLSX) return Promise.resolve(); if(xlsxLoading) return xlsxLoading;
+xlsxLoading=new Promise((res,rej)=>{ const s=document.createElement("script"); s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"; s.onload=()=>res(); s.onerror=()=>{ xlsxLoading=null; rej(new Error("xlsx")); }; document.head.appendChild(s); });
+return xlsxLoading; }
+async function farmWorkbook(){ if(!isAdmin()){ toast(T2("Only an administrator can download the full workbook.","Solo un administrador puede descargar el libro completo.")); return; }
+toast(T2("Building the workbook…","Preparando el libro…"));
+try{ await loadXLSX(); }catch{ toast(T2("Couldn't load the Excel tool. Check the signal.","No se pudo cargar Excel. Verifique la señal.")); return; }
+const X=window.XLSX, wb=X.utils.book_new(); const saveRange=REC.range; REC.range="all";
+const num=v=>v===""||v==null||isNaN(Number(v))?v:Number(v); const r2=v=>Math.round((Number(v)||0)*100)/100;
+const WD=lang==="es"?["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"]:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const add=(name,head,rows,widths)=>{ const ws=X.utils.aoa_to_sheet([head].concat(rows.length?rows:[[T2("(nothing yet)","(nada todavía)")]]));
+ws["!cols"]=(widths||head.map(h=>Math.max(10,String(h).length+2))).map(w=>({wch:w})); if(rows.length) ws["!autofilter"]={ref:X.utils.encode_range({s:{r:0,c:0},e:{r:rows.length,c:head.length-1}})};
+X.utils.book_append_sheet(wb,ws,name.slice(0,31)); };
+try{
+const sales=(S.sales||[]).slice().sort((a,b)=>String(a.ts||a.d).localeCompare(String(b.ts||b.d)));
+const totRev=sales.reduce((n,s)=>n+(Number(s.total)||0),0); const s30=salesSum(sales,30), s7=salesSum(sales,7);
+const head=S.animals.filter(a=>a.status!=="sold"&&a.status!=="dead").reduce((n,a)=>n+(a.kind==="group"?(+a.count||0):1),0);
+// 1. Summary
+add(T2("Summary","Resumen"),[T2("Measure","Medida"),T2("Value","Valor")],[
+[T2("Farm","Finca"),"La Finca Pastoreo"],[T2("Workbook made","Libro creado"),new Date().toLocaleString(lang==="es"?"es-PR":"en-US")],[T2("Made by","Creado por"),meObj()?.name||""],[DEMO?T2("Data","Datos"):"",DEMO?T2("DEMO sample data","Datos de DEMOSTRACIÓN"):""],
+[T2("Revenue, all time ($)","Ingresos, total ($)"),r2(totRev)],[T2("Revenue, last 30 days ($)","Ingresos, últimos 30 días ($)"),r2(s30.rev)],[T2("Revenue, last 7 days ($)","Ingresos, últimos 7 días ($)"),r2(s7.rev)],
+[T2("Sales recorded","Ventas registradas"),sales.length],[T2("Products in store","Productos en tienda"),S.products.filter(p=>p.active!==false).length],[T2("Products low or sold out","Productos bajos o agotados"),S.products.filter(p=>p.active!==false&&lowStock(p)).length],
+[T2("Animals (head)","Animales (cabezas)"),head],[T2("Traced map areas","Áreas trazadas en el mapa"),zones.length],[T2("Staff","Personal"),S.staff.length],[T2("Shifts recorded","Turnos registrados"),clockAll.length]],[34,30]);
+// 2. Sales (every line)
+add(T2("Sales","Ventas"),[T2("Date","Fecha"),T2("Time","Hora"),T2("Weekday","Día"),T2("Channel","Canal"),T2("Item","Producto"),"SKU",T2("Qty","Cant."),T2("Unit","Unidad"),T2("Price","Precio"),T2("Total","Total"),T2("Payment","Pago"),T2("Customer","Cliente"),T2("Order","Orden"),T2("Sold by","Vendido por"),T2("Note","Nota")],
+sales.map(s=>{ const dt=s.ts?new Date(s.ts):null; return [s.d||"",dt?fmtTime(s.ts):"",dt?WD[dt.getDay()]:"",chLabel(s.channel),L(s,"item"),s.sku||"",num(s.qty),s.unit||"",num(s.price),num(s.total),s.payment||"",s.customer||"",s.order||"",s.by||"",s.note||""]; }),[11,9,7,14,26,10,7,7,9,10,9,16,10,16,24]);
+// 3. Daily sales by channel
+const chans=[...new Set(sales.map(s=>s.channel))]; const byDay={}; sales.forEach(s=>{ const d=s.d||""; byDay[d]=byDay[d]||{}; byDay[d][s.channel]=(byDay[d][s.channel]||0)+(Number(s.total)||0); });
+add(T2("Daily sales","Ventas diarias"),[T2("Date","Fecha"),T2("Weekday","Día")].concat(chans.map(chLabel),[T2("Total","Total")]),
+Object.keys(byDay).sort().map(d=>{ const v=chans.map(c=>r2(byDay[d][c]||0)); return [d,WD[new Date(d+"T12:00:00").getDay()]].concat(v,[r2(v.reduce((a,b)=>a+b,0))]); }));
+// 4. Products (with their QR code text and sales performance)
+add(T2("Products","Productos"),[T2("Product","Producto"),"SKU",T2("QR code text","Texto del QR"),T2("Category","Categoría"),T2("Price","Precio"),T2("Unit","Unidad"),T2("In stock","En inventario"),T2("Warn at","Avisar en"),T2("Status","Estado"),T2("Sold 7d","Vendido 7d"),T2("Sold 30d","Vendido 30d"),T2("Revenue 30d","Ingresos 30d"),T2("Sold all time","Vendido total"),T2("Revenue all time","Ingresos total"),T2("Avg per day (30d)","Prom. por día (30d)"),T2("Days of stock left","Días de inventario"),T2("Last sold","Última venta")],
+S.products.map(p=>{ const l=prodSales(p); const a7=salesSum(l,7),a30=salesSum(l,30),at=salesSum(l,0); const pd=a30.qty/30; const last=l.map(s=>s.ts||s.d).sort().pop()||"";
+return [prodName(p),p.sku||"","SHP:"+(p.sku||""),p.category||"",num(p.price),p.unit||"",p.track===false?"":num(p.stock),num(p.lowAt),p.active===false?T2("Removed","Quitado"):p.track!==false&&(Number(p.stock)||0)<=0?T2("Sold out","Agotado"):lowStock(p)?T2("Low","Bajo"):T2("OK","OK"),a7.qty,a30.qty,r2(a30.rev),at.qty,r2(at.rev),r2(pd),p.track!==false&&pd>0?Math.floor((Number(p.stock)||0)/pd):"",last?String(last).slice(0,10):""]; }),[26,10,14,12,8,7,9,8,9,9,9,11,11,13,11,12,11]);
+// 5. Monthly sales per product
+const months=[...new Set(sales.map(s=>String(s.d||"").slice(0,7)).filter(Boolean))].sort(); const items=[...new Set(sales.map(s=>L(s,"item")))].sort();
+add(T2("Monthly by item","Mensual por producto"),[T2("Item","Producto")].concat(months.map(m=>m+" qty"),months.map(m=>m+" $")),
+items.map(it=>{ const l=sales.filter(s=>L(s,"item")===it); return [it].concat(months.map(m=>l.filter(s=>String(s.d).startsWith(m)).reduce((n,s)=>n+(Number(s.qty)||0),0)),months.map(m=>r2(l.filter(s=>String(s.d).startsWith(m)).reduce((n,s)=>n+(Number(s.total)||0),0)))); }));
+// 6. Buying behavior: weekday × hour
+const grid={}; sales.forEach(s=>{ if(!s.ts) return; const dt=new Date(s.ts); const key=dt.getDay()+"_"+dt.getHours(); grid[key]=grid[key]||{n:0,qty:0,rev:0}; grid[key].n++; grid[key].qty+=Number(s.qty)||0; grid[key].rev+=Number(s.total)||0; });
+add(T2("Sales by day & hour","Ventas por día y hora"),[T2("Weekday","Día"),T2("Hour","Hora"),T2("Sale lines","Líneas de venta"),T2("Items","Artículos"),T2("Revenue","Ingresos")],
+Object.entries(grid).map(([k,v])=>{ const [d,h]=k.split("_").map(Number); return [d,h,v]; }).sort((a,b)=>a[0]-b[0]||a[1]-b[1]).map(([d,h,v])=>[WD[d],`${String(h).padStart(2,"0")}:00`,v.n,v.qty,r2(v.rev)]));
+// 7-10. Records tabs (all time)
+const recSheet=(tab,name)=>{ const cols=recCols(tab); const rows=recRows(tab); add(name,cols.map(c=>c.label),rows.map(r=>cols.map(c=>c.k==="ts"?fmtWhen(r.ts,r.d):c.num?num(r[c.k]):(r[c.k]??"")))); };
+recSheet("animals",T2("Animals","Animales")); recSheet("activity",T2("Activity log","Bitácora")); recSheet("production",T2("Production","Producción")); recSheet("labor",T2("Labor","Personal"));
+// 11. Areas (map) and their monthly behavior
+add(T2("Areas","Áreas"),[T2("Area","Área"),T2("Spanish name","Nombre en español"),T2("Type","Tipo"),T2("Acres","Acres"),T2("Cuerdas","Cuerdas"),T2("Animals now (head)","Animales ahora (cabezas)"),T2("Notes 30d","Notas 30d"),T2("Health notes 30d","Notas de salud 30d"),T2("Notes 90d","Notas 90d"),T2("Open tasks","Tareas abiertas"),T2("Center lat","Lat. centro"),T2("Center lng","Lng. centro"),T2("Note","Nota")],
+zones.map(z=>{ const a=zoneStats(z,30),b=zoneStats(z,90); const c=(z.pts||[]).reduce((o,p)=>({lat:o.lat+p.lat/z.pts.length,lng:o.lng+p.lng/z.pts.length}),{lat:0,lng:0});
+return [z.name,z.name_es||"",T2(zk(z.kind)[1],zk(z.kind)[2]),z.m2?r2(z.m2/4046.86):"",z.m2?r2(z.m2/3930.4):"",a.head,a.ev.length,a.health,b.ev.length,a.tasks.length,c.lat?+c.lat.toFixed(6):"",c.lng?+c.lng.toFixed(6):"",z.note||""]; }));
+const amonth={}; S.animals.forEach(a=>(a.events||[]).forEach(e=>{ const z=zoneOf(e.pen,e.pen_es); const nm=z?z.name:(e.pen||T2("(no area)","(sin área)")); const m=String(e.d||e.ts||"").slice(0,7); if(!m) return; const k=nm+"|"+m;
+amonth[k]=amonth[k]||{nm,m,n:0,h:0,types:{}}; amonth[k].n++; if(e.type==="health"||e.type==="treatment") amonth[k].h++; amonth[k].types[e.type]=(amonth[k].types[e.type]||0)+1; }));
+add(T2("Area activity by month","Actividad por área y mes"),[T2("Area","Área"),T2("Month","Mes"),T2("On map","En el mapa"),T2("Entries","Entradas"),T2("Health / treatment","Salud / tratamiento"),T2("Breakdown","Desglose")],
+Object.values(amonth).sort((a,b)=>a.nm.localeCompare(b.nm)||a.m.localeCompare(b.m)).map(x=>[x.nm,x.m,zoneOf(x.nm)?T2("Yes","Sí"):T2("No","No"),x.n,x.h,Object.entries(x.types).map(([k,v])=>`${typeL(k)} ${v}`).join(", ")]),[22,9,9,9,12,50]);
+// 12. Admin sign-ins
+add(T2("Admin sign-ins","Entradas de admin"),[T2("Date","Fecha"),T2("Time","Hora"),T2("Name","Nombre"),T2("Status","Estado"),T2("Distance (m)","Distancia (m)"),T2("Accuracy (m)","Precisión (m)"),T2("Device","Dispositivo"),"Lat","Lng"],
+logins.slice().sort((a,b)=>String(a.ts).localeCompare(String(b.ts))).map(x=>[x.date||"",x.ts?fmtTime(x.ts):"",x.name||"",x.status||"",num(x.dist),num(x.acc),x.device||"",x.lat??"",x.lng??""]));
+X.writeFile(wb,`la-finca-farm-workbook-${today()}.xlsx`,{compression:true});
+toast(T2("Excel workbook downloaded.","Libro de Excel descargado."));
+}catch(err){ console.warn("workbook",err); toast(T2("Couldn't build the workbook.","No se pudo crear el libro.")); }
+finally{ REC.range=saveRange; } }
+document.addEventListener("click",e=>{ const b=e.target.closest&&e.target.closest('[data-act="farmXlsx"]'); if(!b) return; e.stopPropagation(); farmWorkbook(); },true);
+
 // ---------- boot ----------
 document.documentElement.lang=lang;
 render();
@@ -2862,6 +3129,7 @@ bind("animals","animals"); bind("tasks","tasks"); bind("staff","staff",(a,b)=>St
 db.doc("settings/clock").onSnapshot(d=>{ clockCfg=d.exists?d.data():null; if(pendingClock&&pendingClock!=="ok"){ const c=pendingClock; pendingClock=null; setTimeout(()=>processClockCode(c),0); } render(); },err=>console.warn("clock",err));
 bind("sales","sales"); bind("attention","attention"); bind("vision","vision");
 bind("products","products",(a,b)=>String(a.name).localeCompare(String(b.name)));
+db.collection("zones").onSnapshot(snap=>{ zones=snap.docs.map(d=>Object.assign({id:d.id},d.data())); render(); },err=>console.warn("zones",err));
 db.doc("settings/site").onSnapshot(d=>{ siteCfg=d.exists?d.data():null; render(); },err=>console.warn("site",err));
 db.collection("logins").onSnapshot(snap=>{ logins=snap.docs.map(d=>Object.assign({id:d.id},d.data())); if(S.view==="dash") render(); },err=>console.warn("logins",err));
 db.collection("clock").onSnapshot(snap=>{ clockAll=snap.docs.map(d=>Object.assign({id:d.id},d.data())); if(S.view==="records") render(); },err=>console.warn("clockAll",err));
