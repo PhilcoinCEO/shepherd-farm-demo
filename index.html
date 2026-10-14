@@ -67,6 +67,7 @@ button{cursor:pointer}
 :root[data-theme="light"]{color-scheme:light}
 .who{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px 4px 4px;font-weight:600;font-size:13px}
 .avatar{width:26px;height:26px;border-radius:50%;background:var(--hay);color:var(--hay-ink);display:grid;place-items:center;font-weight:700;font-size:12px}
+.demo-thin{padding:5px 10px!important;font-size:12px!important;margin-bottom:10px!important}
 .demo{background:var(--warn-bg);color:var(--fg);border:1px dashed var(--warn);border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:16px}
 .grid{display:grid;gap:16px}
 .vis-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}.vis-card{border:1px solid var(--line,rgba(0,0,0,.12));border-radius:12px;padding:12px 14px;background:rgba(255,255,255,.35)}.vis-card p{margin:6px 0 4px;white-space:pre-wrap}.row.idea.done b{text-decoration:line-through;opacity:.6}.chip.on{background:var(--pasture);color:var(--pasture-ink);border-color:var(--pasture)}
@@ -319,6 +320,7 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 .app>.main{order:1;flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;padding-bottom:24px}
 .brand,.rail-foot{display:none}
 .nav{flex-direction:row;width:100%;justify-content:space-around}
+.nav .nav-desk{display:none}.nav button.alt-cur{background:rgba(169,194,122,.18);box-shadow:inset 3px 0 0 var(--rail-gold);opacity:1}
 .nav .nl{display:none}.nav .ns{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .nav button{flex-direction:column;gap:2px;font-size:10px;padding:6px 0;flex:1 1 0;min-width:0;align-items:center;text-align:center;line-height:1.1;letter-spacing:-.2px}
 .topbar h1{font-size:28px}
@@ -361,6 +363,8 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 
 .kpi-link{text-align:left;cursor:pointer;font:inherit;color:inherit;display:block;width:100%;transition:transform .12s,box-shadow .12s}
 .kpi-link:hover{transform:translateY(-2px);box-shadow:0 8px 20px -10px rgba(23,61,34,.45)}
+@keyframes flashp{0%{box-shadow:0 0 0 3px var(--pasture)}100%{box-shadow:0 0 0 0 transparent}}.panel.flash{animation:flashp 1.6s ease-out}
+button.kpi-link[disabled]{cursor:default;transform:none!important;box-shadow:none}
 .kpi-go{float:right;font-size:11px;font-weight:700;color:var(--pasture);letter-spacing:0;text-transform:none}
 .kpi-sp{text-decoration:underline dotted;cursor:pointer}.kpi-sp:hover{color:var(--pasture)}
 .asearch{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
@@ -386,7 +390,9 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 .co-hint{margin-top:8px;font-size:14px;font-weight:600;color:var(--crit)}.stamp.warn{color:var(--crit)}
 .ph-choice{display:flex;gap:10px;margin:10px 0 4px}.ph-choice .btn{flex:1;justify-content:center;cursor:pointer}
 .inst{position:relative;display:flex;flex-direction:column;gap:6px;background:var(--rail,#18291B);color:#f3efe2;border-radius:14px;padding:14px 40px 14px 14px;margin:0 0 12px;width:100%;max-width:520px;box-sizing:border-box;text-align:left}.inst b{font-size:16px}.inst span,.inst li{font-size:14px;opacity:.92}.inst ol{margin:2px 0 0 18px;padding:0}.inst .btn{align-self:flex-start;margin-top:4px}.inst-x{position:absolute;top:8px;right:8px;background:none;border:0;color:inherit;font-size:18px;cursor:pointer;padding:6px}.inst-ic{display:inline-block;border:1px solid currentColor;border-radius:4px;padding:0 4px;font-size:12px}
-.gate .inst{margin-top:48px}
+.gate .inst{margin-top:20px}
+@media (max-width:640px){.gate{justify-content:flex-start;padding-top:52px}.gate-logo{width:min(52vw,220px);margin-bottom:4px}}
+@media (max-width:640px) and (max-height:700px){.gate-logo{width:min(40vw,170px)}}
 .demo.offline{background:color-mix(in srgb,var(--crit) 14%,transparent)}
 .sq-big{width:180px;height:180px;border-radius:16px;object-fit:cover;border:3px solid var(--pasture);display:grid;place-items:center;font-size:56px}
 .prof-cam{position:absolute;left:8px;right:8px;bottom:8px;background:rgba(0,0,0,.6);color:#fff;border-radius:8px;text-align:center;font-size:12px;font-weight:700;padding:5px}
@@ -628,7 +634,7 @@ else await writeDoc("tasks",tk.id,()=>S.db.collection("tasks").doc(tk.id).update
 function renderNav(){
 if(meObj() && staffStatus(meObj())!=="active"){ document.getElementById("nav").innerHTML=""; document.getElementById("railNote").textContent=meObj().name; return; }
 const items=[["today",I.today],["animals",I.animals],["map",I.map],["store",I.store],["agent",I.agent]]; if(isAdmin()){ items.unshift(["command",I.megaphone]); items.push(["dash",I.dash]); items.push(["records",I.sheet]); }
-document.getElementById("nav").innerHTML = items.map(([k,ic])=>`<button data-nav="${k}" ${S.view===k?'aria-current="page"':""}>${ic}<span class="nl">${k==="records"?T2("Records","Registros"):k==="store"?T2("Store","Tienda"):k==="map"?T2("Map","Mapa"):t(k)}</span><span class="ns">${({agent:T2("AI","IA"),dash:T2("Board","Panel"),command:T2("Orders","Mando")})[k]||(k==="records"?T2("Records","Registros"):k==="store"?T2("Store","Tienda"):k==="map"?T2("Map","Mapa"):t(k))}</span></button>`).join("");
+document.getElementById("nav").innerHTML = items.map(([k,ic])=>`<button data-nav="${k}" class="${k==="command"||k==="records"?"nav-desk":""}${k==="dash"&&(S.view==="command"||S.view==="records")?" alt-cur":""}" ${S.view===k?'aria-current="page"':""}>${ic}<span class="nl">${k==="records"?T2("Records","Registros"):k==="store"?T2("Store","Tienda"):k==="map"?T2("Map","Mapa"):t(k)}</span><span class="ns">${({agent:T2("AI","IA"),dash:T2("Board","Panel"),command:T2("Orders","Mando")})[k]||(k==="records"?T2("Records","Registros"):k==="store"?T2("Store","Tienda"):k==="map"?T2("Map","Mapa"):t(k))}</span></button>`).join("");
 document.getElementById("railNote").textContent = meObj() ? `${meObj().name} · ${meObj().role==="admin"?t("admin"):t("employee")}` : "";
 }
 const FLAG_US='<svg viewBox="0 0 38 20" width="30" height="16" aria-hidden="true"><rect width="38" height="20" fill="#B22234"/><g fill="#fff"><rect y="1.54" width="38" height="1.54"/><rect y="4.62" width="38" height="1.54"/><rect y="7.69" width="38" height="1.54"/><rect y="10.77" width="38" height="1.54"/><rect y="13.85" width="38" height="1.54"/><rect y="16.92" width="38" height="1.54"/></g><rect width="15.2" height="10.77" fill="#3C3B6E"/><g fill="#fff">'+[...Array(20)].map((_,i)=>`<circle cx="${1.5+(i%5)*3.05+(Math.floor(i/5)%2)*1.5}" cy="${1.4+Math.floor(i/5)*2.6}" r=".55"/>`).join("")+'</g></svg>';
@@ -698,7 +704,7 @@ try{ const perm = await BS.requestPermissions(); if(perm && perm.camera && perm.
 const r = await BS.scan({ formats: ["QR_CODE"] }); const txt = r && r.barcodes && r.barcodes[0] && (r.barcodes[0].rawValue || r.barcodes[0].displayValue);
 if(!txt) return true; const code = codeFromText(txt); if(!code){ toast(T2("That isn't the farm clock-in code.","Ese no es el código de entrada de la finca.")); return true; }
 processClockCode(code); return true; }catch(e){ console.warn("native scan", e); return false; } }
-function banners(){ let h=offlineBanner()+installBanner()+(DEMO?`<div class="demo demo-mode"><b>${T2("Demo mode","Modo demostración")}</b> · ${T2("Data is saved only on this device. The AI agent and shared data work in the full version.","Los datos se guardan solo en este dispositivo. El agente IA y los datos compartidos funcionan en la versión completa.")} <button class="chip" data-act="resetDemo">${T2("Reset demo","Reiniciar demo")}</button></div>`:""); if(S.animals.some(a=>a.sample)||S.staff.some(s=>s.sample)) h+=`<div class="demo">${t("sample")}</div>`; if(!S.canWrite) h+=`<div class="demo">${t("readOnly")}</div>`; if(isAdmin()){ const pend=S.animals.filter(a=>a.review==="pending"); if(pend.length) h+=`<div class="demo">🆕 ${pend.length===1?T2("1 animal added by staff needs your review:","1 animal agregado por el personal necesita su revisión:"):T2(`${pend.length} animals added by staff need your review:`,`${pend.length} animales agregados por el personal necesitan su revisión:`)} ${pend.slice(0,6).map(a=>`<button class="chip" data-open="${esc(a.id)}">${esc(animalLabel(a))} · ${esc(a.addedBy?.name||"")}</button>`).join(" ")}</div>`; } return h; }
+function banners(){ let h=offlineBanner()+installBanner()+(DEMO?`<div class="demo demo-mode demo-thin"><b>${T2("Demo","Demo")}</b> · ${T2("sample data, saved only on this device","datos de muestra, guardados solo en este dispositivo")} <button class="linkbtn" data-act="resetDemo">${T2("Reset","Reiniciar")}</button></div>`:""); if(!DEMO&&(S.animals.some(a=>a.sample)||S.staff.some(s=>s.sample))) h+=`<div class="demo demo-thin">${t("sample")}</div>`; if(!S.canWrite) h+=`<div class="demo">${t("readOnly")}</div>`; if(isAdmin()){ const pend=S.animals.filter(a=>a.review==="pending"); if(pend.length) h+=`<div class="demo">🆕 ${pend.length===1?T2("1 animal added by staff needs your review:","1 animal agregado por el personal necesita su revisión:"):T2(`${pend.length} animals added by staff need your review:`,`${pend.length} animales agregados por el personal necesitan su revisión:`)} ${pend.slice(0,6).map(a=>`<button class="chip" data-open="${esc(a.id)}">${esc(animalLabel(a))} · ${esc(a.addedBy?.name||"")}</button>`).join(" ")}</div>`; } return h; }
 
 function render(){
 renderNav();
@@ -734,7 +740,7 @@ return me.role==="admin" ? (Date.now()-new Date(since).getTime())<ADMIN_TTL : ne
 function endSession(msgEn,msgEs){ if(LIVE&&FB.auth) FB.auth.signOut().catch(()=>{}); S.me=null; LS.set("sh.me",null); LS.set("sh.since",null); closeSheet(); render(); window.scrollTo(0,0); if(msgEn) toast(T2(msgEn,msgEs)); }
 function gateShell(inner){ const em=document.querySelector(".brand img")?.src||"";
 return `<div class="gate"><div class="gate-tools"><div class="seg flags" role="group" aria-label="${t("langLabel")}"><button data-lang="en" aria-pressed="${lang==="en"}" aria-label="English">${FLAG_US}</button><button data-lang="es" aria-pressed="${lang==="es"}" aria-label="Español">${FLAG_ES}</button></div></div>
-${installBanner()}<img class="gate-logo" src="${em}" alt="La Finca Pastoreo · Regenerativo · Puerto Rico"><div class="gate-tag">Shepherd Farm OS</div>${inner}</div>`; }
+<img class="gate-logo" src="${em}" alt="La Finca Pastoreo · Regenerativo · Puerto Rico"><div class="gate-tag">Shepherd Farm OS</div>${inner}${installBanner()}</div>`; }
 const pinField=(id)=>`<form class="gate-form" id="gateForm" data-id="${esc(id)}"><div class="field"><label class="label" for="gt-pin">PIN</label>
 <input id="gt-pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required autocomplete="current-password"></div>
 <div class="gate-err" id="gt-err" role="alert"></div><button class="btn primary" type="submit">${T2("Sign in","Entrar")}</button><button class="linkbtn" type="button" data-forgot="${esc(id)}" style="align-self:center">${T2("Forgot PIN?","¿Olvidó su PIN?")}</button></form>`;
@@ -960,9 +966,9 @@ const herd=S.animals.reduce((s,a)=>s+(a.kind==="group"?(a.count||0):1),0);
 const counts={}; for(const a of S.animals) counts[a.species]=(counts[a.species]||0)+(a.kind==="group"?(a.count||0):1);
 const staff=S.staff.filter(s=>s.role!=="admin"&&staffStatus(s)==="active").map(s=>{const m=list.filter(tk=>tk.assignee===s.id);return{s,n:m.length,d:m.filter(taskDoneToday).length}});
 return topbar(t("dash"), t("farm"), S.canWrite?`${isAdmin()?`<button class="btn voicebtn" data-nav="command">${I.megaphone} ${T2("Command center","Centro de mando")}</button>`:`<button class="btn voicebtn" data-act="voice">${I.mic} ${T2("Voice log","Registro por voz")}</button>`}<button class="btn" data-nav="records">${I.sheet} ${T2("Records","Registros")}</button><button class="btn" data-act="hire">${T2("Add employee","Agregar empleado")}</button><button class="btn primary" data-act="assign">${t("assign")}</button>`:"") + banners() +
-`<div class="kpis"><div class="kpi"><span class="label">${t("done")}</span><b>${doneN}/${list.length}</b></div>
-<div class="kpi ${overdue.length?"crit":""}"><span class="label">${t("overdue")}</span><b>${overdue.length}</b></div>
-<div class="kpi"><span class="label">${t("health7")}</span><b>${health.length}</b></div>
+`<div class="kpis"><button class="kpi kpi-link" data-go="today"><span class="label">${t("done")} <span class="kpi-go">${T2("Open","Abrir")} →</span></span><b>${doneN}/${list.length}</b></button>
+<button class="kpi kpi-link ${overdue.length?"crit":""}" ${overdue.length===1?`data-open="${esc(overdue[0].a.id)}" data-due="${esc(overdue[0].it.d+"|"+overdue[0].it.what)}"`:`data-go="#dashAttn"`}><span class="label">${t("overdue")} <span class="kpi-go">${overdue.length?T2("See","Ver")+" →":""}</span></span><b>${overdue.length}</b>${overdue.length?`<span class="t-meta">${overdue.slice(0,2).map(o=>esc(o.a.tag+" · "+L(o.it,"what"))).join(", ")}</span>`:""}</button>
+<button class="kpi kpi-link" data-go="#dashHealth"><span class="label">${t("health7")} <span class="kpi-go">${T2("See","Ver")} →</span></span><b>${health.length}</b></button>
 <button class="kpi kpi-link" data-act="herdSearch" title="${T2("Search every animal","Buscar cualquier animal")}"><span class="label">${t("herd")} <span class="kpi-go">${T2("Search","Buscar")} →</span></span><b>${herd}</b><span class="t-meta">${SPECIES.filter(s=>counts[s]).map(s=>`<span class="kpi-sp" data-sp-go="${s}">${counts[s]} ${t(s).toLowerCase()}</span>`).join(" · ")}</span></button></div>
 <div class="dash-cols">
 <div class="dash-col">
@@ -972,10 +978,10 @@ ${pinResetPanel()}${newHiresPanel()}
 </div>
 <div class="dash-col">
 <section class="panel"><h2>${t("staffProgress")}</h2><div class="list">${staff.map(({s,n,d})=>`<button class="row rowlink" data-staff="${esc(s.id)}"><span class="avatar">${esc(initials(s.name))}</span><div class="grow"><b>${esc(s.name)}</b> <span class="t-meta">${esc(areaLabel(s))}</span><div class="bar-track" style="margin-top:6px"><div class="bar-fill" style="width:${n?Math.round(d/n*100):0}%"></div></div></div><span class="pill ${n&&d===n?"ok":"mute"}">${d}/${n}</span><span class="chev" aria-hidden="true">›</span></button>`).join("")||`<div class="empty">—</div>`}</div></section>
-<section class="panel"><h2>${t("recentHealth")}</h2><div class="list">${health.length?health.slice(0,10).map(({a,e})=>`<div class="row"><span class="when t-meta" style="font-family:var(--f-mono);width:84px">${esc(e.d)}</span><div class="grow"><button class="chip" data-open="${esc(a.id)}">${esc(animalLabel(a))}</button> ${esc(L(e,"note"))}<div class="t-meta">${esc(e.by||"")}</div></div></div>`).join(""):`<div class="empty">—</div>`}</div></section>
+<section class="panel" id="dashHealth"><h2>${t("recentHealth")}</h2><div class="list">${health.length?health.slice(0,10).map(({a,e})=>`<div class="row"><span class="when t-meta" style="font-family:var(--f-mono);width:84px">${esc(e.d)}</span><div class="grow"><button class="chip" data-open="${esc(a.id)}">${esc(animalLabel(a))}</button> ${esc(L(e,"note"))}<div class="t-meta">${esc(e.by||"")}</div></div></div>`).join(""):`<div class="empty">—</div>`}</div></section>
 </div>
 <div class="dash-col dash-attn">
-<section class="panel">${attnHead()}<div class="list">${attnRows()}${care.length?care.slice(0,10).map(({a,it,n})=>`<button class="row rowlink" data-open="${esc(a.id)}" data-due="${esc(it.d+"|"+it.what)}" title="${esc(T2("Open","Abrir"))}"><span class="tag ${a.kind==="group"?"group":""}"><span>${esc(a.tag)}</span></span><div class="grow"><b>${esc(L(it,"what"))}</b><div class="t-meta">${esc(L(a,"name")||t(a.species))}</div></div>${duePill(n)}<span class="chev" aria-hidden="true">›</span></button>`).join(""):(openAttn().length?"":`<div class="empty">—</div>`)}</div></section>
+<section class="panel" id="dashAttn">${attnHead()}<div class="list">${attnRows()}${care.length?care.slice(0,10).map(({a,it,n})=>`<button class="row rowlink" data-open="${esc(a.id)}" data-due="${esc(it.d+"|"+it.what)}" title="${esc(T2("Open","Abrir"))}"><span class="tag ${a.kind==="group"?"group":""}"><span>${esc(a.tag)}</span></span><div class="grow"><b>${esc(L(it,"what"))}</b><div class="t-meta">${esc(L(a,"name")||t(a.species))}</div></div>${duePill(n)}<span class="chev" aria-hidden="true">›</span></button>`).join(""):(openAttn().length?"":`<div class="empty">—</div>`)}</div></section>
 </div>
 </div>`;
 }
@@ -1150,7 +1156,7 @@ const wantTask=/\btask\b|tarea|vet check|call the vet|llamar al vet|veterinari/.
 const mv=cmd.match(/\b(?:move|moved|mover|mueve|movida|movido|pasar|pasa|trasladar|traslada)\b.*?\b(?:to|into|a|al|para)\s+(.+?)[.!]?$/i);
 const rest=restOf(cmd);
 const isNote=r.type==="health"||r.type==="treatment"||rest.length>=12;
-const isQ=/\?\s*$/.test(cmd.replace(/\s*\b[a-z]?-?\d{1,6}\s*$/i,"").trim())||/^(what|whats|what's|how|why|should|can|could|is|does|do|which|when|qué|que|cómo|como|por qué|debo|puedo|cuál|cual|cuándo|es)\b/i.test(cmd.trim());
+const isQ=/\?\s*$/.test(cmd.replace(/\s*\b[a-z]?-?\d{1,6}\s*$/i,"").trim())||/^(what|whats|what's|how|why|should|can|could|is|does|do|which|when|qué|que|cómo|como|por qué|debo|puedo|cuál|cual|cuándo|es)\b/i.test(cmd.trim())||/\b(what should|what do i|what can i|should i|how do i|how can i|how to|is it normal|any advice|advice|what to do|what.s wrong|qu[eé] (hago|debo|puedo|le doy)|debo hacer|c[oó]mo (hago|puedo)|es normal|qu[eé] le pasa|consejo)\b/i.test(cmd);
 if(isQ&&r.weight_lb==null&&r.eggs==null&&!wantTask&&!mv){ say(demoProfile(a)+"\n\n"+T2("I can't give medical advice. If an animal is sick or not eating, call the vet. I can create an urgent vet task or log what you see.","No puedo dar consejos médicos. Si un animal está enfermo o no come, llame al veterinario. Puedo crear una tarea urgente de veterinario o anotar lo que ve."),[{label:T2("Create vet task","Crear tarea de veterinario"),say:T2(`vet task for ${a.tag}`,`tarea de veterinario para ${a.tag}`)},{label:T2("Health note","Nota de salud"),fill:T2(`${a.tag} looks `,`${a.tag} se ve `)},{label:T2("Open record","Abrir registro"),open:a.id}]); return; }
 const acts=r.weight_lb!=null||r.eggs!=null||r.due_date||mv||wantTask||wantPhoto||isNote;
 if(!acts){ say(demoProfile(a)+"\n\n"+T2("What do you want to do?","¿Qué desea hacer?"),demoActionChips(a)); return; }
@@ -1919,7 +1925,7 @@ const s=REC.sort[tab]||{k:(tab==="animals"?"tag":tab==="production"||tab==="labo
 rows.sort((a,b)=>{ const x=a[s.k],y=b[s.k]; const n=typeof x==="number"||typeof y==="number"; return (n?((Number(x)||0)-(Number(y)||0)):String(x??"").localeCompare(String(y??""),undefined,{numeric:true}))*s.dir; });
 return {rows,sort:s}; }
 function cellFmt(c,v,r){ if(c.fmt) return c.fmt(v,r); if(v===""||v==null) return ""; if(c.money) return "$"+Number(v).toFixed(2); if(c.sign&&typeof v==="number") return (v>0?"+":"")+v; return v; }
-function recSummary(){ const tab=REC.tab; const k=(lab,val,sub)=>`<div class="kpi"><span class="t-meta">${lab}</span><b>${val}</b>${sub?`<span class="t-meta">${sub}</span>`:""}</div>`;
+function recSummary(){ const tab=REC.tab; const k=(lab,val,sub,go)=>`<button class="kpi kpi-link" data-go="${go}"${(go==="rec:"+REC.tab)?' aria-pressed="true"':""}><span class="t-meta">${lab}</span><b>${val}</b>${sub?`<span class="t-meta">${sub}</span>`:""}</button>`;
 const sales=S.sales.filter(s=>inRange(s.d)); const rev=sales.reduce((s,x)=>s+(Number(x.total)||0),0);
 const hrs=clockAll.filter(c=>inRange(c.date)&&c.in&&c.out).reduce((s,c)=>s+(new Date(c.out)-new Date(c.in))/36e5,0);
 const flock=S.animals.filter(a=>(a.production||[]).length); let eggs=0,days=new Set(),hens=0; for(const a of flock){ hens+=a.count||0; for(const p of a.production) if(inRange(p.d)){ eggs+=p.eggs; days.add(p.d); } }
@@ -1927,12 +1933,12 @@ const lastEggs=flock.reduce((s,a)=>{ const p=(a.production||[]).slice().sort((x,
 const lay=hens?Math.round(lastEggs/hens*100):0; const list=tasksToday(); const doneN=list.filter(taskDoneToday).length;
 const acts=recRows("activity"); const people=new Set(acts.map(r=>r.who).filter(Boolean));
 const byCh={}; for(const s of sales) byCh[s.channel]=(byCh[s.channel]||0)+(Number(s.total)||0); const topCh=Object.entries(byCh).sort((a,b)=>b[1]-a[1])[0];
-return `<div class="kpis">${k(T2("Revenue","Ingresos"),"$"+Math.round(rev).toLocaleString(),topCh?T2("Top: ","Mayor: ")+chLabel(topCh[0]):T2("No sales logged","Sin ventas"))}
-${k(T2("Eggs","Huevos"),eggs.toLocaleString(),days.size?`${Math.round(eggs/days.size)} ${T2("per day","por día")}`:"")}
-${k(T2("Lay rate (capacity)","Tasa de postura (capacidad)"),lay+"%",`${lastEggs} / ${hens} ${T2("hens, last count","gallinas, último conteo")}`)}
-${k(T2("Labor hours","Horas de trabajo"),Math.round(hrs*10)/10,`${people.size} ${T2("people active","personas activas")}`)}
-${k(T2("Tasks today","Tareas hoy"),`${doneN}/${list.length}`,list.length?Math.round(doneN/list.length*100)+"% "+T2("complete","completo"):"")}
-${k(T2("Logged entries","Entradas registradas"),acts.length.toLocaleString(),T2("in this range","en este período"))}</div>`; }
+return `<div class="kpis">${k(T2("Revenue","Ingresos"),"$"+Math.round(rev).toLocaleString(),topCh?T2("Top: ","Mayor: ")+chLabel(topCh[0]):T2("No sales logged","Sin ventas"),"rec:sales")}
+${k(T2("Eggs","Huevos"),eggs.toLocaleString(),days.size?`${Math.round(eggs/days.size)} ${T2("per day","por día")}`:"","rec:production")}
+${k(T2("Lay rate (capacity)","Tasa de postura (capacidad)"),lay+"%",`${lastEggs} / ${hens} ${T2("hens, last count","gallinas, último conteo")}`,"rec:production")}
+${k(T2("Labor hours","Horas de trabajo"),Math.round(hrs*10)/10,`${people.size} ${T2("people active","personas activas")}`,"rec:labor")}
+${k(T2("Tasks today","Tareas hoy"),`${doneN}/${list.length}`,list.length?Math.round(doneN/list.length*100)+"% "+T2("complete","completo"):"","today")}
+${k(T2("Logged entries","Entradas registradas"),acts.length.toLocaleString(),T2("in this range","en este período"),"rec:activity")}</div>`; }
 function recTableHTML(){ const cols=recCols(REC.tab); const {rows,sort}=recFiltered();
 const tot={}; if(REC.tab==="sales"){ tot.qty=rows.reduce((s,r)=>s+(Number(r.qty)||0),0); tot.total=rows.reduce((s,r)=>s+(Number(r.total)||0),0); }
 if(REC.tab==="labor"){ tot.hours=Math.round(rows.reduce((s,r)=>s+(Number(r.hours)||0),0)*10)/10; tot.done=rows.reduce((s,r)=>s+(Number(r.done)||0),0); }
@@ -2704,7 +2710,7 @@ function addToCart(id,n=1){ const p=S.products.find(x=>x.id===id); if(!p) return
 if(p.track!==false&&want>(Number(p.stock)||0)){ toast(T2(`Only ${Number(p.stock)||0} ${prodName(p)} in stock.`,`Solo hay ${Number(p.stock)||0} de ${prodName(p)}.`)); return false; }
 if(l) l.qty=want; else STORE.cart.push({id,qty:n}); saveCart(); return true; }
 function storeGridHTML(){ const q=STORE.q.trim().toLowerCase(); const adm=isAdmin()&&S.canWrite;
-const list=S.products.filter(p=>p.active!==false&&(!q||[p.name,p.name_es,p.sku,p.category].some(v=>String(v||"").toLowerCase().includes(q))));
+const list=S.products.filter(p=>p.active!==false&&(!STORE.lowOnly||lowStock(p))&&(!q||[p.name,p.name_es,p.sku,p.category].some(v=>String(v||"").toLowerCase().includes(q))));
 if(!S.products.length) return `<div class="empty">${adm?T2("No products yet. Tap “+ Product” or scan an item to add it.","Todavía no hay productos. Toque “+ Producto” o escanee un artículo para añadirlo."):T2("The store is empty. An administrator adds products.","La tienda está vacía. Un administrador añade los productos.")}</div>`;
 if(!list.length) return `<div class="empty">—</div>`;
 return `<div class="st-grid">${list.map(p=>{ const s=Number(p.stock)||0; const tr=p.track!==false;
@@ -2724,9 +2730,9 @@ function renderStore(){ const adm=isAdmin()&&S.canWrite;
 const td=(S.sales||[]).filter(x=>x.d===today()&&x.channel==="store"); const low=S.products.filter(p=>p.active!==false&&lowStock(p));
 return topbar(T2("Store","Tienda"),T2("Scan, sell and track inventory","Escanee, venda y controle inventario"),
 `<button class="btn primary" data-st="scan">📷 ${T2("Scan to sell","Escanear para vender")}</button>${adm?`<button class="btn" data-st="new">+ ${T2("Product","Producto")}</button><button class="btn" data-st="scanRecv">${T2("Receive stock","Recibir inventario")}</button><button class="btn" data-st="labels">${T2("Print labels","Imprimir etiquetas")}</button><button class="btn" data-act="farmXlsx">⬇︎ Excel</button>`:""}`)+banners()+
-`<div class="kpis"><div class="kpi"><span class="label">${T2("Store sales today","Ventas de hoy")}</span><b>${money(td.reduce((s,x)=>s+(Number(x.total)||0),0))}</b></div>
-<div class="kpi"><span class="label">${T2("Items sold today","Artículos hoy")}</span><b>${td.reduce((s,x)=>s+(Number(x.qty)||0),0)}</b></div>
-<div class="kpi ${low.length?"crit":""}"><span class="label">${T2("Low or sold out","Poco o agotado")}</span><b>${low.length}</b>${low.length?`<span class="t-meta">${low.slice(0,3).map(p=>esc(prodName(p))).join(", ")}</span>`:""}</div></div>
+`<div class="kpis"><button class="kpi kpi-link" ${isAdmin()?`data-go="rec:sales"`:"disabled"}><span class="label">${T2("Store sales today","Ventas de hoy")} ${isAdmin()?`<span class="kpi-go">${T2("Records","Registros")} →</span>`:""}</span><b>${money(td.reduce((s,x)=>s+(Number(x.total)||0),0))}</b></button>
+<button class="kpi kpi-link" ${isAdmin()?`data-go="rec:sales"`:"disabled"}><span class="label">${T2("Items sold today","Artículos hoy")} ${isAdmin()?`<span class="kpi-go">${T2("Records","Registros")} →</span>`:""}</span><b>${td.reduce((s,x)=>s+(Number(x.qty)||0),0)}</b></button>
+<button class="kpi kpi-link ${low.length?"crit":""}" data-go="storeLow" ${low.length?"":"disabled"} aria-pressed="${!!STORE.lowOnly}"><span class="label">${T2("Low or sold out","Poco o agotado")} ${low.length?`<span class="kpi-go">${STORE.lowOnly?T2("Show all","Ver todo"):T2("Show","Ver")} →</span>`:""}</span><b>${low.length}</b>${low.length?`<span class="t-meta">${low.slice(0,3).map(p=>esc(prodName(p))).join(", ")}</span>`:""}</button></div>
 <div class="grid cols-2" style="align-items:start">${cartHTML()}
 <section class="panel"><div class="field" style="margin:0 0 10px"><input id="stQ" type="search" placeholder="${esc(T2("Search products","Buscar productos"))}" value="${esc(STORE.q)}"></div><div id="stGrid">${storeGridHTML()}</div></section></div>`; }
 function productSheet(p,sku){ p=p||{}; const v=k=>esc(p[k]!=null?p[k]:"");
@@ -2810,6 +2816,7 @@ else if(k==="new") productSheet();
 else if(k==="edit"&&p) productSheet(p);
 else if(k==="labels") labelsSheet();
 else if(k==="qr"&&p) productQRSheet(p);
+else if(k==="recvOne"&&p) receiveSheet(p);
 else if(k==="qrpng"&&p) saveQRPng(p);
 else if(k==="print"){ document.body.classList.add("printing-labels"); setTimeout(()=>{ window.print(); setTimeout(()=>document.body.classList.remove("printing-labels"),500); },50); }
 else if(k==="archive"&&p){ if(!confirm(T2("Remove this product from the store? Past sales stay in Records.","¿Quitar este producto de la tienda? Las ventas pasadas quedan en Registros."))) return;
@@ -2933,10 +2940,10 @@ const ev=s.ev.slice(0,8).map(e=>`<div class="row"><div class="grow"><b>${esc(e.a
 const tk=s.tasks.slice(0,8).map(t=>`<div class="row"><div class="grow"><b>${esc(L(t,"title"))}</b><div class="t-meta">${esc(t.date||"")}</div></div></div>`).join("");
 return `<div class="panel zdetail"><div class="ph"><h2><span class="zdot" style="background:${zk(z.kind)[3]}"></span> ${esc(zoneName(z))}</h2><button class="btn" data-act="mapClose">✕</button></div>
 <div class="t-meta">${esc(T2(zk(z.kind)[1],zk(z.kind)[2]))}${z.m2?" · "+fmtArea(z.m2):""}${z.note?" · "+esc(z.note):""}</div>
-<div class="kpis zk"><div class="kpi"><b>${s.head}</b><span>${T2("animals now","animales ahora")}</span></div><div class="kpi"><b>${s.ev.length}</b><span>${T2(`notes, ${MAP.period} days`,`notas, ${MAP.period} días`)}</span></div><div class="kpi"><b>${s.health}</b><span>${T2("health notes","notas de salud")}</span></div><div class="kpi"><b>${s.tasks.length}</b><span>${T2("open tasks","tareas abiertas")}</span></div></div>
-${an?`<h3 class="label">${T2("Animals here","Animales aquí")}</h3><div class="chips">${an}</div>`:`<p class="t-meta">${T2(`No animals list “${z.name}” as their pen.`,`Ningún animal tiene “${z.name}” como su corral.`)}</p>`}
-${ev?`<h3 class="label">${T2("Recent notes","Notas recientes")}</h3><div class="list">${ev}</div>`:""}
-${tk?`<h3 class="label">${T2("Open tasks","Tareas abiertas")}</h3><div class="list">${tk}</div>`:""}
+<div class="kpis zk"><button class="kpi kpi-link" data-go="#zdAnimals"><b>${s.head}</b><span>${T2("animals now","animales ahora")}</span></button><button class="kpi kpi-link" data-go="#zdNotes"><b>${s.ev.length}</b><span>${T2(`notes, ${MAP.period} days`,`notas, ${MAP.period} días`)}</span></button><button class="kpi kpi-link" data-go="#zdNotes"><b>${s.health}</b><span>${T2("health notes","notas de salud")}</span></button><button class="kpi kpi-link" data-go="#zdTasks"><b>${s.tasks.length}</b><span>${T2("open tasks","tareas abiertas")}</span></button></div>
+${an?`<h3 class="label" id="zdAnimals">${T2("Animals here","Animales aquí")}</h3><div class="chips">${an}</div>`:`<p class="t-meta">${T2(`No animals list “${z.name}” as their pen.`,`Ningún animal tiene “${z.name}” como su corral.`)}</p>`}
+${ev?`<h3 class="label" id="zdNotes">${T2("Recent notes","Notas recientes")}</h3><div class="list">${ev}</div>`:""}
+${tk?`<h3 class="label" id="zdTasks">${T2("Open tasks","Tareas abiertas")}</h3><div class="list">${tk}</div>`:""}
 ${adm?`<div class="inline" style="margin-top:12px"><button class="btn" data-act="mapEdit">✏️ ${T2("Rename / type","Nombre / tipo")}</button><button class="btn" data-act="mapRedraw">✏️ ${T2("Redraw shape","Redibujar forma")}</button><button class="btn" data-act="mapDelete" style="border-color:var(--crit);color:var(--crit)">${T2("Remove area","Quitar área")}</button></div>`:""}</div>`; }
 
 async function afterMapRender(){ const slot=document.getElementById("mapSlot"); if(!slot||MAP.err) return;
@@ -3032,14 +3039,14 @@ return {qty:l.reduce((n,s)=>n+(Number(s.qty)||0),0),rev:l.reduce((n,s)=>n+(Numbe
 function productQRSheet(p){ const all=prodSales(p).slice().sort((a,b)=>String(b.ts||b.d).localeCompare(String(a.ts||a.d)));
 const d7=salesSum(all,7), d30=salesSum(all,30), tot=salesSum(all,0); const last=all[0];
 const perDay=d30.qty/30; const left=p.track!==false&&perDay>0?Math.floor((Number(p.stock)||0)/perDay):null;
-const k=(lab,val,sub)=>`<div class="kpi"><span class="t-meta">${lab}</span><b>${val}</b>${sub?`<span class="t-meta">${sub}</span>`:""}</div>`;
+const k=(lab,val,sub,go)=>`<button class="kpi kpi-link" ${go}><span class="t-meta">${lab}</span><b>${val}</b>${sub?`<span class="t-meta">${sub}</span>`:""}</button>`; const toSales='data-go="#pqSales"';
 openSheet(`<div class="no-print" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2 style="margin:0">${esc(prodName(p))}</h2><button class="btn" data-act="closeSheet">✕</button></div>
 <div class="pq"><div class="lbl pq-lbl"><div class="lbl-qr" id="pqBox" data-qr="${esc("SHP:"+p.sku)}"></div><b>${esc(prodName(p))}</b><span>${money(p.price)} / ${esc(p.unit||"ea")}</span><code>${esc(p.sku)}</code></div>
 <div class="no-print pq-side"><p class="t-meta" style="margin:0">${T2("This QR belongs to this product only. Scan it with “Scan to sell” to add it to a sale, or with “Receive stock” to add inventory.","Este QR pertenece solo a este producto. Escanéelo con “Escanear para vender” para añadirlo a una venta, o con “Recibir inventario” para sumar inventario.")}</p>
 <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" data-st="add" data-id="${esc(p.id)}">+ ${T2("Add to sale","Añadir a la venta")}</button><button class="btn" data-st="print">${T2("Print label","Imprimir etiqueta")}</button><button class="btn" data-st="qrpng" data-id="${esc(p.id)}">${T2("Save QR image","Guardar imagen QR")}</button>${isAdmin()&&S.canWrite?`<button class="btn" data-st="edit" data-id="${esc(p.id)}">✏️ ${T2("Edit","Editar")}</button>`:""}</div></div></div>
-<div class="no-print"><div class="kpis">${k(T2("Sold, 7 days","Vendido, 7 días"),d7.qty,money(d7.rev))}${k(T2("Sold, 30 days","Vendido, 30 días"),d30.qty,money(d30.rev))}${k(T2("Sold, all time","Vendido, total"),tot.qty,money(tot.rev))}
-${k(T2("In stock","En inventario"),p.track===false?"—":(Number(p.stock)||0),left!=null?T2(`≈ ${left} days at this pace`,`≈ ${left} días a este ritmo`):T2("No recent sales","Sin ventas recientes"))}</div>
-<h3 class="label">${T2("Recent sales","Ventas recientes")}</h3>${all.length?`<div class="list">${all.slice(0,10).map(s=>`<div class="row"><div class="grow"><b>${esc(String(s.qty))} × ${money(s.price)}</b> = ${money(s.total)}<div class="t-meta">${esc(fmtWhen(s.ts,s.d))} · ${esc(s.by||"")}${s.payment?" · "+esc(s.payment):""}${s.customer?" · "+esc(s.customer):""}</div></div></div>`).join("")}</div>`:`<p class="t-meta">${T2("No sales yet.","Sin ventas todavía.")}</p>`}
+<div class="no-print"><div class="kpis">${k(T2("Sold, 7 days","Vendido, 7 días"),d7.qty,money(d7.rev),toSales)}${k(T2("Sold, 30 days","Vendido, 30 días"),d30.qty,money(d30.rev),toSales)}${k(T2("Sold, all time","Vendido, total"),tot.qty,money(tot.rev),toSales)}
+${k(T2("In stock","En inventario"),p.track===false?"—":(Number(p.stock)||0),left!=null?T2(`≈ ${left} days at this pace`,`≈ ${left} días a este ritmo`):T2("No recent sales","Sin ventas recientes"),isAdmin()&&S.canWrite?`data-st="recvOne" data-id="${esc(p.id)}"`:"disabled")}</div>
+<h3 class="label" id="pqSales">${T2("Recent sales","Ventas recientes")}</h3>${all.length?`<div class="list">${all.slice(0,10).map(s=>`<div class="row"><div class="grow"><b>${esc(String(s.qty))} × ${money(s.price)}</b> = ${money(s.total)}<div class="t-meta">${esc(fmtWhen(s.ts,s.d))} · ${esc(s.by||"")}${s.payment?" · "+esc(s.payment):""}${s.customer?" · "+esc(s.customer):""}</div></div></div>`).join("")}</div>`:`<p class="t-meta">${T2("No sales yet.","Sin ventas todavía.")}</p>`}
 ${last?`<p class="t-meta">${T2("Last sold","Última venta")}: ${esc(fmtWhen(last.ts,last.d))}</p>`:""}</div>`);
 setTimeout(()=>{ const el=document.getElementById("pqBox"); if(!el) return; if(window.QRCode) new QRCode(el,{text:el.dataset.qr,width:180,height:180,colorDark:"#000",colorLight:"#fff",correctLevel:QRCode.CorrectLevel.M}); else el.textContent=el.dataset.qr; },30); }
 function saveQRPng(p){ const box=document.getElementById("pqBox"); const cv=box&&box.querySelector("canvas"); if(!cv){ toast(T2("QR not ready yet.","El QR aún no está listo.")); return; }
@@ -3157,6 +3164,14 @@ if(a) a.textContent=(r&&r.address&&(r.address.LongLabel||r.address.Match_addr))|
 catch{ const a=document.getElementById("locAddr"); if(a) a.textContent=T2("Address lookup needs signal.","La dirección necesita señal."); } } }
 document.addEventListener("click",e=>{ const b=e.target.closest&&e.target.closest("[data-loginmap]"); if(b){ e.preventDefault(); loginMapSheet(b.dataset.loginmap); return; }
 const g=e.target.closest&&e.target.closest('[data-act="goPinMap"]'); if(g){ e.stopPropagation(); S.view="map"; LS.set("sh.view","map"); MAP.mode="pin"; render(); setTimeout(()=>document.getElementById("mapSlot")?.scrollIntoView({block:"start"}),300); } },true);
+
+// ---------- clickable summary tiles: every number takes you to what it counts ----------
+document.addEventListener("click",e=>{ const b=e.target.closest&&e.target.closest("[data-go]"); if(!b||b.disabled) return; if(e.target.closest("[data-sp-go]")) return;
+e.preventDefault(); e.stopPropagation(); const g=b.dataset.go;
+if(g==="today"){ S.view="today"; S.animalId=null; LS.set("sh.view","today"); render(); window.scrollTo(0,0); return; }
+if(g==="storeLow"){ STORE.lowOnly=!STORE.lowOnly; render(); setTimeout(()=>document.getElementById("stGrid")?.scrollIntoView({block:"start",behavior:"smooth"}),60); return; }
+if(g.startsWith("rec:")){ S.view="records"; LS.set("sh.view","records"); REC.tab=g.slice(4); LS.set("sh.rec.tab",REC.tab); render(); window.scrollTo(0,0); setTimeout(()=>document.getElementById("recTable")?.scrollIntoView({block:"start",behavior:"smooth"}),60); return; }
+if(g.startsWith("#")){ const el=document.querySelector(g); if(el){ el.scrollIntoView({block:"start",behavior:"smooth"}); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); } } },true);
 // ---------- boot ----------
 document.documentElement.lang=lang;
 render();
