@@ -1008,7 +1008,7 @@ const canTalk="speechSynthesis" in window;
 return topbar(t("agent"), t("vetNote"), canTalk?`<button class="btn ${S.speak?"voicebtn":""}" data-act="toggleSpeak" aria-pressed="${!!S.speak}">${I.speaker} ${S.speak?T2("Voice replies on","Respuestas en voz: sí"):T2("Voice replies off","Respuestas en voz: no")}</button>`:"") +
 `<div class="agent"><div class="msgs" id="msgs" aria-live="polite">
 <div class="msg ai">${esc(t("agentIntro"))}</div>
-${S.chat.map(m=>m.kind==="receipt"?`<div class="receipt">${esc(m.text)}</div>`:`<div class="msg ${m.role==="user"?"user":"ai"}">${m.img?`<img src="${m.img}" alt="">`:""}${m.role==="user"?esc(m.text):aiRich(m.text)}</div>${m.chips&&m.chips.length?`<div class="suggest mchips">${m.chips.map(c=>c.nav?`<button class="chip" data-nav="${esc(c.nav)}">${esc(c.label)}</button>`:c.open?`<button class="chip" data-open="${esc(c.open)}">${esc(c.label)}</button>`:c.fill?`<button class="chip" data-sayfill="${esc(c.fill)}">${esc(c.label)}</button>`:`<button class="chip" data-say="${esc(c.say)}">${esc(c.label)}</button>`).join("")}</div>`:""}`).join("")}
+${S.chat.map(m=>m.kind==="receipt"?`<div class="receipt">${esc(m.text)}</div>`:`<div class="msg ${m.role==="user"?"user":"ai"}">${m.img?`<img src="${m.img}" alt="">`:""}${m.role==="user"?esc(m.text):aiRich(m.text)}${(m.photos||[]).map(id=>`<img class="ai-photo" src="${blobSrc(id)}" alt="" loading="lazy">`).join("")}</div>${m.chips&&m.chips.length?`<div class="suggest mchips">${m.chips.map(c=>c.nav?`<button class="chip" data-nav="${esc(c.nav)}">${esc(c.label)}</button>`:c.open?`<button class="chip" data-open="${esc(c.open)}">${esc(c.label)}</button>`:c.fill?`<button class="chip" data-sayfill="${esc(c.fill)}">${esc(c.label)}</button>`:`<button class="chip" data-say="${esc(c.say)}">${esc(c.label)}</button>`).join("")}</div>`:""}`).join("")}
 ${S.busy?`<div class="msg ai" id="streaming">${esc(S.streamText||t("thinking"))}</div>`:""}
 </div>
 <div class="composer">${!S.sample?`<div class="t-meta">${LIVE?T2("Shepherd AI is in basic mode: it understands tags, names, weights, notes, dates, moves and tasks. Full AI turns on when the administrator connects the AI key.","Shepherd IA está en modo básico: entiende aretes, nombres, pesos, notas, fechas, movimientos y tareas. La IA completa se activa cuando el administrador conecte la clave de IA."):DEMO?T2("Demo: Shepherd understands tags, names, weights, egg counts, health notes, treatments, dates, moves and vet tasks. Recognizing animals from photos is in the full version.","Demo: Shepherd entiende números de arete, nombres, pesos, huevos, notas de salud, tratamientos, fechas, movimientos y tareas de veterinario. Reconocer animales por foto es parte de la versión completa."):t("noAgent")}</div>`:""}
@@ -1070,8 +1070,14 @@ receipt(`${t("title")}: ${lang==="es"?(tes||ten):(ten||tes)} → ${staffName(ass
 execute:()=>({care:careItems().map(({a,it,n})=>({animal:animalLabel(a),id:a.id,what:it.what,date:it.d,daysUntil:n})),recentHealth:recentEvents(7,["health","treatment"]).slice(0,15).map(({a,e})=>({animal:animalLabel(a),id:a.id,date:e.d,type:e.type,note:e.note}))})}
 ];
 }
+// When someone asks to see a picture, show the profile photo of the animal(s) the conversation is about.
+function photosFor(q,reply){ if(!/\b(photos?|pictures?|pics?|images?|fotos?|imagen(es)?|fotograf[ií]as?)\b/i.test(String(q||""))) return null;
+const rx=s=>String(s).toLowerCase().replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+const find=hay=>{ hay=String(hay||"").toLowerCase(); return S.animals.filter(a=>((a.tag&&new RegExp("(^|[^0-9a-z])"+rx(a.tag)+"([^0-9a-z]|$)").test(hay))||(a.name&&a.name.length>2&&hay.includes(String(a.name).toLowerCase())))); };
+let hits=find(q+" "+reply); if(!hits.length) hits=find(S.chat.slice(-8).map(m=>m.text||"").join(" "));
+hits=hits.filter(a=>a.photoId); return hits.length?hits.slice(0,4).map(a=>a.photoId):null; }
 function instructions(){
-const herd=S.animals.map(a=>`${a.tag}${a.name?" "+a.name:""} (${a.species}${a.kind==="group"?", flock of "+(a.count||0):""}, ${a.breed||""}, pen ${a.pen||"?"}${a.color?", "+a.color:""})`).join("; ");
+const herd=S.animals.map(a=>`${a.tag}${a.name?" "+a.name:""} (${a.species}${a.kind==="group"?", flock of "+(a.count||0):""}, ${a.breed||""}, pen ${a.pen||"?"}${a.color?", "+a.color:""}${a.photoId?", has profile photo":", no photo yet"})`).join("; ");
 return `You are Shepherd, the animal-care agent inside the operating system of La Finca Pastoreo (chickens, cattle, pigs, horses, sheep).
 Today is ${today()}. You are talking with ${meObj()?.name} (${meObj()?.role}). Reply in ${lang==="es"?"Spanish (Puerto Rico)":"English"}. Be brief and practical: short sentences, no markdown headers, no tables.
 Staff (id: name, role): ${S.staff.map(s=>`${s.id}: ${s.name}, ${s.role}`).join("; ")}.
@@ -1082,7 +1088,8 @@ Rules:
 3. Actions: use the tools to read and write records. After a write, confirm in one line what you saved. Ask a short clarifying question when the person's intent is unclear (for example: log a health note, create a vet task, or both?).
 4. Chickens and pigs are often tracked as flocks or groups; log to the group record.
 5. When someone says an animal needs something on a future date, call schedule_care with that date (next upcoming date if no year). If the tag they said is not on file, say so and list close matches; never create a record for a tag that does not exist.
-6. Staff read records in English and Spanish. Every note and task you save must be written in both languages (the _en and _es fields), whichever language the person used.`+visionContext();
+6. Staff read records in English and Spanish. Every note and task you save must be written in both languages (the _en and _es fields), whichever language the person used.
+7. Photos: this chat shows pictures. When someone asks to see an animal's photo, name the animal by tag and name and the app displays its profile photo under your reply. Never say you cannot show pictures and never paste photo links. If the animal has no photo yet, say so and suggest adding one from its record.`+visionContext();
 }
 async function ask(text){
 if(S.busy) return; if(!S.sample){ if(DEMO||LIVE) return demoAsk(text); return; } text=String(text||"").trim(); const photo=S.photo;
@@ -1097,7 +1104,7 @@ try{
 const opts={signal:S.ctl.signal,tools:agentTools(),onText:({text})=>{S.streamText=text; const el=document.getElementById("streaming"); if(el) el.textContent=text; const m=document.getElementById("msgs"); if(m) m.scrollTop=m.scrollHeight;}};
 if(photo) opts.images=[photo.file];
 const res=await S.sample(turns,opts);
-S.chat.push({role:"assistant",text:res.text+(res.truncated?" …":"")}); if(S.speak) sayAloud(res.text);
+S.chat.push({role:"assistant",text:res.text+(res.truncated?" …":""),photos:photosFor(text,res.text)}); if(S.speak) sayAloud(res.text);
 }catch(e){
 const partial=e&&e.text; if(partial) S.chat.push({role:"assistant",text:partial});
 const map={cancelled:"",not_granted:lang==="es"?"No se permitió usar Claude en esta página.":"Claude wasn't allowed on this page.",rate_limited:lang==="es"?"Demasiadas solicitudes. Intenta en un momento.":"Too many requests right now. Try again in a moment.",image_rejected:lang==="es"?"No pude leer esa foto. Prueba otra.":"That photo couldn't be read. Try a different one.",images_unavailable:lang==="es"?"Esta vista no puede enviar fotos.":"Photos can't be sent from this view.",tools_unavailable:lang==="es"?"Esta vista no permite que el agente cambie registros.":"This view can't let the agent change records."};
