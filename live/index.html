@@ -1375,10 +1375,17 @@ if(/unavailable|internal|deadline|network/i.test(e&&e.code||"")||!navigator.onLi
 function wrapDoc(r){ return new Proxy(r,{ get(t,k){ if(k==="update") return p=>(/^animals\/[^/]+$/.test(t.path||"")&&p&&p.events)?logViaServer(t.path,p,t):t.update(flat(p)); const v=t[k]; return typeof v==="function"?v.bind(t):v; } }); }
 function wrapCol(c){ return new Proxy(c,{ get(t,k){ if(k==="doc") return id=>wrapDoc(id===undefined?t.doc():t.doc(id)); const v=t[k]; return typeof v==="function"?v.bind(t):v; } }); }
 function liveInit(){
-const app=firebase.initializeApp(window.FINCA_FIREBASE); const fdb=firebase.firestore();
+const app=firebase.initializeApp(window.FINCA_FIREBASE);
+// iPhone/Android app: start Firebase Auth WITHOUT the popup/redirect helper. That helper loads a hidden
+// frame that phone web views block, which leaves sign-in (and every server call waiting on it) stuck.
+// We only use PIN sign-in with server tokens, so the helper is never needed.
+if(IS_NATIVE){ try{ const c=(app._delegate&&app._delegate.container)||app.container; const pv=c&&c.getProvider("auth");
+if(pv&&!pv.isInitialized()) pv.initialize({options:{}}); }catch(e){ console.warn("[auth] native init",e); } }
+const fdb=firebase.firestore();
 try{ fdb.settings({ignoreUndefinedProperties:true, merge:true}); }catch{}
 try{ fdb.enablePersistence({synchronizeTabs:true}).catch(()=>{}); }catch{} // entries save offline and sync when signal returns
 Object.assign(FB,{app,fdb,auth:firebase.auth(),fns:app.functions("us-east1"),st:firebase.storage()});
+if(IS_NATIVE){ try{ FB.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(e=>console.warn("[auth] persistence",e)); }catch(e){} } // stay signed in between app launches
 FB.db={ collection:c=>wrapCol(fdb.collection(c)), doc:p=>wrapDoc(fdb.doc(p)) };
 return FB.db; }
 async function callFn(name,data){ try{ return (await FB.fns.httpsCallable(name)(data||{})).data; }
@@ -1427,7 +1434,11 @@ on(db.collection("clock").where("staffId","==",sid),s=>{ clockAll=docs(s); clock
 clockCfg={mode:"server"};
 } }
 function liveBoot(){
-FB.auth.onAuthStateChanged(async u=>{ liveStop();
+// The sign-in list is public: load it right away, not only after Firebase Auth reports in
+// (inside the iPhone/Android app, Auth start-up can be slow or silent).
+let authSeen=false; liveRoster();
+setTimeout(()=>{ if(!authSeen){ console.warn("[auth] no auth state after 6 s"); S.ready=true; render(); liveRoster(); } },6000);
+FB.auth.onAuthStateChanged(async u=>{ authSeen=true; liveStop();
 if(!u){ S.animals=[]; S.tasks=[]; directives=[]; clocks=[]; clockAll=[]; S.attention=[]; S.vision=[]; S.sales=[];
 S.me=null; LS.set("sh.me",null); S.ready=true; render(); await liveRoster(); return; }
 let claims={}; try{ claims=(await u.getIdTokenResult(true)).claims; }catch{}
@@ -1463,7 +1474,7 @@ run.limits=async()=>({images:true,tools:true}); return run; }
 let liveAIchecked=false;
 async function liveAICheck(){ if(liveAIchecked) return; liveAIchecked=true; try{ const r=await callFn("shepherdAI",{ping:true}); if(r&&r.ok){ S.sample=makeLiveSample(); imgOK=true; render(); } }catch(e){ console.warn("ai check",e&&e.code); liveAIchecked=false; } }
 function liveStart(c){ liveStop(); S.me=c.sid; S.role=c.role; LS.set("sh.me",S.me); if(!LS.get("sh.since",null)) LS.set("sh.since",new Date().toISOString()); S.ready=true; liveListen(c.role,c.sid); render(); if(c.role==="admin"||c.role==="employee"){ liveAICheck(); setTimeout(flushLogQueue,1500); } }
-async function liveSignInToken(token){ await FB.auth.signInWithCustomToken(token); const u=FB.auth.currentUser; const c=(await u.getIdTokenResult(true)).claims; if(c.sid&&(c.sid!==S.me||c.role!==S.role)) liveStart(c);
+async function liveSignInToken(token){ await Promise.race([FB.auth.signInWithCustomToken(token),new Promise((_,rej)=>setTimeout(()=>{ const e=new Error(T2("Sign-in is taking too long. Check the signal and try again.","El acceso está tardando demasiado. Revise la señal e intente otra vez.")); e.code="auth-timeout"; console.warn("[auth] signInWithCustomToken timed out"); rej(e); },20000))]); const u=FB.auth.currentUser; const c=(await u.getIdTokenResult(true)).claims; if(c.sid&&(c.sid!==S.me||c.role!==S.role)) liveStart(c);
 // wait until my own staff record arrives so the screen knows who I am
 for(let i=0;i<40&&!S.staff.some(x=>x.id===c.sid&&x.role);i++) await new Promise(r=>setTimeout(r,100)); return c; }
 function liveErr(e){ const m=String(e&&e.message||""); if(/network|unavailable|internal/i.test(e&&e.code||"")) return T2("Can't reach the farm server. Check your connection and try again.","No se puede conectar al servidor. Revise su conexión e intente de nuevo."); return m||t("saveErr"); }
