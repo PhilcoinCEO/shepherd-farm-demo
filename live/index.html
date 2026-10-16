@@ -331,6 +331,17 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 .app>.main{order:1;flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;padding-bottom:24px}
 .brand,.rail-foot{display:none}
 .app>.main>.topbar{position:sticky;top:-20px;z-index:6;margin:-20px calc(-1*clamp(16px,3vw,36px)) 14px;padding:20px clamp(16px,3vw,36px) 12px;background-color:var(--bg);background-image:var(--bg-art);box-shadow:0 6px 10px -8px rgba(0,0,0,.35)}
+.app>.main>.topbar{transition:padding .22s ease}
+.app>.main>.topbar h1{transition:font-size .22s ease}
+.app>.main>.topbar .sub,.app>.main>.topbar .tools{max-height:260px;opacity:1;overflow:hidden;transition:max-height .25s ease,opacity .18s ease,margin .22s ease}
+.app>.main>.topbar .me-card .sq{transition:width .22s ease,height .22s ease,font-size .22s ease,border-radius .22s ease}
+.app.hdr-c>.main>.topbar{padding-top:calc(20px + 0px);padding-bottom:8px;align-items:center}
+.app.hdr-c>.main>.topbar h1{font-size:22px;margin:0}
+.app.hdr-c>.main>.topbar .sub,.app.hdr-c>.main>.topbar .tools{max-height:0;opacity:0;margin:0;pointer-events:none}
+.app.hdr-c>.main>.topbar .tb-main{gap:0}
+.app.hdr-c>.main>.topbar .tb-me{flex-direction:row;align-items:center;gap:10px}
+.app.hdr-c>.main>.topbar .me-card .sq{width:36px;height:36px;font-size:13px;border-radius:9px;border-width:2px}
+.app.hdr-c>.main>.topbar .me-name{display:none}
 .nav{flex-direction:row;width:100%;justify-content:space-around}
 .nav .nav-desk{display:none}.nav button.alt-cur{background:rgba(169,194,122,.18);box-shadow:inset 3px 0 0 var(--rail-gold);opacity:1}
 .nav .nl{display:none}.nav .ns{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
@@ -693,6 +704,14 @@ ${me?`<button class="me-tile desk-only" data-act="profile" title="${T2("My profi
 </div></div>
 <div class="tb-me phone-only">${themeSeg()}${me?`<button class="me-card" data-act="profile" title="${T2("My profile","Mi perfil")}">${meSquare(me,"sq")}<span class="me-name">${esc(me.name.split(" ")[0])}</span></button>`:""}</div></div>`;
 }
+// ---------- collapsing header on phones (like Apple Mail / Settings) ----------
+// Full header at the top of a screen; slim pinned bar (title, theme, photo) once the content scrolls.
+function hdrSync(){ const app=document.querySelector(".app"), m=document.getElementById("main"); if(!app||!m) return;
+if(!matchMedia("(max-width:820px)").matches){ app.classList.remove("hdr-c"); return; }
+const y=m.scrollTop, room=m.scrollHeight-m.clientHeight, on=app.classList.contains("hdr-c");
+if(!on && y>60 && room>220) app.classList.add("hdr-c"); else if(on && y<12) app.classList.remove("hdr-c"); }
+document.addEventListener("scroll",e=>{ if(e.target&&e.target.id==="main") hdrSync(); },true);
+addEventListener("resize",hdrSync);
 // ---------- install as an app (PWA) + native shell (Capacitor) ----------
 const IS_NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 const IS_STANDALONE = IS_NATIVE || (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
@@ -723,6 +742,8 @@ processClockCode(code); return true; }catch(e){ console.warn("native scan", e); 
 function banners(){ let h=offlineBanner()+installBanner()+(DEMO?`<div class="demo demo-mode demo-thin"><b>${T2("Demo","Demo")}</b> · ${T2("sample data, saved only on this device","datos de muestra, guardados solo en este dispositivo")} <button class="linkbtn" data-act="resetDemo">${T2("Reset","Reiniciar")}</button></div>`:""); if(!DEMO&&(S.animals.some(a=>a.sample)||S.staff.some(s=>s.sample))) h+=`<div class="demo demo-thin">${t("sample")}</div>`; if(!S.canWrite) h+=`<div class="demo">${t("readOnly")}</div>`; if(isAdmin()){ const pend=S.animals.filter(a=>a.review==="pending"); if(pend.length) h+=`<div class="demo">🆕 ${pend.length===1?T2("1 animal added by staff needs your review:","1 animal agregado por el personal necesita su revisión:"):T2(`${pend.length} animals added by staff need your review:`,`${pend.length} animales agregados por el personal necesitan su revisión:`)} ${pend.slice(0,6).map(a=>`<button class="chip" data-open="${esc(a.id)}">${esc(animalLabel(a))} · ${esc(a.addedBy?.name||"")}</button>`).join(" ")}</div>`; } return h; }
 
 function render(){
+renderView(); requestAnimationFrame(hdrSync); }
+function renderView(){
 renderNav();
 const main=document.getElementById("main");
 if(!S.db){ main.innerHTML = S.ready ? topbar("Shepherd")+`<div class="panel empty">${t("noDb")}</div>` : `<div class="empty">${t("loading")}</div>`; return; }
